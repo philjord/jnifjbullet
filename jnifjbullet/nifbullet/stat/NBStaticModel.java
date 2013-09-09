@@ -67,8 +67,11 @@ public class NBStaticModel implements BulletNifModel
 
 	public NBStaticModel(GeometryInfo gi, Transform3D rootTrans)
 	{
-		NBStaticRigidBody nbbco = new NBStaticRigidBody(gi, rootTrans, this);
-		nifBulletbhkCollisionObjects.add(nbbco);
+		if (gi != null)
+		{
+			NBStaticRigidBody nbbco = new NBStaticRigidBody(gi, rootTrans, this);
+			nifBulletbhkCollisionObjects.add(nbbco);
+		}
 	}
 
 	public void destroy()
