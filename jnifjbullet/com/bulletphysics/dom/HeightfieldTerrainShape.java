@@ -228,7 +228,7 @@ public class HeightfieldTerrainShape extends ConcaveShape
 				vertices[1] = v1;
 				vertices[2] = v2;
 				if (m_flipQuadEdges || (m_useDiamondSubdivision && (((j + x) & 1) != 0)))
-				{// XXX
+				{ 
 					// first triangle
 					getVertex(x, j, vertices[0]);
 					getVertex(x + 1, j, vertices[1]);
@@ -309,7 +309,7 @@ public class HeightfieldTerrainShape extends ConcaveShape
 		halfExtents.z = halfExtents.z * m_localScaling.z * 0.5f;
 
 		/*Vector3f localOrigin(0, 0, 0);
-		localOrigin[m_upAxis] = (m_minHeight + m_maxHeight) * 0.5f; XXX
+		localOrigin[m_upAxis] = (m_minHeight + m_maxHeight) * 0.5f;  
 		localOrigin *= m_localScaling;*/
 
 		Matrix3f abs_b = new Matrix3f(t.basis);
@@ -386,7 +386,7 @@ public class HeightfieldTerrainShape extends ConcaveShape
 	{
 
 		/*
-		 * btVector3 clampedPoint(point); XXX
+		 * btVector3 clampedPoint(point); 
 		clampedPoint.setMax(m_localAabbMin);
 		clampedPoint.setMin(m_localAabbMax);
 
