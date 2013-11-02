@@ -76,6 +76,7 @@ public class NBControlledChar implements NifBulletChar
 		{
 			new Throwable("destroy called whilst in dynamic world");
 		}
+
 	}
 
 	@Override
