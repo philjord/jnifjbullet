@@ -3,6 +3,7 @@ package nifbullet.util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
+import java3d.nativelinker.Java3dLinker2;
 
 import javax.media.j3d.BranchGroup;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -34,7 +35,7 @@ import com.bulletphysics.linearmath.Clock;
 public class NifBulletDisplay
 {
 
-	private static HeadlessUniverse j3dUni = new HeadlessUniverse();
+	private HeadlessUniverse j3dUni = new HeadlessUniverse();
 
 	// Gravity
 	private static Vector3f gravity = new Vector3f(0f, 0f, -9.81f);
@@ -177,6 +178,7 @@ public class NifBulletDisplay
 
 	public static void main(String[] args)
 	{
+		new Java3dLinker2();
 		new LWJGLLinker();
 
 		nifDisplay = new NifBulletDisplay();
