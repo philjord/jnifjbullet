@@ -12,9 +12,12 @@ public class NBRigidBody
 
 	private bhkRigidBody bhkRigidBody;
 
-	public NBRigidBody(BulletNifModel parentModel)
+	protected float fixedScaleFactor = 1.0f;
+
+	public NBRigidBody(BulletNifModel parentModel, float fixedScaleFactor)
 	{
 		this.parentModel = parentModel;
+		this.fixedScaleFactor = fixedScaleFactor;
 	}
 
 	public BulletNifModel getParentModel()

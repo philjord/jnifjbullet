@@ -32,7 +32,7 @@ public class NBSimpleDynamicModel extends BranchGroup implements BulletNifModel
 
 	private boolean isInDynamicWorld = false;
 
-	public NBSimpleDynamicModel(String fileName, MeshSource meshSource)  
+	public NBSimpleDynamicModel(String fileName, MeshSource meshSource)
 	{
 
 		this.fileName = fileName;
@@ -60,7 +60,7 @@ public class NBSimpleDynamicModel extends BranchGroup implements BulletNifModel
 								if (bhkRigidBody.mass != 0)
 								{
 									rootDynamicBody = new NBSimpleDynamicRigidBody(new NifBulletTransformListenerDelegate(),
-											bhkCollisionObject, nifFile.blocks, this);
+											bhkCollisionObject, nifFile.blocks, this, 1.0f);
 									nifBulletbhkCollisionObjects.add(rootDynamicBody);
 								}
 								else

@@ -30,9 +30,9 @@ public class NBSimpleKinematicRigidBody extends NBRigidBody
 	private J3dNiAVObject parentJ3dNiAVObject;
 
 	public NBSimpleKinematicRigidBody(Group behaviourRootGroup, J3dNiAVObject j3dNiNodeRoot, bhkCollisionObject bhkCollisionObject,
-			NiToJ3dData niToJ3dData, Transform3D rootTrans, BulletNifModel parentModel)
+			NiToJ3dData niToJ3dData, Transform3D rootTrans, BulletNifModel parentModel, float fixedScaleFactor)
 	{
-		super(parentModel);
+		super(parentModel, fixedScaleFactor);
 
 		this.j3dNiNodeRoot = j3dNiNodeRoot;
 		this.rootTrans = rootTrans;
@@ -48,7 +48,7 @@ public class NBSimpleKinematicRigidBody extends NBRigidBody
 			if (bhkRigidBody.mass == 0)
 			{
 				bhkShape bhkShape = (bhkShape) niToJ3dData.get(bhkRigidBody.shape);
-				CollisionShape colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, niToJ3dData.getNiObjects());
+				CollisionShape colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, niToJ3dData.getNiObjects(), fixedScaleFactor);
 
 				setRigidBody(NifBulletUtil.createRigidBody(bhkRigidBody, colShape, calcWorldTransform(), this));
 
@@ -113,7 +113,8 @@ public class NBSimpleKinematicRigidBody extends NBRigidBody
 			// add in the rigid body trans
 			if (getBhkRigidBody() instanceof bhkRigidBodyT)
 			{
-				temp.set(ConvertFromHavok.toJ3d(getBhkRigidBody().rotation), ConvertFromHavok.toJ3d(getBhkRigidBody().translation), 1f);
+				temp.set(ConvertFromHavok.toJ3d(getBhkRigidBody().rotation),
+						ConvertFromHavok.toJ3d(getBhkRigidBody().translation, fixedScaleFactor), 1f);
 				worldTransformCalc.mul(temp);
 			}
 		}

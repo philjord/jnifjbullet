@@ -58,14 +58,17 @@ public class NBKinematicModel extends BranchGroup implements BulletNifModel
 							|| layer == OblivionLayer.OL_UNIDENTIFIED || layer == OblivionLayer.OL_STAIRS
 							|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT)
 					{
-						NBStaticRigidBody sb = new NBStaticRigidBody(bhkCollisionObject, niToJ3dData.getNiObjects(), rootTrans, this);
+						float sf = (float) rootTrans.getScale();
+						rootTrans.setScale(1.0f);
+						NBStaticRigidBody sb = new NBStaticRigidBody(bhkCollisionObject, niToJ3dData.getNiObjects(), rootTrans, this, sf);
 						staticRigidBodys.add(sb);
 					}
 					else if (layer == OblivionLayer.OL_ANIM_STATIC)
 					{
-
+						float sf = (float) rootTrans.getScale();
+						rootTrans.setScale(1.0f);
 						NBSimpleKinematicRigidBody kb = new NBSimpleKinematicRigidBody(this, j3dNiNodeRoot, bhkCollisionObject,
-								niToJ3dData, rootTrans, this);
+								niToJ3dData, rootTrans, this, sf);
 						simpleKinematicRigidBodys.add(kb);
 					}
 					else

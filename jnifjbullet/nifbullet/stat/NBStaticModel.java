@@ -43,7 +43,9 @@ public class NBStaticModel implements BulletNifModel
 					if (layer == OblivionLayer.OL_STATIC || layer == OblivionLayer.OL_UNIDENTIFIED || layer == OblivionLayer.OL_STAIRS
 							|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT)
 					{
-						NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkCollisionObject, nifFile.blocks, rootTrans, this);
+						float sf = (float) rootTrans.getScale();
+						rootTrans.setScale(1.0f);
+						NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkCollisionObject, nifFile.blocks, rootTrans, this, sf);
 						nifBulletbhkCollisionObjects.add(nbbco);
 					}
 					else if (layer == OblivionLayer.OL_LINE_OF_SIGHT)

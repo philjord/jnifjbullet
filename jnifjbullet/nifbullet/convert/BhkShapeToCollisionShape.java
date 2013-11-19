@@ -35,17 +35,18 @@ public abstract class BhkShapeToCollisionShape
 	 * Convinience for non dynamic shapes
 	 * @param bhkShape
 	 * @param niToJ3dData
+	 * @param scale 
 	 * @return
 	 */
 
-	public static CollisionShape processBhkShape(bhkShape bhkShape, NiObjectList niToJ3dData)
+	public static CollisionShape processBhkShape(bhkShape bhkShape, NiObjectList niToJ3dData, float scale)
 	{
-		return processBhkShape(bhkShape, niToJ3dData, false);
+		return processBhkShape(bhkShape, niToJ3dData, false, scale);
 	}
 
 	private static WeakHashMap<bhkShape, CollisionShape> preloadedShapes = new WeakHashMap<bhkShape, CollisionShape>();
 
-	public static CollisionShape processBhkShape(bhkShape bhkShape, NiObjectList niToJ3dData, boolean isDynamic)
+	public static CollisionShape processBhkShape(bhkShape bhkShape, NiObjectList niToJ3dData, boolean isDynamic, float scale)
 	{
 		CollisionShape ret = null;
 		ret = preloadedShapes.get(bhkShape);
@@ -59,7 +60,7 @@ public abstract class BhkShapeToCollisionShape
 			for (int i = 0; i < bhkListShape.numSubShapes; i++)
 			{
 				// odd that listshape does not transform children
-				CollisionShape s = processBhkShape((bhkShape) niToJ3dData.get(bhkListShape.subShapes[i]), niToJ3dData, isDynamic);
+				CollisionShape s = processBhkShape((bhkShape) niToJ3dData.get(bhkListShape.subShapes[i]), niToJ3dData, isDynamic, scale);
 				if (s != null)
 				{
 					Transform idTransform = NifBulletUtil.newIdentityTransform();
@@ -76,7 +77,8 @@ public abstract class BhkShapeToCollisionShape
 			for (int i = 0; i < bhkConvexListShape.numSubShapes; i++)
 			{
 				// odd that listshape does not transform children
-				CollisionShape s = processBhkShape((bhkShape) niToJ3dData.get(bhkConvexListShape.subShapes[i]), niToJ3dData, isDynamic);
+				CollisionShape s = processBhkShape((bhkShape) niToJ3dData.get(bhkConvexListShape.subShapes[i]), niToJ3dData, isDynamic,
+						scale);
 				if (s != null)
 				{
 					Transform idTransform = NifBulletUtil.newIdentityTransform();
@@ -94,7 +96,7 @@ public abstract class BhkShapeToCollisionShape
 			{
 				NiTriStripsData niTriStripsData = (NiTriStripsData) niToJ3dData.get(bhkNiTriStripsShape.stripsData[i]);
 				Transform idTransform = NifBulletUtil.newIdentityTransform();
-				cs.addChildShape(idTransform, BhkCollisionToNifBullet.processNiTriStripsData(niTriStripsData, isDynamic));
+				cs.addChildShape(idTransform, BhkCollisionToNifBullet.processNiTriStripsData(niTriStripsData, isDynamic, scale));
 				cs.recalculateLocalAabb();
 			}
 			ret = cs;
@@ -105,7 +107,7 @@ public abstract class BhkShapeToCollisionShape
 			if (bhkMoppBvTreeShape.shape.ref != -1)
 			{
 				bhkShape bhkShape2 = (bhkShape) niToJ3dData.get(bhkMoppBvTreeShape.shape);
-				ret = processBhkShape(bhkShape2, niToJ3dData, isDynamic);
+				ret = processBhkShape(bhkShape2, niToJ3dData, isDynamic, scale);
 			}
 			else
 			{
@@ -115,7 +117,7 @@ public abstract class BhkShapeToCollisionShape
 		}
 		else
 		{
-			ret = createCollisionShape(bhkShape, niToJ3dData, isDynamic);
+			ret = createCollisionShape(bhkShape, niToJ3dData, isDynamic, scale);
 		}
 
 		if (ret != null)
@@ -123,16 +125,19 @@ public abstract class BhkShapeToCollisionShape
 		return ret;
 	}
 
-	private static CollisionShape createCollisionShape(bhkShape bhkShape, NiObjectList niToJ3dData, boolean isDynamic)
+	private static CollisionShape createCollisionShape(bhkShape bhkShape, NiObjectList niToJ3dData, boolean isDynamic, float scale)
 	{
 		if (bhkShape instanceof bhkPackedNiTriStripsShape)
 		{
 			bhkPackedNiTriStripsShape bhkPackedNiTriStripsShape = (bhkPackedNiTriStripsShape) bhkShape;
 
+			if (bhkPackedNiTriStripsShape.scale.x != 1 || bhkPackedNiTriStripsShape.scale.y != 1 || bhkPackedNiTriStripsShape.scale.z != 1)
+				System.out.println("laff laff non 1,1,1 scale in bhkPackedNiTriStripsShape.scale.x");
+
 			if (bhkPackedNiTriStripsShape.data.ref != -1)
 			{
 				hkPackedNiTriStripsData hkPackedNiTriStripsData = (hkPackedNiTriStripsData) niToJ3dData.get(bhkPackedNiTriStripsShape.data);
-				return BhkCollisionToNifBullet.hkPackedNiTriStripsData(hkPackedNiTriStripsData, isDynamic);
+				return BhkCollisionToNifBullet.hkPackedNiTriStripsData(hkPackedNiTriStripsData, isDynamic, scale);
 			}
 			System.out.println("bhkPackedNiTriStripsShape.data.ref == -1");
 			return null;
@@ -146,38 +151,38 @@ public abstract class BhkShapeToCollisionShape
 				bhkCompressedMeshShapeData bhkCompressedMeshShapeData = (bhkCompressedMeshShapeData) niToJ3dData
 						.get(bhkCompressedMeshShape.data);
 
-				return BhkCollisionToNifBullet.bhkCompressedMeshShape(bhkCompressedMeshShapeData, isDynamic);
+				return BhkCollisionToNifBullet.bhkCompressedMeshShape(bhkCompressedMeshShapeData, isDynamic, scale);
 			}
 			System.out.println("bhkCompressedMeshShape.data.ref == -1");
 			return null;
 		}
 		else if (bhkShape instanceof hkPackedNiTriStripsData)
 		{
-			return BhkCollisionToNifBullet.hkPackedNiTriStripsData((hkPackedNiTriStripsData) bhkShape, isDynamic);
+			return BhkCollisionToNifBullet.hkPackedNiTriStripsData((hkPackedNiTriStripsData) bhkShape, isDynamic, scale);
 		}
 		else if (bhkShape instanceof bhkBoxShape)
 		{
-			return BhkCollisionToNifBullet.bhkBoxShape((bhkBoxShape) bhkShape);
+			return BhkCollisionToNifBullet.bhkBoxShape((bhkBoxShape) bhkShape, scale);
 		}
 		else if (bhkShape instanceof bhkCapsuleShape)
 		{
-			return BhkCollisionToNifBullet.bhkCapsuleShape((bhkCapsuleShape) bhkShape);
+			return BhkCollisionToNifBullet.bhkCapsuleShape((bhkCapsuleShape) bhkShape, scale);
 		}
 		else if (bhkShape instanceof bhkSphereShape)
 		{
-			return BhkCollisionToNifBullet.bhkSphereShape((bhkSphereShape) bhkShape);
+			return BhkCollisionToNifBullet.bhkSphereShape((bhkSphereShape) bhkShape, scale);
 		}
 		else if (bhkShape instanceof bhkConvexVerticesShape)
 		{
-			return BhkCollisionToNifBullet.bhkConvexVerticesShape((bhkConvexVerticesShape) bhkShape);
+			return BhkCollisionToNifBullet.bhkConvexVerticesShape((bhkConvexVerticesShape) bhkShape, scale);
 		}
 		else if (bhkShape instanceof bhkMultiSphereShape)
 		{
-			return BhkCollisionToNifBullet.bhkMultiSphereShape((bhkMultiSphereShape) bhkShape);
+			return BhkCollisionToNifBullet.bhkMultiSphereShape((bhkMultiSphereShape) bhkShape, scale);
 		}
 		else if (bhkShape instanceof bhkTransformShape)
 		{
-			return bhkTransformShape((bhkTransformShape) bhkShape, niToJ3dData, isDynamic);
+			return bhkTransformShape((bhkTransformShape) bhkShape, niToJ3dData, isDynamic, scale);
 		}
 
 		else
@@ -188,16 +193,16 @@ public abstract class BhkShapeToCollisionShape
 
 	}
 
-	private static CollisionShape bhkTransformShape(bhkTransformShape data, NiObjectList niToJ3dData, boolean isDynamic)
+	private static CollisionShape bhkTransformShape(bhkTransformShape data, NiObjectList niToJ3dData, boolean isDynamic, float scale)
 	{
 		if (data.shape.ref != -1)
 		{
 			bhkShape bhkShape = (bhkShape) niToJ3dData.get(data.shape);
-			CollisionShape shape = processBhkShape(bhkShape, niToJ3dData, isDynamic);
+			CollisionShape shape = processBhkShape(bhkShape, niToJ3dData, isDynamic, scale);
 			if (shape != null)
 			{
 				Quat4f q = ConvertFromHavok.toJ3dQ4f(data.transform);
-				Vector3f v = ConvertFromHavok.toJ3dV3f(data.transform);
+				Vector3f v = ConvertFromHavok.toJ3dV3f(data.transform, scale);
 
 				CompoundShape cs = new CompoundShape();
 				Transform t = NifBulletUtil.createTrans(q, v);

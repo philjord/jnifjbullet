@@ -30,9 +30,18 @@ public class NBStaticRigidBody extends NBRigidBody
 {
 	private NiAVObject parentNiObject;
 
-	public NBStaticRigidBody(bhkCollisionObject bhkCollisionObject, NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel)
+	/** send fixed scaling via the float not transform
+	 * 
+	 * @param bhkCollisionObject
+	 * @param blocks
+	 * @param rootTrans
+	 * @param parentModel
+	 * @param fixedScaleFactor
+	 */
+	public NBStaticRigidBody(bhkCollisionObject bhkCollisionObject, NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel,
+			float fixedScaleFactor)
 	{
-		super(parentModel);
+		super(parentModel, fixedScaleFactor);
 		parentNiObject = (NiAVObject) blocks.get(bhkCollisionObject.target);
 		bhkRigidBody bhkRigidBody = (bhkRigidBody) blocks.get(bhkCollisionObject.body);
 		setBhkRigidBody(bhkRigidBody);
@@ -45,7 +54,7 @@ public class NBStaticRigidBody extends NBRigidBody
 			if (bhkRigidBody.mass == 0)
 			{
 				bhkShape bhkShape = (bhkShape) blocks.get(bhkRigidBody.shape);
-				CollisionShape colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, blocks);
+				CollisionShape colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, blocks, fixedScaleFactor);
 				setRigidBody(NifBulletUtil.createStaticRigidBody(bhkRigidBody, colShape, this));
 				updateRootTransform(rootTrans);
 			}
@@ -74,7 +83,7 @@ public class NBStaticRigidBody extends NBRigidBody
 	 */
 	public NBStaticRigidBody(GeometryInfo gi, Transform3D rootTrans, BulletNifModel parentModel)
 	{
-		super(parentModel);
+		super(parentModel, 1.0f);
 		CollisionShape colShape = BhkCollisionToNifBullet.makeFromGeometryInfo(gi);
 		RigidBody rigidBody = new RigidBody(new RigidBodyConstructionInfo(0, null, colShape));
 		rigidBody.setCollisionFlags(CollisionFlags.STATIC_OBJECT);
@@ -124,7 +133,7 @@ public class NBStaticRigidBody extends NBRigidBody
 		if (getBhkRigidBody() instanceof bhkRigidBodyT)
 		{
 			temp.setRotation(ConvertFromHavok.toJ3d(getBhkRigidBody().rotation));
-			temp.setTranslation(ConvertFromHavok.toJ3d(getBhkRigidBody().translation));
+			temp.setTranslation(ConvertFromHavok.toJ3d(getBhkRigidBody().translation, fixedScaleFactor));
 			worldTransformCalc.mul(temp);
 		}
 

@@ -34,9 +34,9 @@ public class NBSimpleDynamicRigidBody extends NBRigidBody
 	 * @param niToJ3dData
 	 */
 	public NBSimpleDynamicRigidBody(NifBulletTransformListener nbtl, bhkCollisionObject bhkCollisionObject, NiObjectList niToJ3dData,
-			BulletNifModel parentModel)
+			BulletNifModel parentModel, float fixedScaleFactor)
 	{
-		super(parentModel);
+		super(parentModel, fixedScaleFactor);
 
 		bhkRigidBody bhkRigidBody = (bhkRigidBody) niToJ3dData.get(bhkCollisionObject.body);
 		setBhkRigidBody(bhkRigidBody);
@@ -47,22 +47,21 @@ public class NBSimpleDynamicRigidBody extends NBRigidBody
 		{
 			if (bhkRigidBody.mass != 0)
 			{
-
 				if (bhkRigidBody instanceof bhkRigidBodyT)
 				{
 					bhkShape bhkShape = (bhkShape) niToJ3dData.get(bhkRigidBody.shape);
 					CompoundShape colShape = new CompoundShape();
-					Transform3D temp = new Transform3D(ConvertFromHavok.toJ3d(bhkRigidBody.rotation),
-							ConvertFromHavok.toJ3d(bhkRigidBody.translation), 1.0f);
+					Transform3D temp = new Transform3D(ConvertFromHavok.toJ3d(bhkRigidBody.rotation), ConvertFromHavok.toJ3d(
+							bhkRigidBody.translation, fixedScaleFactor), 1.0f);
 					colShape.addChildShape(NifBulletUtil.createTrans(temp),
-							BhkShapeToCollisionShape.processBhkShape(bhkShape, niToJ3dData, true));
+							BhkShapeToCollisionShape.processBhkShape(bhkShape, niToJ3dData, true, fixedScaleFactor));
 					setRigidBody(NifBulletUtil.createRigidBody(bhkRigidBody, colShape, NifBulletUtil.newIdentityTransform(), this));
 				}
 				else
 				{
 
 					bhkShape bhkShape = (bhkShape) niToJ3dData.get(bhkRigidBody.shape);
-					CollisionShape colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, niToJ3dData, true);
+					CollisionShape colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, niToJ3dData, true, fixedScaleFactor);
 					setRigidBody(NifBulletUtil.createRigidBody(bhkRigidBody, colShape, NifBulletUtil.newIdentityTransform(), this));
 				}
 
