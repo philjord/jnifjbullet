@@ -32,7 +32,7 @@ public class SceneGraphTransformChangeBehavior extends Behavior
 
 			if (!nmtg.isNoImpact())
 			{
-				allTransformGroups.add(nmtg);				
+				allTransformGroups.add(nmtg);
 			}
 			current = niToJ3dData.get(current.getNiAVObject().parent);
 		}
