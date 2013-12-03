@@ -3,7 +3,6 @@ package nifbullet.util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
-import java3d.nativelinker.Java3dLinker2;
 
 import javax.media.j3d.BranchGroup;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -178,7 +177,7 @@ public class NifBulletDisplay
 
 	public static void main(String[] args)
 	{
-		new Java3dLinker2();
+
 		new LWJGLLinker();
 
 		nifDisplay = new NifBulletDisplay();
