@@ -125,7 +125,7 @@ public class NavigationProcessorBullet implements NavigationProcessorInterface
 					rotY = rotationYPerSec * motionDelay;
 					rotX = rotationXPerSec * motionDelay;
 				}
-				else if (rotationY != Double.MIN_VALUE || rotationX != Double.MIN_VALUE)
+				else if (rotationY != Float.MIN_VALUE || rotationX != Float.MIN_VALUE)
 				{
 					rotY = rotationY;
 					rotX = rotationX;
@@ -144,7 +144,6 @@ public class NavigationProcessorBullet implements NavigationProcessorInterface
 
 					tempYawPitch.get(avatarRot);
 					avatarLocation.setRotation(avatarRot);//we also set this to make the screen nice and smooth for now
-
 				}
 
 				if (xChangePerSec != 0 || yChangePerSec != 0 || zChangePerSec != 0)
