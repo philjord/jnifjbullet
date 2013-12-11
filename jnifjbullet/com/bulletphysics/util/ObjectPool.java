@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * EXACT copy of JBullet com.bulletphysics.util.ObjectPool, but with no object pooling at all
  * The old one appears to be wildly incompatible with multi dynamics worlds and causes crazy pointer bugs everywhere
- * This one should over rule the orginal, be careful wehn deploying to jars
+ * This one should over rule the orginal, be careful when deploying to jars
  * @author philip
  *
  */
