@@ -65,7 +65,6 @@ public class ArrayPool<T>
 
 	}
 
-	
 	////////////////////////////////////////////////////////////////////////////
 
 	private static ThreadLocal<Map> threadLocal = new ThreadLocal<Map>()
