@@ -385,10 +385,6 @@ public abstract class BhkCollisionToNifBullet
 			//gi.compact();
 		}
 		// *******************************************************************************************
-		// TODO: BULLET recheck this gi.convertToIndexedTriangles(); means dump Stripifier st = new Stripifier(); true?
-		// restripify to sort out bad stripping
-		//Stripifier st = new Stripifier();
-		//st.stripify(gi);
 
 		gi.convertToIndexedTriangles();
 		gi.compact();
