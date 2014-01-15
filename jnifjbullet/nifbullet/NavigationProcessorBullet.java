@@ -46,12 +46,24 @@ public class NavigationProcessorBullet implements NavigationProcessorInterface
 
 	private boolean active = false;
 
+	private boolean noPitch = false;
+
 	private NbccProvider nbccProvider;
 
 	public NavigationProcessorBullet(NbccProvider nbccProvider, AvatarLocation avatarLocation)
 	{
 		this.nbccProvider = nbccProvider;
 		this.avatarLocation = avatarLocation;
+	}
+
+	public boolean isNoPitch()
+	{
+		return noPitch;
+	}
+
+	public void setNoPitch(boolean noPitch)
+	{
+		this.noPitch = noPitch;
 	}
 
 	@Override
@@ -77,6 +89,7 @@ public class NavigationProcessorBullet implements NavigationProcessorInterface
 	{
 		this.rotationXPerSec = newRotationX;
 		this.rotationYPerSec = newRotationY;
+
 		this.rotationX = Float.MIN_VALUE;
 		this.rotationY = Float.MIN_VALUE;
 	}
@@ -140,7 +153,7 @@ public class NavigationProcessorBullet implements NavigationProcessorInterface
 					// *********ROTATION HANDLING ****************
 					tempYawPitch.set(avatarRot);
 					tempYawPitch.setYaw(tempYawPitch.getYaw() + rotY);
-					tempYawPitch.setPitch(tempYawPitch.getPitch() + rotX);
+					tempYawPitch.setPitch(noPitch ? 0 : tempYawPitch.getPitch() + rotX);
 
 					tempYawPitch.get(avatarRot);
 					avatarLocation.setRotation(avatarRot);//we also set this to make the screen nice and smooth for now
