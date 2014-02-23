@@ -297,9 +297,10 @@ public abstract class BhkCollisionToNifBullet
 
 	}
 
-	public static CollisionShape hkPackedNiTriStripsData(hkPackedNiTriStripsData data, boolean isDynamic, float scale)
+	public static CollisionShape hkPackedNiTriStripsData(hkPackedNiTriStripsData data, boolean isDynamic, float scale, float xScale,
+			float yScale, float zScale)
 	{
-		
+
 		int[] coordIndices = new int[data.numTriangles * 3];
 		for (int i = 0; i < data.numTriangles; i++)
 		{
@@ -315,9 +316,9 @@ public abstract class BhkCollisionToNifBullet
 		for (int i = 0; i < data.numVertices; i++)
 		{
 			Vector3f v = ConvertFromHavok.toJ3d(data.vertices[i], scale);
-			coords[i * 3 + 0] = v.x;
-			coords[i * 3 + 1] = v.y;
-			coords[i * 3 + 2] = v.z;
+			coords[i * 3 + 0] = v.x * xScale;
+			coords[i * 3 + 1] = v.y * yScale;
+			coords[i * 3 + 2] = v.z * zScale;
 		}
 
 		coordIndices = NifBulletUtil.remove2dTriangles(coordIndices);

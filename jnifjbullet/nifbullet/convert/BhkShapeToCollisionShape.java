@@ -130,14 +130,12 @@ public abstract class BhkShapeToCollisionShape
 		if (bhkShape instanceof bhkPackedNiTriStripsShape)
 		{
 			bhkPackedNiTriStripsShape bhkPackedNiTriStripsShape = (bhkPackedNiTriStripsShape) bhkShape;
-
-			if (bhkPackedNiTriStripsShape.scale.x != 1 || bhkPackedNiTriStripsShape.scale.y != 1 || bhkPackedNiTriStripsShape.scale.z != 1)
-				System.out.println("laff laff non 1,1,1 scale in bhkPackedNiTriStripsShape.scale.x");
-
+			
 			if (bhkPackedNiTriStripsShape.data.ref != -1)
 			{
 				hkPackedNiTriStripsData hkPackedNiTriStripsData = (hkPackedNiTriStripsData) niToJ3dData.get(bhkPackedNiTriStripsShape.data);
-				return BhkCollisionToNifBullet.hkPackedNiTriStripsData(hkPackedNiTriStripsData, isDynamic, scale);
+				return BhkCollisionToNifBullet.hkPackedNiTriStripsData(hkPackedNiTriStripsData, isDynamic, scale,
+						bhkPackedNiTriStripsShape.scale.x, bhkPackedNiTriStripsShape.scale.y, bhkPackedNiTriStripsShape.scale.z);
 			}
 			System.out.println("bhkPackedNiTriStripsShape.data.ref == -1");
 			return null;
@@ -158,7 +156,7 @@ public abstract class BhkShapeToCollisionShape
 		}
 		else if (bhkShape instanceof hkPackedNiTriStripsData)
 		{
-			return BhkCollisionToNifBullet.hkPackedNiTriStripsData((hkPackedNiTriStripsData) bhkShape, isDynamic, scale);
+			return BhkCollisionToNifBullet.hkPackedNiTriStripsData((hkPackedNiTriStripsData) bhkShape, isDynamic, scale, 1, 1, 1);
 		}
 		else if (bhkShape instanceof bhkBoxShape)
 		{
