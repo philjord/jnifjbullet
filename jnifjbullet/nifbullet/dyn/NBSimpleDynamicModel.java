@@ -176,7 +176,7 @@ public class NBSimpleDynamicModel extends BranchGroup implements BulletNifModel
 	{
 		for (NBSimpleDynamicRigidBody nbbco : nifBulletbhkCollisionObjects)
 		{
-			dynamicsWorld.addRigidBody(nbbco.getRigidBody());
+			dynamicsWorld.removeRigidBody(nbbco.getRigidBody());
 		}
 		isInDynamicWorld = false;
 	}
