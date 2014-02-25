@@ -34,11 +34,17 @@ public class NBSimpleDynamicModel extends BranchGroup implements BulletNifModel
 
 	public NBSimpleDynamicModel(String fileName, MeshSource meshSource)
 	{
+		this(fileName, meshSource, 0);
+
+	}
+
+	public NBSimpleDynamicModel(String fileName, MeshSource meshSource, float forcedMass)
+	{
 
 		this.fileName = fileName;
 		setCapability(BranchGroup.ALLOW_DETACH);
 
-		if (BulletNifModelClassifier.isSimpleDynamicModel(fileName, meshSource))
+		if (forcedMass != 0 || BulletNifModelClassifier.isSimpleDynamicModel(fileName, meshSource))
 		{
 			NifFile nifFile = NifToJ3d.loadNiObjects(fileName, meshSource);
 
@@ -55,12 +61,13 @@ public class NBSimpleDynamicModel extends BranchGroup implements BulletNifModel
 							bhkCollisionObject bhkCollisionObject = (bhkCollisionObject) niObject;
 							bhkRigidBody bhkRigidBody = (bhkRigidBody) nifFile.blocks.get(bhkCollisionObject.body);
 							int layer = bhkRigidBody.layerCopy.layer;
-							if (layer == OblivionLayer.OL_CLUTTER || layer == OblivionLayer.OL_PROPS)
+							if (forcedMass != 0 ||layer == OblivionLayer.OL_CLUTTER || layer == OblivionLayer.OL_PROPS)
 							{
+								bhkRigidBody.mass = forcedMass != 0 ? forcedMass : bhkRigidBody.mass;
 								if (bhkRigidBody.mass != 0)
 								{
 									rootDynamicBody = new NBSimpleDynamicRigidBody(new NifBulletTransformListenerDelegate(),
-											bhkCollisionObject, nifFile.blocks, this, 1.0f);
+											bhkCollisionObject, nifFile.blocks, this, 1.0f, forcedMass);
 									nifBulletbhkCollisionObjects.add(rootDynamicBody);
 								}
 								else

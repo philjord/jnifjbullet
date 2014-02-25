@@ -34,7 +34,7 @@ public class NBSimpleDynamicRigidBody extends NBRigidBody
 	 * @param niToJ3dData
 	 */
 	public NBSimpleDynamicRigidBody(NifBulletTransformListener nbtl, bhkCollisionObject bhkCollisionObject, NiObjectList niToJ3dData,
-			BulletNifModel parentModel, float fixedScaleFactor)
+			BulletNifModel parentModel, float fixedScaleFactor, float forcedMass)
 	{
 		super(parentModel, fixedScaleFactor);
 
@@ -43,8 +43,9 @@ public class NBSimpleDynamicRigidBody extends NBRigidBody
 
 		int layer = bhkRigidBody.layer.layer;
 
-		if (layer == OblivionLayer.OL_CLUTTER || layer == OblivionLayer.OL_PROPS)
+		if (forcedMass != 0 || layer == OblivionLayer.OL_CLUTTER || layer == OblivionLayer.OL_PROPS)
 		{
+			bhkRigidBody.mass = forcedMass != 0 ? forcedMass : bhkRigidBody.mass;
 			if (bhkRigidBody.mass != 0)
 			{
 				if (bhkRigidBody instanceof bhkRigidBodyT)
