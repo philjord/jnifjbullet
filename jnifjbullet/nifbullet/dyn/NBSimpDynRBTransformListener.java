@@ -1,6 +1,7 @@
 package nifbullet.dyn;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
 import com.bulletphysics.dynamics.RigidBody;
@@ -46,20 +47,21 @@ public class NBSimpDynRBTransformListener extends DefaultMotionState
 		// jitter checks removed, because JBullet should do this for me
 		//	if (!graphicsWorldTrans.origin.epsilonEquals(worldTrans.origin, 0.0001f)
 		//			|| !graphicsWorldTrans.basis.epsilonEquals(worldTrans.basis, 0.0001f))
-
+		
+		 
 		super.setWorldTransform(worldTrans);
 
 		rigidBody.getAngularVelocity(angularVel);
 		rigidBody.getLinearVelocity(linearVel);
 
-		temp.setIdentity();
 		temp.set(graphicsWorldTrans.basis);
 		temp.invert();
 		temp.transform(angularVel);
 		temp.transform(linearVel);
 
-		temp.set(worldTrans.basis, worldTrans.origin, 1f);
-
+		
+		temp.set(graphicsWorldTrans.basis, graphicsWorldTrans.origin, 1f);
+				
 		// Note world coords is correct at the nifbullet listener level
 		nifBulletTransformListener.transformChanged(temp, linearVel, angularVel);
 	}
