@@ -5,7 +5,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import nifbullet.cha.KinematicCharacterController2.CharacterPositionListener;
+import nifbullet.cha.KinematicCharacterController3.CharacterPositionListener;
 import nifbullet.util.NifBulletUtil;
 
 import com.bulletphysics.collision.dispatch.CollisionFlags;

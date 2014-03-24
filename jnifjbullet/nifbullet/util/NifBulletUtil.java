@@ -207,7 +207,7 @@ public abstract class NifBulletUtil
 	}
 
 	/**
-	 * I convienence method because the default construtor usesthe "busted" emtpy matrix constructor for rotation
+	 * I convienence method because the default construtor uses the "busted" emtpy matrix constructor for rotation
 	 * @return an identity transform
 	 */
 	public static Transform newIdentityTransform()

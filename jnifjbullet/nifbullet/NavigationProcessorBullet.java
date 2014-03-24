@@ -4,7 +4,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import nifbullet.cha.KinematicCharacterController2;
+import nifbullet.cha.KinematicCharacterController3;
 import nifbullet.cha.NBControlledChar;
 import tools3d.navigation.AvatarLocation;
 import tools3d.navigation.NavigationProcessorInterface;
@@ -178,7 +178,7 @@ public class NavigationProcessorBullet implements NavigationProcessorInterface
 
 				if (nbccProvider.getNBControlledChar() != null)
 				{
-					KinematicCharacterController2 kcc = nbccProvider.getNBControlledChar().getCharacterController();
+					KinematicCharacterController3 kcc = nbccProvider.getNBControlledChar().getCharacterController();
 					//kcc.setWalkDirection(currentOneFrameTranslation);						
 					kcc.setRotation(avatarRot);
 					kcc.setVelocityForTimeInterval(oneFrameTranslation, 1.0f);

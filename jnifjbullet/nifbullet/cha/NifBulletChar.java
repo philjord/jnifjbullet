@@ -5,7 +5,7 @@ import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
 import nifbullet.BulletNifModel;
-import nifbullet.cha.KinematicCharacterController2.CharacterPositionListener;
+import nifbullet.cha.KinematicCharacterController3.CharacterPositionListener;
 
 public interface NifBulletChar extends BulletNifModel
 {

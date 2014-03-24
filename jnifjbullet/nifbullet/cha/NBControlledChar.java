@@ -4,7 +4,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import nifbullet.cha.KinematicCharacterController2.CharacterPositionListener;
+import nifbullet.cha.KinematicCharacterController3.CharacterPositionListener;
 import nifbullet.util.NifBulletUtil;
 
 import com.bulletphysics.LocalPairCachingGhostObject;
@@ -17,7 +17,7 @@ import com.bulletphysics.linearmath.Transform;
 
 public class NBControlledChar implements NifBulletChar
 {
-	private KinematicCharacterController2 character;
+	private KinematicCharacterController3 character;
 
 	private LocalPairCachingGhostObject ghostObject;
 
@@ -42,11 +42,11 @@ public class NBControlledChar implements NifBulletChar
 		ghostObject.setCollisionShape(capsule);
 		ghostObject.setCollisionFlags(CollisionFlags.CHARACTER_OBJECT);
 
-		character = new KinematicCharacterController2(ghostObject, capsule, stepHeight);
+		character = new KinematicCharacterController3(ghostObject, capsule, stepHeight);
 
 	}
 
-	public KinematicCharacterController2 getCharacterController()
+	public KinematicCharacterController3 getCharacterController()
 	{
 		return character;
 	}

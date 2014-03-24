@@ -4,7 +4,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 import nifbullet.NavigationProcessorBullet.NbccProvider;
-import nifbullet.cha.KinematicCharacterController2;
+import nifbullet.cha.KinematicCharacterController3;
 
 public class JumpKeyListener extends KeyAdapter
 {
@@ -28,7 +28,7 @@ public class JumpKeyListener extends KeyAdapter
 
 			if (clientPhysicsSystem.getNBControlledChar() != null)
 			{
-				KinematicCharacterController2 kcc = clientPhysicsSystem.getNBControlledChar().getCharacterController();
+				KinematicCharacterController3 kcc = clientPhysicsSystem.getNBControlledChar().getCharacterController();
 				if (kcc.canJump())
 				{
 					kcc.jump(multi);
