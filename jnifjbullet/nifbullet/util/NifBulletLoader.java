@@ -7,7 +7,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.vecmath.Vector3f;
 
-import nif.NifFileReader;
 import nif.NifToJ3d;
 import nifbullet.BulletNifModel;
 import nifbullet.BulletNifModelClassifier;
@@ -93,7 +92,7 @@ public class NifBulletLoader
 					try
 					{
 						BulletNifModelClassifier.testNif(f.getAbsolutePath(), new FileMeshSource());
-						BulletNifModelClassifier.createNifBullet(f.getAbsolutePath(), new FileMeshSource()).addToDynamicsWorld(
+						BulletNifModelClassifier.createNifBullet(f.getAbsolutePath(), new FileMeshSource(), 0).addToDynamicsWorld(
 								dynamicsWorld);
 
 					}
@@ -122,7 +121,7 @@ public class NifBulletLoader
 				{
 					System.out.println("\tFile: " + fs[i]);
 					BulletNifModelClassifier.testNif(fs[i].getAbsolutePath(), meshSource);
-					BulletNifModel bnm = BulletNifModelClassifier.createNifBullet(fs[i].getAbsolutePath(), meshSource);
+					BulletNifModel bnm = BulletNifModelClassifier.createNifBullet(fs[i].getAbsolutePath(), meshSource, 0);
 					if (bnm != null)
 						bnm.addToDynamicsWorld(dynamicsWorld);
 

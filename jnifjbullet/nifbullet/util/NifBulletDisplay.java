@@ -141,7 +141,7 @@ public class NifBulletDisplay
 					bnm.removeFromDynamicsWorld(dynamicsWorld);
 				}
 
-				BulletNifModel nb = BulletNifModelClassifier.createNifBullet(f.getAbsolutePath(), new FileMeshSource());
+				BulletNifModel nb = BulletNifModelClassifier.createNifBullet(f.getAbsolutePath(), new FileMeshSource(), 0);
 				if (nb != null)
 				{
 					nb.addToDynamicsWorld(dynamicsWorld);

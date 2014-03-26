@@ -50,7 +50,6 @@ public class NBStaticRigidBody extends NBRigidBody
 		if (layer == OblivionLayer.OL_STATIC || layer == OblivionLayer.OL_UNIDENTIFIED || layer == OblivionLayer.OL_STAIRS
 				|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT)
 		{
-
 			if (bhkRigidBody.mass == 0)
 			{
 				bhkShape bhkShape = (bhkShape) blocks.get(bhkRigidBody.shape);
@@ -102,7 +101,7 @@ public class NBStaticRigidBody extends NBRigidBody
 	private Transform worldTransform = NifBulletUtil.newIdentityTransform();
 
 	/**
-	 * NOTICE this just uses teh unchanging static niObject fixed rotr's
+	 * NOTICE this just uses the unchanging static niObject fixed rotr's
 	 * The kinematic equivilent use altering j3dNiAVObjects
 	 * @param rootTrans
 	 * @return

@@ -16,16 +16,16 @@ import nifbullet.convert.BhkShapeToCollisionShape;
 import nifbullet.util.NifBulletUtil;
 import utils.convert.ConvertFromHavok;
 
-import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.collision.shapes.CompoundShape;
 import com.bulletphysics.linearmath.Transform;
 
-public class NBSimpleDynamicRigidBody extends NBRigidBody
+public class NBDynamicRigidBody extends NBRigidBody
 {
 	// transform binding point, send rigid body trans updates out to the parent transform group and nifbullet
-	private NBSimpDynRBTransformListener rigidBodyTransformListener;
+	private NBDynRBTransformListener rigidBodyTransformListener;
 
-	//private NiAVObject parentNiObject;
+	// root shape to allow multi parts to be added as required
+	private CompoundShape colShape = new CompoundShape();
 
 	/**
 	 * As one of these simple objects controls the transform of one simple model we need the model now to update it
@@ -33,7 +33,7 @@ public class NBSimpleDynamicRigidBody extends NBRigidBody
 	 * @param bhkCollisionObject
 	 * @param niToJ3dData
 	 */
-	public NBSimpleDynamicRigidBody(NifBulletTransformListener nbtl, bhkCollisionObject bhkCollisionObject, NiObjectList niToJ3dData,
+	public NBDynamicRigidBody(NifBulletTransformListener nbtl, bhkCollisionObject bhkCollisionObject, NiObjectList niToJ3dData,
 			BulletNifModel parentModel, float fixedScaleFactor, float forcedMass)
 	{
 		super(parentModel, fixedScaleFactor);
@@ -48,26 +48,26 @@ public class NBSimpleDynamicRigidBody extends NBRigidBody
 			bhkRigidBody.mass = forcedMass != 0 ? forcedMass : bhkRigidBody.mass;
 			if (bhkRigidBody.mass != 0)
 			{
+				Transform3D colTrans = new Transform3D();
+
 				if (bhkRigidBody instanceof bhkRigidBodyT)
 				{
-					bhkShape bhkShape = (bhkShape) niToJ3dData.get(bhkRigidBody.shape);
-					CompoundShape colShape = new CompoundShape();
-					Transform3D temp = new Transform3D(ConvertFromHavok.toJ3d(bhkRigidBody.rotation), ConvertFromHavok.toJ3d(
+					colTrans = new Transform3D(ConvertFromHavok.toJ3d(bhkRigidBody.rotation), ConvertFromHavok.toJ3d(
 							bhkRigidBody.translation, fixedScaleFactor), 1.0f);
-					colShape.addChildShape(NifBulletUtil.createTrans(temp),
-							BhkShapeToCollisionShape.processBhkShape(bhkShape, niToJ3dData, true, fixedScaleFactor));
-					setRigidBody(NifBulletUtil.createRigidBody(bhkRigidBody, colShape, NifBulletUtil.newIdentityTransform(), this));
 				}
 				else
 				{
-
-					bhkShape bhkShape = (bhkShape) niToJ3dData.get(bhkRigidBody.shape);
-					CollisionShape colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, niToJ3dData, true, fixedScaleFactor);
-					setRigidBody(NifBulletUtil.createRigidBody(bhkRigidBody, colShape, NifBulletUtil.newIdentityTransform(), this));
+					colTrans.setIdentity();
 				}
 
+				bhkShape bhkShape = (bhkShape) niToJ3dData.get(bhkRigidBody.shape);
+
+				colShape.addChildShape(NifBulletUtil.createTrans(colTrans),
+						BhkShapeToCollisionShape.processBhkShape(bhkShape, niToJ3dData, true, fixedScaleFactor));
+				setRigidBody(NifBulletUtil.createRigidBody(bhkRigidBody, colShape, NifBulletUtil.newIdentityTransform(), this));
+
 				//note we don't set initial transform or velocities during construction
-				rigidBodyTransformListener = new NBSimpDynRBTransformListener(nbtl, getRigidBody(), NifBulletUtil.newIdentityTransform());
+				rigidBodyTransformListener = new NBDynRBTransformListener(nbtl, getRigidBody(), NifBulletUtil.newIdentityTransform());
 				getRigidBody().setMotionState(rigidBodyTransformListener);
 			}
 			else

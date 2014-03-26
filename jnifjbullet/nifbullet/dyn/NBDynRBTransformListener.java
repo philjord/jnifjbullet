@@ -15,13 +15,13 @@ import com.bulletphysics.linearmath.Transform;
  * @author philip
  *
  */
-public class NBSimpDynRBTransformListener extends DefaultMotionState
+public class NBDynRBTransformListener extends DefaultMotionState
 {
 	private RigidBody rigidBody;
 
 	private NifBulletTransformListener nifBulletTransformListener;
 
-	public NBSimpDynRBTransformListener(NifBulletTransformListener nifBulletTransformListener, RigidBody rigidBody, Transform initialTransform)
+	public NBDynRBTransformListener(NifBulletTransformListener nifBulletTransformListener, RigidBody rigidBody, Transform initialTransform)
 	{
 		super(initialTransform);
 		this.nifBulletTransformListener = nifBulletTransformListener;

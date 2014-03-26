@@ -97,7 +97,7 @@ public abstract class BulletNifModelClassifier
 			System.out.println("isKinematicModel");
 		}
 
-		if (isSimpleDynamicModel(filename, meshSource))
+		if (isSimpleDynamicModel(filename, meshSource, 0))
 		{
 			categoryCount++;
 			System.out.println("isSimpleDynamicModel");
@@ -122,7 +122,7 @@ public abstract class BulletNifModelClassifier
 	public static boolean isNotPhysics(String filename, MeshSource meshSource)
 	{
 		NifFile nifFile = NifToJ3d.loadNiObjects(filename, meshSource);
-	 
+
 		boolean ret = false;
 		if (nifFile != null)
 		{
@@ -144,7 +144,7 @@ public abstract class BulletNifModelClassifier
 	{
 
 		NifFile nifFile = NifToJ3d.loadNiObjects(filename, meshSource);
-		 
+
 		boolean ret = false;
 		if (nifFile != null)
 		{
@@ -175,7 +175,7 @@ public abstract class BulletNifModelClassifier
 	public static boolean isKinematicModel(String filename, MeshSource meshSource)
 	{
 		NifFile nifFile = NifToJ3d.loadNiObjects(filename, meshSource);
-		 
+
 		boolean ret = false;
 		if (nifFile != null)
 		{
@@ -196,15 +196,15 @@ public abstract class BulletNifModelClassifier
 		return ret;
 	}
 
-	// 1 only massed rigid (and is directly off root?), has 0 non massed
-	// 1 total OL_PROP or OL_CLUTTER layer  (I think clutter can be picked and props can't?)
+	// 1 only massed rigid (and is directly off root?), has 0 non massed (unless a forced mass used)
+	// 1 total OL_PROP or OL_CLUTTER layer  (I think clutter can be picked and props can't?)(unless a forced mass used)
 	// no transform controllers
 	// no constraints
 	// no bones or skins
-	public static boolean isSimpleDynamicModel(String filename, MeshSource meshSource)
+	public static boolean isSimpleDynamicModel(String filename, MeshSource meshSource, float forcedMass)
 	{
 		NifFile nifFile = NifToJ3d.loadNiObjects(filename, meshSource);
-		 
+
 		boolean ret = false;
 		if (nifFile != null)
 		{
@@ -214,7 +214,9 @@ public abstract class BulletNifModelClassifier
 
 				ret = getMassedRigidBodyCount(niToJ3dData) == 1 && //
 						getNonMassedRigidBodyCount(niToJ3dData) == 0 && //
-						getLayerCount(niToJ3dData, OblivionLayer.OL_PROPS) + getLayerCount(niToJ3dData, OblivionLayer.OL_CLUTTER) == 1 && // 
+						(getLayerCount(niToJ3dData, OblivionLayer.OL_PROPS) + getLayerCount(niToJ3dData, OblivionLayer.OL_CLUTTER) == 1 //
+						//or it has a forced mass which flips this to a dynamic from any layer type
+						|| forcedMass != 0) && //
 						getTransformControllerCount(niToJ3dData) == 0 && //
 						getConstraintCount(niToJ3dData) == 0 && //
 						getSkinAndBoneCount(niToJ3dData) == 0;
@@ -225,15 +227,15 @@ public abstract class BulletNifModelClassifier
 		return ret;
 	}
 
-	// only massed rigids (no non massed) < - not true can have statics attached
-	// not sure what sort of layers to allow 
-	// must have constraints?(should?) <- no?
+	// dynamics and static, but at least one dynamic
+	// not sure what sort of layers to allow, statics need to be static 
+	// constraints can exist (storm atronach has none in death for example)
 	// bones allowed for visual rendering
-	// any of the go.nif files under armor
+	// any of the go.nif files under armor, trainign dummy, ragdolls storm atronach
 	public static boolean isComplexDynamic(String filename, MeshSource meshSource)
 	{
 		NifFile nifFile = NifToJ3d.loadNiObjects(filename, meshSource);
-		 
+
 		boolean ret = false;
 		if (nifFile != null)
 		{
@@ -369,7 +371,7 @@ public abstract class BulletNifModelClassifier
 		return (countOfAllowed - getRigidBodyCount(niToJ3dData)) == 0;
 	}
 
-	public static BulletNifModel createNifBullet(String filename, MeshSource meshSource)
+	public static BulletNifModel createNifBullet(String filename, MeshSource meshSource, float forcedMass)
 	{
 
 		if (isNotPhysics(filename, meshSource))
@@ -385,13 +387,13 @@ public abstract class BulletNifModelClassifier
 		{
 			return new NBKinematicModel(filename, meshSource, new Transform3D());
 		}
-		else if (isSimpleDynamicModel(filename, meshSource))
+		else if (isSimpleDynamicModel(filename, meshSource, forcedMass))
 		{
-			return new NBSimpleDynamicModel(filename, meshSource);
+			return new NBSimpleDynamicModel(filename, meshSource, forcedMass);
 		}
 		else if (isComplexDynamic(filename, meshSource))
 		{
-			System.out.println("createNifBullet isComplexDynamic not yet! "+ filename);
+			System.out.println("createNifBullet isComplexDynamic not yet! " + filename);
 			return null;
 		}
 

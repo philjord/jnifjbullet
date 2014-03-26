@@ -1,10 +1,5 @@
 package nifbullet.dyn;
 
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
-
 import nif.NifFile;
 import nif.NifToJ3d;
 import nif.enums.OblivionLayer;
@@ -15,8 +10,6 @@ import nif.niobject.bhk.bhkRigidBody;
 import nifbullet.BulletNifModel;
 import nifbullet.BulletNifModelClassifier;
 import utils.source.MeshSource;
-
-import com.bulletphysics.dynamics.DynamicsWorld;
 
 /**
  * //my ship needs to have a root rigid body that is compound so I can add all apras to it!
@@ -42,21 +35,58 @@ import com.bulletphysics.dynamics.DynamicsWorld;
 * Can A have C? yes dual col shapes can exist for static and dynamics
 * 
 * 
+* So we derive this model:
+* simple model has one dyn RB which is it's root
+* complex modle has multiple dyn RB the first is it's root and there are constraints
+* 	The root object is updated by AREF updates, and it reports it's own updates back out
+* 	So a complex with more than 1 static RB will have an issue if a force transform comes in 
+* 	because it needs to update all statics (based off the start positions) but the dyns should 
+* 	be constrained to follow, though big moves might be worth updating all parts by, depends a bit
+* 
+* Then the dyn RB has 2 types, 
+* Simple has a single nif model and is simple
+* Multipart is a compound at the top  and can have nifs added to the root and allows user pointers
+* It also allows a transform update based on user object.
+* Currently it does not have a user ref update call back (as it is not animated or dynamical at the
+* compound shape level
+* For now all dynRB will be multipart, but statics will not
+*  
+* 
+* /**
+ * All complex dynamic objects will be called ragdoll.
+Ragdolls basically simply have constraints (or not for skeletons that fall apart) 
+Ragdolls can be connected to bones (and hence visuals will look skinish and lovely) 
+or ninodes (and visuals will be storm actronach or chain doll or chandelier) physics doesn’t care.
+ 
+Ragdolls can be anchored or un anchored, chandelier or chain doll anchored, character with foot 
+caught in bear trap anchored. Basically physics has a constraint attached to a static (or even kinematic) 
+results are just whatever is determined by physics. 
+
+Unanchored (and in fact anchored because it’s no cost) have a ninode (or nibone) that is considered the “root”;
+updates to this root’s position need to be sent back into model exactly like a simple dynamic  
+
+Note a complex dynamic that is unanchored and has one ninode and no constraints is the current simple dynamic.
+So at some point these will merge as 1 model called dynamic. The anchoring to beartraps and kinematics would be
+ across 2 instrecos and so would be “above and outside” the nifbulletmodel system.
+ 
+ Each rigid body in a ragdoll needs to be joined via it's NBDynRigid
+ Body to it's particular J3dNinode. That J3dNinode is either rigid (ninode based) or bone (ninode with the bone marker (or nibone?)
+  Picking however wants the rigidbody to point to the instreco, so I think the user object pointer should point to the NRigidBody 
+  and that should hold a model ref, and that should hold an instref
+ 
+ Note for the unconstrained ragdolls (storm atronach) I still need all transforms to come from the root node so the rendering 
+ bounds system works, I can't have every ninode trmsformed in teh world coords and a root node at 0,0,0
+
+ * @author philip
+ *
+ 
  * @param fileName
  * @param meshSource
  * @param forcedMass
  */
 
-public class NBComplexDynamicModel extends BranchGroup implements BulletNifModel
+public class NBComplexDynamicModel extends NBDynamicModel implements BulletNifModel
 {
-
-	private String fileName = "";
-
-	private NBSimpleDynamicRigidBody rootDynamicBody;
-
-	private NifBulletTransformListener transformChangeListener;
-
-	private boolean isInDynamicWorld = false;
 
 	public NBComplexDynamicModel(String fileName, MeshSource meshSource)
 	{
@@ -67,10 +97,9 @@ public class NBComplexDynamicModel extends BranchGroup implements BulletNifModel
 	public NBComplexDynamicModel(String fileName, MeshSource meshSource, float forcedMass)
 	{
 
-		this.fileName = fileName;
-		setCapability(BranchGroup.ALLOW_DETACH);
+		super(fileName);
 
-		if (forcedMass != 0 || BulletNifModelClassifier.isSimpleDynamicModel(fileName, meshSource))
+		if (BulletNifModelClassifier.isSimpleDynamicModel(fileName, meshSource, forcedMass))
 		{
 			NifFile nifFile = NifToJ3d.loadNiObjects(fileName, meshSource);
 
@@ -82,8 +111,6 @@ public class NBComplexDynamicModel extends BranchGroup implements BulletNifModel
 					{
 						if (niObject instanceof bhkCollisionObject)
 						{
-							//TODO: check for collision being off the root node, otherwise we should be a complex dynamic
-
 							bhkCollisionObject bhkCollisionObject = (bhkCollisionObject) niObject;
 							bhkRigidBody bhkRigidBody = (bhkRigidBody) nifFile.blocks.get(bhkCollisionObject.body);
 							int layer = bhkRigidBody.layerCopy.layer;
@@ -92,10 +119,12 @@ public class NBComplexDynamicModel extends BranchGroup implements BulletNifModel
 								bhkRigidBody.mass = forcedMass != 0 ? forcedMass : bhkRigidBody.mass;
 								if (bhkRigidBody.mass != 0)
 								{
-									//TODO: why is this changing constantly only to end up as the last one?
-									rootDynamicBody = new NBSimpleDynamicRigidBody(new NifBulletTransformListenerDelegate(),
-											bhkCollisionObject, nifFile.blocks, this, 1.0f, forcedMass);
-
+									//NOTE for now the first is considered the root 
+									if (rootDynamicBody != null)
+									{
+										rootDynamicBody = new NBDynamicRigidBody(new NifBulletTransformListenerDelegate(),
+												bhkCollisionObject, nifFile.blocks, this, 1.0f, forcedMass);
+									}
 								}
 								else
 								{
@@ -118,117 +147,4 @@ public class NBComplexDynamicModel extends BranchGroup implements BulletNifModel
 
 	}
 
-	/**
-	 * Registers a listener that will get transform update from NBSimpleDynamicRigidBody
-	 * @param transformChangeListener
-	 */
-	public void setTransformChangeListener(NifBulletTransformListener transformChangeListener)
-	{
-		this.transformChangeListener = transformChangeListener;
-	}
-
-	/*
-	 * Called externally to tell the nifbullet it has moved 
-	 */
-	public void forceUpdate(Transform3D trans, Vector3f linearVelocity, Vector3f rotationalVelocity)
-	{
-		if (rootDynamicBody != null)
-		{
-			rootDynamicBody.forceUpdate(trans, linearVelocity, rotationalVelocity);
-		}
-	}
-
-	public void forceUpdate(Vector3f linearVelocity, Vector3f rotationalVelocity)
-	{
-		if (rootDynamicBody != null)
-		{
-			rootDynamicBody.forceUpdate(linearVelocity, rotationalVelocity);
-		}
-	}
-
-	/*
-	 * Called externally to tell the nifbullet it has moved 
-	 */
-	public void setTransform(Quat4f q, Vector3f v)
-	{
-		forceUpdate(q, v);
-	}
-
-	private void forceUpdate(Quat4f q, Vector3f v)
-	{
-		if (rootDynamicBody != null)
-		{
-			Transform3D trans = new Transform3D(q, v, 1f);
-			rootDynamicBody.forceUpdate(trans);
-		}
-	}
-
-	public void applyRelForces(Vector3f linearForce, Vector3f rotationalForce)
-	{
-		if (this.rootDynamicBody != null)
-		{
-			rootDynamicBody.applyRelCentralForce(linearForce);
-			rootDynamicBody.applyRelTorque(rotationalForce);
-		}
-	}
-
-	public NBSimpleDynamicRigidBody getRootNifBulletbhkCollisionObject()
-	{
-		return rootDynamicBody;
-	}
-
-	public void destroy()
-	{
-		if (isInDynamicWorld)
-		{
-			new Throwable("destroy called whilst in dynamic world");
-		}
-
-		rootDynamicBody.destroy();
-
-	}
-
-	/**
-	 * Basically a set enabled true
-	 */
-	public void addToDynamicsWorld(DynamicsWorld dynamicsWorld)
-	{
-
-		dynamicsWorld.addRigidBody(rootDynamicBody.getRigidBody());
-
-		isInDynamicWorld = true;
-	}
-
-	/** basically a set enabled false
-	 * 
-	 */
-	public void removeFromDynamicsWorld(DynamicsWorld dynamicsWorld)
-	{
-
-		dynamicsWorld.removeRigidBody(rootDynamicBody.getRigidBody());
-
-		isInDynamicWorld = false;
-	}
-
-	public String toString()
-	{
-		return "NifBullet, file: " + fileName + " class;" + this.getClass().getSimpleName();
-	}
-
-	private class NifBulletTransformListenerDelegate implements NifBulletTransformListener
-	{
-		@Override
-		/**
-		 * Sending changes from teh NBSimpleDynamicRigidBody out to the registered listener
-		 * @see nifbullet.dyn.NifBulletTransformListener#transformChanged(javax.media.j3d.Transform3D, javax.vecmath.Vector3f, javax.vecmath.Vector3f)
-		 */
-		public void transformChanged(Transform3D trans, Vector3f linearVelocity, Vector3f rotationalVelocity)
-		{
-			// if we are being listened to update listener
-			if (transformChangeListener != null)
-			{
-				transformChangeListener.transformChanged(trans, linearVelocity, rotationalVelocity);
-			}
-		}
-	}
 }
