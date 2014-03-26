@@ -7,7 +7,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.vecmath.Vector3f;
 
+import nif.NifFileReader;
+import nif.NifToJ3d;
+import nifbullet.BulletNifModel;
 import nifbullet.BulletNifModelClassifier;
+import utils.source.MeshSource;
 import utils.source.file.FileMeshSource;
 
 import com.bulletphysics.collision.broadphase.BroadphaseInterface;
@@ -106,6 +110,7 @@ public class NifBulletLoader
 
 	private static void processDir(File dir)
 	{
+		MeshSource meshSource = new FileMeshSource();
 		System.out.println("Processing directory " + dir);
 		Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 		File[] fs = dir.listFiles();
@@ -116,9 +121,10 @@ public class NifBulletLoader
 				if (fs[i].isFile() && (fs[i].getName().endsWith(".nif") || fs[i].getName().endsWith(".kf")))
 				{
 					System.out.println("\tFile: " + fs[i]);
-					BulletNifModelClassifier.testNif(fs[i].getAbsolutePath(), new FileMeshSource());
-					BulletNifModelClassifier.createNifBullet(fs[i].getAbsolutePath(), new FileMeshSource()).addToDynamicsWorld(
-							dynamicsWorld);
+					BulletNifModelClassifier.testNif(fs[i].getAbsolutePath(), meshSource);
+					BulletNifModel bnm = BulletNifModelClassifier.createNifBullet(fs[i].getAbsolutePath(), meshSource);
+					if (bnm != null)
+						bnm.addToDynamicsWorld(dynamicsWorld);
 
 				}
 				else if (fs[i].isDirectory())
@@ -132,5 +138,8 @@ public class NifBulletLoader
 				ex.printStackTrace();
 			}
 		}
+
+		// avoid memory caching
+		NifToJ3d.clearCache();
 	}
 }

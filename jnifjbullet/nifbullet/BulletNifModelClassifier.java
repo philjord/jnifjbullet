@@ -111,6 +111,7 @@ public abstract class BulletNifModelClassifier
 
 		if (categoryCount != 1)
 		{
+			//TODO: E:\game media\Oblivion\meshes\architecture\arena\arenacolumn01.nif gives count0
 			System.err.println("Bad category count for file!!" + categoryCount);
 		}
 		return;
@@ -224,9 +225,9 @@ public abstract class BulletNifModelClassifier
 		return ret;
 	}
 
-	// only massed rigids (no non massed)
+	// only massed rigids (no non massed) < - not true can have statics attached
 	// not sure what sort of layers to allow 
-	// must have constraints?(should?)
+	// must have constraints?(should?) <- no?
 	// bones allowed for visual rendering
 	// any of the go.nif files under armor
 	public static boolean isComplexDynamic(String filename, MeshSource meshSource)
@@ -390,11 +391,11 @@ public abstract class BulletNifModelClassifier
 		}
 		else if (isComplexDynamic(filename, meshSource))
 		{
-			System.out.println("createNifBullet isSimpleDynamic not yet");
+			System.out.println("createNifBullet isComplexDynamic not yet! "+ filename);
 			return null;
 		}
 
-		System.err.println("Bad category count for file!!" + filename);
+		System.err.println("Bad category for file isNotPhysics didn't catch it!!" + filename);
 		return null;
 
 	}

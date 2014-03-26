@@ -19,12 +19,35 @@ import utils.source.MeshSource;
 import com.bulletphysics.dynamics.DynamicsWorld;
 
 /**
-* @param fileName
-* @param meshSource
-* @param forcedMass
-*/
+ * //my ship needs to have a root rigid body that is compound so I can add all apras to it!
+*probably a custom thing, note that the apar models probabyl should be rigid? 
+*No in fact they should have transformable and static parts? Because a gun added on has a turret base that doesn't swivel
+*dynamic rigid bodies need to be simple singles or
+*compound, where coumpounfd have child col shapes that can kinematically animate
+* much like a kinematic RB, but each child is just a col shape and can have more col shapes
+* then I need ot intersect with them to find which is pointed at
+* So I really need to be able to "add" file name to this model (or a compound version of it)
+* Then when intersections happen find out which one it was (maybe a user object pointer)
+* Then be able to change the transform for each sub collision object
 
-public class NBSimpleDynamicModel extends BranchGroup implements BulletNifModel
+* arrayList of static bodies, therefore they never move and other things a jointed from them
+* arrayList of dynamic children - rigid bodies with constraints
+* and array list of transformable children bodies that are in a non jointed constraint with parent
+* 
+* A The static plus dynamic is training dummy style
+* B dynamic plus jointed dynamic is the clothes fall to floor model (one is master and hence holds "location")
+* C one dynamic animated collision shapes 
+* 
+* Can A have B? yes A is B with a static attached
+* Can A have C? yes dual col shapes can exist for static and dynamics
+* 
+* 
+ * @param fileName
+ * @param meshSource
+ * @param forcedMass
+ */
+
+public class NBComplexDynamicModel extends BranchGroup implements BulletNifModel
 {
 
 	private String fileName = "";
@@ -35,13 +58,13 @@ public class NBSimpleDynamicModel extends BranchGroup implements BulletNifModel
 
 	private boolean isInDynamicWorld = false;
 
-	public NBSimpleDynamicModel(String fileName, MeshSource meshSource)
+	public NBComplexDynamicModel(String fileName, MeshSource meshSource)
 	{
 		this(fileName, meshSource, 0);
 
 	}
 
-	public NBSimpleDynamicModel(String fileName, MeshSource meshSource, float forcedMass)
+	public NBComplexDynamicModel(String fileName, MeshSource meshSource, float forcedMass)
 	{
 
 		this.fileName = fileName;
