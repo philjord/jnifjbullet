@@ -3,8 +3,9 @@ package nifbullet;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
+import com.bulletphysics.dynamics.character.KinematicCharacterController3;
+
 import nifbullet.NavigationProcessorBullet.NbccProvider;
-import nifbullet.cha.KinematicCharacterController3;
 
 public class JumpKeyListener extends KeyAdapter
 {

@@ -4,7 +4,8 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import nifbullet.cha.KinematicCharacterController3;
+import com.bulletphysics.dynamics.character.KinematicCharacterController3;
+
 import nifbullet.cha.NBControlledChar;
 import tools3d.navigation.AvatarLocation;
 import tools3d.navigation.NavigationProcessorInterface;

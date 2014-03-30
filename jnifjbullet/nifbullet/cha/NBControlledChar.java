@@ -4,15 +4,16 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import nifbullet.cha.KinematicCharacterController3.CharacterPositionListener;
 import nifbullet.util.NifBulletUtil;
 
-import com.bulletphysics.LocalPairCachingGhostObject;
 import com.bulletphysics.collision.broadphase.CollisionFilterGroups;
 import com.bulletphysics.collision.dispatch.CollisionFlags;
+import com.bulletphysics.collision.dispatch.LocalPairCachingGhostObject;
 import com.bulletphysics.collision.shapes.CapsuleShape;
 import com.bulletphysics.collision.shapes.ConvexShape;
 import com.bulletphysics.dynamics.DynamicsWorld;
+import com.bulletphysics.dynamics.character.KinematicCharacterController3;
+import com.bulletphysics.dynamics.character.KinematicCharacterController3.CharacterPositionListener;
 import com.bulletphysics.linearmath.Transform;
 
 public class NBControlledChar implements NifBulletChar

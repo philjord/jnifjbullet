@@ -4,8 +4,9 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
+import com.bulletphysics.dynamics.character.KinematicCharacterController3.CharacterPositionListener;
+
 import nifbullet.BulletNifModel;
-import nifbullet.cha.KinematicCharacterController3.CharacterPositionListener;
 
 public interface NifBulletChar extends BulletNifModel
 {
