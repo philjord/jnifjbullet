@@ -12,7 +12,7 @@ import nifbullet.BulletNifModelClassifier;
 import utils.source.MeshSource;
 
 /**
- * //my ship needs to have a root rigid body that is compound so I can add all apras to it!
+ * //my ship needs to have a root rigid body that is compound so I can add all apars to it!
 *probably a custom thing, note that the apar models probabyl should be rigid? 
 *No in fact they should have transformable and static parts? Because a gun added on has a turret base that doesn't swivel
 *dynamic rigid bodies need to be simple singles or

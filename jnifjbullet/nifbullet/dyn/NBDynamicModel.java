@@ -5,7 +5,13 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
+import nif.NifFile;
+import nif.NifToJ3d;
+import nif.niobject.NiNode;
+import nif.niobject.NiObject;
+import nif.niobject.bhk.bhkCollisionObject;
 import nifbullet.BulletNifModel;
+import utils.source.MeshSource;
 
 import com.bulletphysics.dynamics.DynamicsWorld;
 
@@ -119,6 +125,36 @@ public abstract class NBDynamicModel extends BranchGroup implements BulletNifMod
 		dynamicsWorld.removeRigidBody(rootDynamicBody.getRigidBody());
 		isInDynamicWorld = false;
 	}
+
+	public void addPart(String partFileName, MeshSource meshSource, Object pointer)
+	{
+		// no check is all cases just the collision sahpe is used
+		NifFile nifFile = NifToJ3d.loadNiObjects(partFileName, meshSource);
+
+		if (nifFile != null)
+		{
+			if (nifFile.blocks.root() instanceof NiNode)
+			{
+				for (NiObject niObject : nifFile.blocks.getNiObjects())
+				{
+					if (niObject instanceof bhkCollisionObject)
+					{
+						bhkCollisionObject bhkCollisionObject = (bhkCollisionObject) niObject;
+						//throws an error if 2 pointers
+						rootDynamicBody.addPart(bhkCollisionObject, nifFile.blocks, pointer);
+					}
+				}
+			}
+		}
+
+	}
+
+	public void setPartTransform(Object pointer, Transform3D t)
+	{
+		rootDynamicBody.setPartTransform(pointer, t);
+	}
+
+	//TODO: get part somehow for mouse over and intersept?
 
 	public String toString()
 	{
