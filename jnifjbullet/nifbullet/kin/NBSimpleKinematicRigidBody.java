@@ -81,6 +81,7 @@ public class NBSimpleKinematicRigidBody extends NBRigidBody
 	 */
 	public void updateInternalWorldTransform()
 	{
+		System.out.println("updatey called? should be called heaps?");
 		getRigidBody().getMotionState().setWorldTransform(calcWorldTransform());
 		getRigidBody().activate(true);
 	}
