@@ -36,6 +36,8 @@ public class NBKinematicModel extends BranchGroup implements BulletNifModel
 	public NBKinematicModel(String fileName, MeshSource meshSource, Transform3D rootTrans)
 	{
 		this.fileName = fileName;
+		this.setName("NBKinematicModel:" + fileName);
+		
 		setCapability(BranchGroup.ALLOW_DETACH);
 
 		if (BulletNifModelClassifier.isKinematicModel(fileName, meshSource))
@@ -44,8 +46,10 @@ public class NBKinematicModel extends BranchGroup implements BulletNifModel
 			J3dNiAVObject j3dNiNodeRoot = nifJ3dRoot.getHavokRoot();
 			NiToJ3dData niToJ3dData = nifJ3dRoot.getNiToJ3dData();
 
-			//needed for animations to occur
+			//needed for animations to occur			
 			addChild(j3dNiNodeRoot);
+			// but must be placed so camera dist works too
+			j3dNiNodeRoot.getTransformGroup().setTransform(rootTrans);
 
 			for (NiObject niObject : niToJ3dData.getNiObjects())
 			{

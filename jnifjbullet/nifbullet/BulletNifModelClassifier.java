@@ -211,12 +211,12 @@ public abstract class BulletNifModelClassifier
 			if (nifFile.blocks.root() instanceof NiNode)
 			{
 				NiToJ3dData niToJ3dData = new NiToJ3dData(nifFile.blocks);
+				//or it has a forced mass which flips this to a dynamic from any layer type
 
-				ret = getMassedRigidBodyCount(niToJ3dData) == 1 && //
+				ret = (getMassedRigidBodyCount(niToJ3dData) == 1 && //
 						getNonMassedRigidBodyCount(niToJ3dData) == 0 && //
-						(getLayerCount(niToJ3dData, OblivionLayer.OL_PROPS) + getLayerCount(niToJ3dData, OblivionLayer.OL_CLUTTER) == 1 //
-						//or it has a forced mass which flips this to a dynamic from any layer type
-						|| forcedMass != 0) && //
+						getLayerCount(niToJ3dData, OblivionLayer.OL_PROPS) + getLayerCount(niToJ3dData, OblivionLayer.OL_CLUTTER) == 1 //
+				|| forcedMass != 0) && //
 						getTransformControllerCount(niToJ3dData) == 0 && //
 						getConstraintCount(niToJ3dData) == 0 && //
 						getSkinAndBoneCount(niToJ3dData) == 0;

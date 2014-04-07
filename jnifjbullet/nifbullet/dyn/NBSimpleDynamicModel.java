@@ -29,7 +29,7 @@ public class NBSimpleDynamicModel extends NBDynamicModel implements BulletNifMod
 			NifFile nifFile = NifToJ3d.loadNiObjects(fileName, meshSource);
 
 			if (nifFile != null)
-			{
+			{	
 				if (nifFile.blocks.root() instanceof NiNode)
 				{
 					for (NiObject niObject : nifFile.blocks.getNiObjects())

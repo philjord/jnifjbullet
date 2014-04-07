@@ -81,7 +81,6 @@ public class NBSimpleKinematicRigidBody extends NBRigidBody
 	 */
 	public void updateInternalWorldTransform()
 	{
-		System.out.println("updatey called? should be called heaps?");
 		getRigidBody().getMotionState().setWorldTransform(calcWorldTransform());
 		getRigidBody().activate(true);
 	}
@@ -94,7 +93,7 @@ public class NBSimpleKinematicRigidBody extends NBRigidBody
 	/** 
 	 * go up to the root of the model adding in all transforms then add o the root transform (models location in world)	
 	 * NOTICE this use the altering j3dNiAVObjects
-	 * Note the fixed rotrs taht static equivilent uses
+	 * Note the fixed rotrs that static equivilent uses
 	 * @param rootTrans
 	 * @return
 	 */
@@ -105,7 +104,6 @@ public class NBSimpleKinematicRigidBody extends NBRigidBody
 		worldTransformCalc.set(rootTrans);
 		if (parentJ3dNiAVObject != null)
 		{
-
 			// get teh transform up to the root
 			Transform3D temp = new Transform3D();
 			parentJ3dNiAVObject.getTreeTransform(temp, j3dNiNodeRoot);
