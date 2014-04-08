@@ -8,7 +8,7 @@ import nifbullet.util.NifBulletUtil;
 
 import com.bulletphysics.collision.broadphase.CollisionFilterGroups;
 import com.bulletphysics.collision.dispatch.CollisionFlags;
-import com.bulletphysics.collision.dispatch.LocalPairCachingGhostObject;
+import com.bulletphysics.collision.dispatch.PairCachingGhostObject;
 import com.bulletphysics.collision.shapes.CapsuleShape;
 import com.bulletphysics.collision.shapes.ConvexShape;
 import com.bulletphysics.dynamics.DynamicsWorld;
@@ -20,7 +20,7 @@ public class NBControlledChar implements NifBulletChar
 {
 	private KinematicCharacterController3 character;
 
-	private LocalPairCachingGhostObject ghostObject;
+	private PairCachingGhostObject ghostObject;
 
 	private float characterHeight = 0.9f;// capsule shape height is height+(2*radius)
 
@@ -37,7 +37,7 @@ public class NBControlledChar implements NifBulletChar
 
 		ConvexShape capsule = new CapsuleShape(characterWidth, characterHeight);
 
-		ghostObject = new LocalPairCachingGhostObject();
+		ghostObject = new PairCachingGhostObject();
 
 		ghostObject.setWorldTransform(tr);
 		ghostObject.setCollisionShape(capsule);
