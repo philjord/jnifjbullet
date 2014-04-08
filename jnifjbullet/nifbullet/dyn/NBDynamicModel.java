@@ -10,9 +10,10 @@ import nif.NifToJ3d;
 import nif.niobject.NiNode;
 import nif.niobject.NiObject;
 import nif.niobject.bhk.bhkCollisionObject;
-import nifbullet.BulletNifModel;
+import nifbullet.PartedBulletNifModel;
 import utils.source.MeshSource;
 
+import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.dynamics.DynamicsWorld;
 
 /**
@@ -21,7 +22,7 @@ import com.bulletphysics.dynamics.DynamicsWorld;
 * @param forcedMass
 */
 
-public abstract class NBDynamicModel extends BranchGroup implements BulletNifModel
+public abstract class NBDynamicModel extends BranchGroup implements PartedBulletNifModel
 {
 
 	private String fileName = "";
@@ -126,7 +127,8 @@ public abstract class NBDynamicModel extends BranchGroup implements BulletNifMod
 		isInDynamicWorld = false;
 	}
 
-	public void addPart(String partFileName, MeshSource meshSource, Object pointer)
+	@Override
+	public void addPart(String partFileName, MeshSource meshSource, Object pointer, Transform3D rootTrans)
 	{
 		// no check is all cases just the collision sahpe is used
 		NifFile nifFile = NifToJ3d.loadNiObjects(partFileName, meshSource);
@@ -141,7 +143,7 @@ public abstract class NBDynamicModel extends BranchGroup implements BulletNifMod
 					{
 						bhkCollisionObject bhkCollisionObject = (bhkCollisionObject) niObject;
 						//throws an error if 2 pointers
-						rootDynamicBody.addPart(bhkCollisionObject, nifFile.blocks, pointer);
+						rootDynamicBody.addPart(bhkCollisionObject, nifFile.blocks, pointer, rootTrans);
 					}
 				}
 			}
@@ -149,12 +151,23 @@ public abstract class NBDynamicModel extends BranchGroup implements BulletNifMod
 
 	}
 
+	@Override
 	public void setPartTransform(Object pointer, Transform3D t)
 	{
 		rootDynamicBody.setPartTransform(pointer, t);
 	}
 
-	//TODO: get part somehow for mouse over and intersept?
+	@Override
+	public Object getPartPointer(CollisionShape collisionShape)
+	{
+		return rootDynamicBody.getPartPointer(collisionShape);
+	}
+
+	@Override
+	public void removePart(Object pointer)
+	{
+		rootDynamicBody.removePart(pointer);
+	}
 
 	public String toString()
 	{
@@ -177,4 +190,5 @@ public abstract class NBDynamicModel extends BranchGroup implements BulletNifMod
 			}
 		}
 	}
+
 }

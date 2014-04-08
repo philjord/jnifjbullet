@@ -1,5 +1,7 @@
 package nifbullet.stat;
 
+import java.util.HashMap;
+
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;
 
@@ -21,6 +23,7 @@ import utils.convert.ConvertFromNif;
 
 import com.bulletphysics.collision.dispatch.CollisionFlags;
 import com.bulletphysics.collision.shapes.CollisionShape;
+import com.bulletphysics.collision.shapes.CompoundShape;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.linearmath.Transform;
@@ -29,6 +32,13 @@ import com.sun.j3d.utils.geometry.GeometryInfo;
 public class NBStaticRigidBody extends NBRigidBody
 {
 	private NiAVObject parentNiObject;
+
+	// root shape to allow multi parts to be added as required
+	private CollisionShape colShape = null;
+
+	private HashMap<Object, CollisionShape> pointerToParts = new HashMap<Object, CollisionShape>();
+
+	private HashMap<CollisionShape, Object> partsToPointer = new HashMap<CollisionShape, Object>();
 
 	/** send fixed scaling via the float not transform
 	 * 
@@ -53,7 +63,7 @@ public class NBStaticRigidBody extends NBRigidBody
 			if (bhkRigidBody.mass == 0)
 			{
 				bhkShape bhkShape = (bhkShape) blocks.get(bhkRigidBody.shape);
-				CollisionShape colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, blocks, fixedScaleFactor);
+				colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, blocks, fixedScaleFactor);
 				setRigidBody(NifBulletUtil.createStaticRigidBody(bhkRigidBody, colShape, this));
 				updateRootTransform(rootTrans);
 			}
@@ -83,7 +93,7 @@ public class NBStaticRigidBody extends NBRigidBody
 	public NBStaticRigidBody(GeometryInfo gi, Transform3D rootTrans, BulletNifModel parentModel)
 	{
 		super(parentModel, 1.0f);
-		CollisionShape colShape = BhkCollisionToNifBullet.makeFromGeometryInfo(gi);
+		colShape = BhkCollisionToNifBullet.makeFromGeometryInfo(gi);
 		RigidBody rigidBody = new RigidBody(new RigidBodyConstructionInfo(0, null, colShape));
 		rigidBody.setCollisionFlags(CollisionFlags.STATIC_OBJECT);
 		setRigidBody(rigidBody);
@@ -141,4 +151,72 @@ public class NBStaticRigidBody extends NBRigidBody
 		return worldTransform;
 	}
 
+	/**
+	 * The pointer can be reused? so one pointer many parts? NO!
+	 * @param bhkCollisionObject
+	 * @param blocks
+	 * @param pointer
+	 */
+	public void addPart(bhkCollisionObject bhkCollisionObject, NiObjectList blocks, Object pointer, Transform3D rootTrans)
+	{
+
+		if (colShape == null)
+		{
+			colShape = new CompoundShape();
+			RigidBody rigidBody = new RigidBody(new RigidBodyConstructionInfo(0, null, colShape));
+			rigidBody.setCollisionFlags(CollisionFlags.STATIC_OBJECT);
+			setRigidBody(rigidBody);
+			updateRootTransform(rootTrans);
+		}
+		else if (!(colShape instanceof CompoundShape))
+		{
+			colShape = new CompoundShape();
+			((CompoundShape) colShape).addChildShape(NifBulletUtil.newIdentityTransform(), getRigidBody().getCollisionShape());
+			getRigidBody().setCollisionShape(colShape);
+		}
+
+		if (partsToPointer.get(pointer) != null)
+		{
+			throw new RuntimeException("multiple pointer part mapping!");
+		}
+
+		bhkRigidBody bhkRigidBody = (bhkRigidBody) blocks.get(bhkCollisionObject.body);
+
+		Transform3D colTrans = new Transform3D();
+		if (bhkRigidBody instanceof bhkRigidBodyT)
+		{
+			colTrans = new Transform3D(ConvertFromHavok.toJ3d(bhkRigidBody.rotation), ConvertFromHavok.toJ3d(bhkRigidBody.translation,
+					fixedScaleFactor), 1.0f);
+		}
+		else
+		{
+			colTrans.setIdentity();
+		}
+
+		bhkShape bhkShape = (bhkShape) blocks.get(bhkRigidBody.shape);
+		CollisionShape partColShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, blocks, true, fixedScaleFactor);
+
+		((CompoundShape) colShape).addChildShape(NifBulletUtil.createTrans(colTrans), partColShape);
+
+		pointerToParts.put(pointer, partColShape);
+		partsToPointer.put(partColShape, pointer);
+	}
+
+	public void setPartTransform(Object pointer, Transform3D t)
+	{
+		CollisionShape cs = pointerToParts.get(pointer);
+		((CompoundShape) colShape).updateChildTransform(((CompoundShape) colShape).getChildShapeIndex(cs), NifBulletUtil.createTrans(t));
+	}
+
+	public Object getPartPointer(CollisionShape collisionShape)
+	{
+		return partsToPointer.get(collisionShape);
+	}
+
+	public void removePart(Object pointer)
+	{
+		CollisionShape cs = pointerToParts.remove(pointer);
+		partsToPointer.remove(cs);
+		((CompoundShape) colShape).removeChildShape(cs);
+	}
 }

@@ -30,7 +30,9 @@ public class NBDynamicRigidBody extends NBRigidBody
 	// root shape to allow multi parts to be added as required
 	private CompoundShape colShape = new CompoundShape();
 
-	private HashMap<Object, CollisionShape> partsToPointer = new HashMap<Object, CollisionShape>();
+	private HashMap<Object, CollisionShape> pointerToParts = new HashMap<Object, CollisionShape>();
+
+	private HashMap<CollisionShape, Object> partsToPointer = new HashMap<CollisionShape, Object>();
 
 	/**
 	 * As one of these simple objects controls the transform of one simple model we need the model now to update it
@@ -145,41 +147,40 @@ public class NBDynamicRigidBody extends NBRigidBody
 	 * @param blocks
 	 * @param pointer
 	 */
-	public void addPart(bhkCollisionObject bhkCollisionObject, NiObjectList blocks, Object pointer)
+	public void addPart(bhkCollisionObject bhkCollisionObject, NiObjectList blocks, Object pointer, Transform3D rootTrans)
 	{
 		if (partsToPointer.get(pointer) != null)
 		{
 			throw new RuntimeException("multiple pointer part mapping!");
 		}
-		
-		bhkRigidBody bhkRigidBody = (bhkRigidBody) blocks.get(bhkCollisionObject.body);
 
-		Transform3D colTrans = new Transform3D();
-		if (bhkRigidBody instanceof bhkRigidBodyT)
-		{
-			colTrans = new Transform3D(ConvertFromHavok.toJ3d(bhkRigidBody.rotation), ConvertFromHavok.toJ3d(bhkRigidBody.translation,
-					fixedScaleFactor), 1.0f);
-		}
-		else
-		{
-			colTrans.setIdentity();
-		}
+		bhkRigidBody bhkRigidBody = (bhkRigidBody) blocks.get(bhkCollisionObject.body);
+		//NOTE rigidBodyT transform ignored here
 
 		bhkShape bhkShape = (bhkShape) blocks.get(bhkRigidBody.shape);
 		CollisionShape partColShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, blocks, true, fixedScaleFactor);
 
-		colShape.addChildShape(NifBulletUtil.createTrans(colTrans), partColShape);
+		colShape.addChildShape(NifBulletUtil.createTrans(rootTrans), partColShape);
 
-		partsToPointer.put(pointer, partColShape);
+		pointerToParts.put(pointer, partColShape);
+		partsToPointer.put(partColShape, pointer);
 	}
 
 	public void setPartTransform(Object pointer, Transform3D t)
 	{
-		CollisionShape cs = partsToPointer.get(pointer);
+		CollisionShape cs = pointerToParts.get(pointer);
 		colShape.updateChildTransform(colShape.getChildShapeIndex(cs), NifBulletUtil.createTrans(t));
 	}
-	//TODO: remove part
 
-	//TODO: get part somehow for mouse over and intersept?
+	public Object getPartPointer(CollisionShape collisionShape)
+	{
+		return partsToPointer.get(collisionShape);
+	}
 
+	public void removePart(Object pointer)
+	{
+		CollisionShape cs = pointerToParts.remove(pointer);
+		partsToPointer.remove(cs);
+		colShape.removeChildShape(cs);
+	}
 }

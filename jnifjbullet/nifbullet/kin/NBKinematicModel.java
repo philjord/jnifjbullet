@@ -37,7 +37,7 @@ public class NBKinematicModel extends BranchGroup implements BulletNifModel
 	{
 		this.fileName = fileName;
 		this.setName("NBKinematicModel:" + fileName);
-		
+
 		setCapability(BranchGroup.ALLOW_DETACH);
 
 		if (BulletNifModelClassifier.isKinematicModel(fileName, meshSource))
@@ -118,7 +118,6 @@ public class NBKinematicModel extends BranchGroup implements BulletNifModel
 	 */
 	public void addToDynamicsWorld(DynamicsWorld dynamicsWorld)
 	{
-
 		for (NBStaticRigidBody sb : staticRigidBodys)
 		{
 			dynamicsWorld.addRigidBody(sb.getRigidBody());
