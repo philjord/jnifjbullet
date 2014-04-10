@@ -28,7 +28,7 @@ public class NBControlledChar implements NifBulletChar
 
 	private float stepHeight = 0.35f;
 
-	private boolean isInDynamicWorld = false;
+	private DynamicsWorld dynamicsWorld = null;
 
 	public NBControlledChar(Transform3D baseTrans)
 	{
@@ -73,7 +73,7 @@ public class NBControlledChar implements NifBulletChar
 
 	public void destroy()
 	{
-		if (isInDynamicWorld)
+		if (dynamicsWorld != null)
 		{
 			new Throwable("destroy called whilst in dynamic world");
 		}
@@ -86,15 +86,15 @@ public class NBControlledChar implements NifBulletChar
 		dynamicsWorld.addCollisionObject(ghostObject, CollisionFilterGroups.CHARACTER_FILTER,
 				(short) (CollisionFilterGroups.STATIC_FILTER | CollisionFilterGroups.DEFAULT_FILTER));
 		dynamicsWorld.addAction(character);
-		isInDynamicWorld = true;
+		this.dynamicsWorld = dynamicsWorld;
 	}
 
 	@Override
-	public void removeFromDynamicsWorld(DynamicsWorld dynamicsWorld)
+	public void removeFromDynamicsWorld()
 	{
 		dynamicsWorld.removeCollisionObject(ghostObject);
 		dynamicsWorld.removeAction(character);
-		isInDynamicWorld = false;
+		dynamicsWorld = null;
 	}
 
 }

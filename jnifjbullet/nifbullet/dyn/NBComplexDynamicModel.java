@@ -12,11 +12,11 @@ import nifbullet.BulletNifModelClassifier;
 import utils.source.MeshSource;
 
 /**
- * //my ship needs to have a root rigid body that is compound so I can add all apars to it!
-*probably a custom thing, note that the apar models probabyl should be rigid? 
-*No in fact they should have transformable and static parts? Because a gun added on has a turret base that doesn't swivel
-*dynamic rigid bodies need to be simple singles or
-*compound, where coumpounfd have child col shapes that can kinematically animate
+ * my ship needs to have a root rigid body that is compound so I can add all apars to it!
+* probably a custom thing, note that the apar models probabyl should be rigid? 
+* No in fact they should have transformable and static parts? Because a gun added on has a turret base that doesn't swivel
+* dynamic rigid bodies need to be simple singles or
+* compound, where coumpounfd have child col shapes that can kinematically animate
 * much like a kinematic RB, but each child is just a col shape and can have more col shapes
 * then I need ot intersect with them to find which is pointed at
 * So I really need to be able to "add" file name to this model (or a compound version of it)
@@ -29,7 +29,7 @@ import utils.source.MeshSource;
 * 
 * A The static plus dynamic is training dummy style
 * B dynamic plus jointed dynamic is the clothes fall to floor model (one is master and hence holds "location")
-* C one dynamic animated collision shapes 
+* C one dynamic (animated collision shapes, a teacup)
 * 
 * Can A have B? yes A is B with a static attached
 * Can A have C? yes dual col shapes can exist for static and dynamics
@@ -52,30 +52,31 @@ import utils.source.MeshSource;
 * For now all dynRB will be multipart, but statics will not
 *  
 * 
-* /**
- * All complex dynamic objects will be called ragdoll.
-Ragdolls basically simply have constraints (or not for skeletons that fall apart) 
-Ragdolls can be connected to bones (and hence visuals will look skinish and lovely) 
-or ninodes (and visuals will be storm actronach or chain doll or chandelier) physics doesn’t care.
- 
-Ragdolls can be anchored or un anchored, chandelier or chain doll anchored, character with foot 
-caught in bear trap anchored. Basically physics has a constraint attached to a static (or even kinematic) 
-results are just whatever is determined by physics. 
-
-Unanchored (and in fact anchored because it’s no cost) have a ninode (or nibone) that is considered the “root”;
-updates to this root’s position need to be sent back into model exactly like a simple dynamic  
-
-Note a complex dynamic that is unanchored and has one ninode and no constraints is the current simple dynamic.
-So at some point these will merge as 1 model called dynamic. The anchoring to beartraps and kinematics would be
- across 2 instrecos and so would be “above and outside” the nifbulletmodel system.
- 
- Each rigid body in a ragdoll needs to be joined via it's NBDynRigid
- Body to it's particular J3dNinode. That J3dNinode is either rigid (ninode based) or bone (ninode with the bone marker (or nibone?)
-  Picking however wants the rigidbody to point to the instreco, so I think the user object pointer should point to the NRigidBody 
-  and that should hold a model ref, and that should hold an instref
- 
- Note for the unconstrained ragdolls (storm atronach) I still need all transforms to come from the root node so the rendering 
- bounds system works, I can't have every ninode trmsformed in teh world coords and a root node at 0,0,0
+*  Older notes
+*  All complex dynamic objects will be called ragdoll.
+* Ragdolls basically simply have constraints (or not for skeletons that fall apart) 
+* Ragdolls can be connected to bones (and hence visuals will look skinish and lovely) 
+* or ninodes (and visuals will be storm actronach or chain doll or chandelier) physics doesn’t care.
+*  
+* Ragdolls can be anchored or un anchored, chandelier or chain doll anchored, character with foot 
+* caught in bear trap anchored. Basically physics has a constraint attached to a static (or even kinematic) 
+* results are just whatever is determined by physics. 
+* 
+* Unanchored (and in fact anchored because it’s no cost) have a ninode (or nibone) that is considered the “root”;
+* updates to this root’s position need to be sent back into model exactly like a simple dynamic  
+* 
+* Note a complex dynamic that is unanchored and has one ninode and no constraints is the current simple dynamic.
+* So at some point these will merge as 1 model called dynamic. 
+* 
+* The anchoring to beartraps and kinematics would be across 2 instrecos and so would be “above and outside” the nifbulletmodel system.
+*  
+*  Each rigid body in a ragdoll needs to be joined via it's NBDynRigidBody to it's particular J3dNinode. 
+*  That J3dNinode is either rigid (ninode) or bone (ninode with the bone marker)
+*   Picking however wants the rigidbody to point to the instreco, so I think the user object pointer should point to the NRigidBody 
+*   and that should hold a model ref, and that should hold an instref
+*  
+*  Note for the unconstrained ragdolls (storm atronach) I still need all transforms to come from the root node so the rendering 
+*  bounds system works, I can't have every ninode transformed into absolute world coords and a root node at 0,0,0
 
  * @author philip
  *
@@ -146,5 +147,7 @@ public class NBComplexDynamicModel extends NBDynamicModel implements BulletNifMo
 		}
 
 	}
+
+	
 
 }

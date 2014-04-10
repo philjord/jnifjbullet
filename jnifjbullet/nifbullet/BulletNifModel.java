@@ -8,6 +8,6 @@ public interface BulletNifModel
 
 	public void addToDynamicsWorld(DynamicsWorld dynamicsWorld);
 
-	public void removeFromDynamicsWorld(DynamicsWorld dynamicsWorld);
+	public void removeFromDynamicsWorld();
 
 }

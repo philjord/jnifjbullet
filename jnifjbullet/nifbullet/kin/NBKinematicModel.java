@@ -1,7 +1,5 @@
 package nifbullet.kin;
 
-import java.util.ArrayList;
-
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Transform3D;
 
@@ -14,28 +12,18 @@ import nif.j3d.animation.J3dNiControllerManager;
 import nif.niobject.NiObject;
 import nif.niobject.bhk.bhkCollisionObject;
 import nif.niobject.bhk.bhkRigidBody;
-import nifbullet.BulletNifModel;
 import nifbullet.BulletNifModelClassifier;
+import nifbullet.stat.NBStaticOrKinematicModel;
 import nifbullet.stat.NBStaticRigidBody;
 import utils.source.MeshSource;
 
-import com.bulletphysics.dynamics.DynamicsWorld;
-
-public class NBKinematicModel extends BranchGroup implements BulletNifModel
+public class NBKinematicModel extends NBStaticOrKinematicModel
 {
-	private ArrayList<NBStaticRigidBody> staticRigidBodys = new ArrayList<NBStaticRigidBody>();
-
-	private ArrayList<NBSimpleKinematicRigidBody> simpleKinematicRigidBodys = new ArrayList<NBSimpleKinematicRigidBody>();
-
 	private NifJ3dHavokRoot nifJ3dRoot;
-
-	private String fileName = "";
-
-	private boolean isInDynamicWorld = false;
 
 	public NBKinematicModel(String fileName, MeshSource meshSource, Transform3D rootTrans)
 	{
-		this.fileName = fileName;
+		super(fileName);
 		this.setName("NBKinematicModel:" + fileName);
 
 		setCapability(BranchGroup.ALLOW_DETACH);
@@ -45,11 +33,6 @@ public class NBKinematicModel extends BranchGroup implements BulletNifModel
 			nifJ3dRoot = NifToJ3d.loadHavok(fileName, meshSource);
 			J3dNiAVObject j3dNiNodeRoot = nifJ3dRoot.getHavokRoot();
 			NiToJ3dData niToJ3dData = nifJ3dRoot.getNiToJ3dData();
-
-			//needed for animations to occur			
-			addChild(j3dNiNodeRoot);
-			// but must be placed so camera dist works too
-			j3dNiNodeRoot.getTransformGroup().setTransform(rootTrans);
 
 			for (NiObject niObject : niToJ3dData.getNiObjects())
 			{
@@ -65,15 +48,15 @@ public class NBKinematicModel extends BranchGroup implements BulletNifModel
 						float sf = (float) rootTrans.getScale();
 						rootTrans.setScale(1.0f);
 						NBStaticRigidBody sb = new NBStaticRigidBody(bhkCollisionObject, niToJ3dData.getNiObjects(), rootTrans, this, sf);
-						staticRigidBodys.add(sb);
+						add(sb);
 					}
 					else if (layer == OblivionLayer.OL_ANIM_STATIC)
 					{
 						float sf = (float) rootTrans.getScale();
 						rootTrans.setScale(1.0f);
-						NBSimpleKinematicRigidBody kb = new NBSimpleKinematicRigidBody(this, j3dNiNodeRoot, bhkCollisionObject,
-								niToJ3dData, rootTrans, this, sf);
-						simpleKinematicRigidBodys.add(kb);
+						NBKinematicRigidBody kb = new NBKinematicRigidBody(this, j3dNiNodeRoot, bhkCollisionObject, niToJ3dData, rootTrans,
+								this, sf);
+						add(kb);
 					}
 					else
 					{
@@ -82,6 +65,11 @@ public class NBKinematicModel extends BranchGroup implements BulletNifModel
 					}
 				}
 			}
+
+			// but must be placed so camera dist works too
+			j3dNiNodeRoot.getTransformGroup().setTransform(rootTrans);
+			//needed for animations to occur			
+			addChild(j3dNiNodeRoot);
 		}
 		else
 		{
@@ -94,62 +82,9 @@ public class NBKinematicModel extends BranchGroup implements BulletNifModel
 		return nifJ3dRoot.getHavokRoot().getJ3dNiControllerManager();
 	}
 
-	public void destroy()
-	{
-		if (isInDynamicWorld)
-		{
-			new Throwable("destroy called whilst in dynamic world");
-		}
-
-		for (NBStaticRigidBody sb : staticRigidBodys)
-		{
-			sb.destroy();
-		}
-		staticRigidBodys.clear();
-		for (NBSimpleKinematicRigidBody kb : simpleKinematicRigidBodys)
-		{
-			kb.destroy();
-		}
-		simpleKinematicRigidBodys.clear();
-	}
-
-	/**
-	 * Basically a set enabled true
-	 */
-	public void addToDynamicsWorld(DynamicsWorld dynamicsWorld)
-	{
-		for (NBStaticRigidBody sb : staticRigidBodys)
-		{
-			dynamicsWorld.addRigidBody(sb.getRigidBody());
-		}
-
-		for (NBSimpleKinematicRigidBody kb : simpleKinematicRigidBodys)
-		{
-			dynamicsWorld.addRigidBody(kb.getRigidBody());
-		}
-		isInDynamicWorld = true;
-	}
-
-	/** basically a set enabled false
-	 * 
-	 */
-	public void removeFromDynamicsWorld(DynamicsWorld dynamicsWorld)
-	{
-		for (NBStaticRigidBody nbbco : staticRigidBodys)
-		{
-			dynamicsWorld.removeRigidBody(nbbco.getRigidBody());
-		}
-
-		for (NBSimpleKinematicRigidBody nbbco : simpleKinematicRigidBodys)
-		{
-			dynamicsWorld.removeRigidBody(nbbco.getRigidBody());
-		}
-		isInDynamicWorld = false;
-	}
-
 	public String toString()
 	{
-		return "NifBullet, file: " + fileName + " in class of " + this.getClass();
+		return "NifBullet, file: " + getFileName() + " in class of " + this.getClass();
 	}
 
 }

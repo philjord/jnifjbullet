@@ -31,7 +31,7 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 
 	private NifBulletTransformListener transformChangeListener;
 
-	private boolean isInDynamicWorld = false;
+	private DynamicsWorld dynamicsWorld = null;
 
 	public NBDynamicModel(String fileName)
 	{
@@ -100,7 +100,7 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 
 	public void destroy()
 	{
-		if (isInDynamicWorld)
+		if (dynamicsWorld != null)
 		{
 			new Throwable("destroy called whilst in dynamic world");
 		}
@@ -114,17 +114,17 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 	 */
 	public void addToDynamicsWorld(DynamicsWorld dynamicsWorld)
 	{
+		this.dynamicsWorld = dynamicsWorld;
 		dynamicsWorld.addRigidBody(rootDynamicBody.getRigidBody());
-		isInDynamicWorld = true;
 	}
 
 	/** basically a set enabled false
 	 * 
 	 */
-	public void removeFromDynamicsWorld(DynamicsWorld dynamicsWorld)
+	public void removeFromDynamicsWorld()
 	{
 		dynamicsWorld.removeRigidBody(rootDynamicBody.getRigidBody());
-		isInDynamicWorld = false;
+		dynamicsWorld = null;
 	}
 
 	@Override

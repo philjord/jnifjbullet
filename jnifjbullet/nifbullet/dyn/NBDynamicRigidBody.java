@@ -27,9 +27,6 @@ public class NBDynamicRigidBody extends NBRigidBody
 	// transform binding point, send rigid body trans updates out to the parent transform group and nifbullet
 	private NBDynRBTransformListener rigidBodyTransformListener;
 
-	// root shape to allow multi parts to be added as required
-	private CompoundShape colShape = new CompoundShape();
-
 	private HashMap<Object, CollisionShape> pointerToParts = new HashMap<Object, CollisionShape>();
 
 	private HashMap<CollisionShape, Object> partsToPointer = new HashMap<CollisionShape, Object>();
@@ -69,7 +66,8 @@ public class NBDynamicRigidBody extends NBRigidBody
 
 				bhkShape bhkShape = (bhkShape) niToJ3dData.get(bhkRigidBody.shape);
 
-				colShape.addChildShape(NifBulletUtil.createTrans(colTrans),
+				colShape = new CompoundShape();
+				((CompoundShape) colShape).addChildShape(NifBulletUtil.createTrans(colTrans),
 						BhkShapeToCollisionShape.processBhkShape(bhkShape, niToJ3dData, true, fixedScaleFactor));
 				setRigidBody(NifBulletUtil.createRigidBody(bhkRigidBody, colShape, NifBulletUtil.newIdentityTransform(), this));
 
@@ -86,6 +84,11 @@ public class NBDynamicRigidBody extends NBRigidBody
 		{
 			new Throwable("Why is a non OL_CLUTTER or OL_PROPS handed to  me? " + layer + " " + this).printStackTrace();
 		}
+	}
+
+	public void updateRootTransform(Transform3D rootTrans)
+	{
+		forceUpdate(rootTrans);
 	}
 
 	public void forceUpdate(Transform3D trans)
@@ -160,7 +163,7 @@ public class NBDynamicRigidBody extends NBRigidBody
 		bhkShape bhkShape = (bhkShape) blocks.get(bhkRigidBody.shape);
 		CollisionShape partColShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, blocks, true, fixedScaleFactor);
 
-		colShape.addChildShape(NifBulletUtil.createTrans(rootTrans), partColShape);
+		((CompoundShape) colShape).addChildShape(NifBulletUtil.createTrans(rootTrans), partColShape);
 
 		pointerToParts.put(pointer, partColShape);
 		partsToPointer.put(partColShape, pointer);
@@ -169,7 +172,7 @@ public class NBDynamicRigidBody extends NBRigidBody
 	public void setPartTransform(Object pointer, Transform3D t)
 	{
 		CollisionShape cs = pointerToParts.get(pointer);
-		colShape.updateChildTransform(colShape.getChildShapeIndex(cs), NifBulletUtil.createTrans(t));
+		((CompoundShape) colShape).updateChildTransform(((CompoundShape) colShape).getChildShapeIndex(cs), NifBulletUtil.createTrans(t));
 	}
 
 	public Object getPartPointer(CollisionShape collisionShape)
@@ -181,6 +184,6 @@ public class NBDynamicRigidBody extends NBRigidBody
 	{
 		CollisionShape cs = pointerToParts.remove(pointer);
 		partsToPointer.remove(cs);
-		colShape.removeChildShape(cs);
+		((CompoundShape) colShape).removeChildShape(cs);
 	}
 }

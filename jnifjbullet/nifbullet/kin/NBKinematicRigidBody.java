@@ -18,10 +18,9 @@ import nifbullet.util.NifBulletUtil;
 import tools3d.utils.Utils3D;
 import utils.convert.ConvertFromHavok;
 
-import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.linearmath.Transform;
 
-public class NBSimpleKinematicRigidBody extends NBRigidBody
+public class NBKinematicRigidBody extends NBRigidBody
 {
 	private J3dNiAVObject j3dNiNodeRoot;
 
@@ -29,7 +28,7 @@ public class NBSimpleKinematicRigidBody extends NBRigidBody
 
 	private J3dNiAVObject parentJ3dNiAVObject;
 
-	public NBSimpleKinematicRigidBody(Group behaviourRootGroup, J3dNiAVObject j3dNiNodeRoot, bhkCollisionObject bhkCollisionObject,
+	public NBKinematicRigidBody(Group behaviourRootGroup, J3dNiAVObject j3dNiNodeRoot, bhkCollisionObject bhkCollisionObject,
 			NiToJ3dData niToJ3dData, Transform3D rootTrans, BulletNifModel parentModel, float fixedScaleFactor)
 	{
 		super(parentModel, fixedScaleFactor);
@@ -48,7 +47,7 @@ public class NBSimpleKinematicRigidBody extends NBRigidBody
 			if (bhkRigidBody.mass == 0)
 			{
 				bhkShape bhkShape = (bhkShape) niToJ3dData.get(bhkRigidBody.shape);
-				CollisionShape colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, niToJ3dData.getNiObjects(), fixedScaleFactor);
+				colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, niToJ3dData.getNiObjects(), fixedScaleFactor);
 
 				setRigidBody(NifBulletUtil.createRigidBody(bhkRigidBody, colShape, calcWorldTransform(), this));
 

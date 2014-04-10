@@ -23,7 +23,7 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 
 	private RigidBody rigidBody;
 
-	private boolean isInDynamicWorld = false;
+	private DynamicsWorld dynamicsWorld = null;
 
 	private CharacterPositionListener listener;
 
@@ -96,7 +96,7 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 
 	public void destroy()
 	{
-		if (isInDynamicWorld)
+		if (dynamicsWorld != null)
 		{
 			new Throwable("destroy called whilst in dynamic world");
 		}
@@ -110,16 +110,16 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 	public void addToDynamicsWorld(DynamicsWorld dynamicsWorld)
 	{
 		dynamicsWorld.addRigidBody(rigidBody);
-		isInDynamicWorld = true;
+		this.dynamicsWorld = dynamicsWorld;
 	}
 
 	/** basically a set enabled false
 	 * 
 	 */
-	public void removeFromDynamicsWorld(DynamicsWorld dynamicsWorld)
+	public void removeFromDynamicsWorld()
 	{
 		dynamicsWorld.removeRigidBody(rigidBody);
-		isInDynamicWorld = false;
+		dynamicsWorld = null;
 	}
 
 	public String toString()

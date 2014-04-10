@@ -17,11 +17,11 @@ public class SceneGraphTransformChangeBehavior extends Behavior
 {
 	private WakeupOr wakeUp;
 
-	private NBSimpleKinematicRigidBody destination;
+	private NBKinematicRigidBody destination;
 
 	private List<TransformGroup> allTransformGroups = new ArrayList<TransformGroup>();
 
-	public SceneGraphTransformChangeBehavior(J3dNiAVObject source, NBSimpleKinematicRigidBody destination, NiToJ3dData niToJ3dData)
+	public SceneGraphTransformChangeBehavior(J3dNiAVObject source, NBKinematicRigidBody destination, NiToJ3dData niToJ3dData)
 	{
 		this.destination = destination;
 
