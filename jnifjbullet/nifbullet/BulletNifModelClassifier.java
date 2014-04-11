@@ -16,8 +16,7 @@ import nif.niobject.controller.NiMultiTargetTransformController;
 import nif.niobject.controller.NiTimeController;
 import nif.niobject.controller.NiTransformController;
 import nifbullet.dyn.NBSimpleDynamicModel;
-import nifbullet.kin.NBKinematicModel;
-import nifbullet.stat.NBStaticModel;
+import nifbullet.simple.NBSimpleModel;
 import utils.source.MeshSource;
 
 public abstract class BulletNifModelClassifier
@@ -379,13 +378,9 @@ public abstract class BulletNifModelClassifier
 			System.out.println("is not physics");
 			return null;
 		}
-		else if (isStaticModel(filename, meshSource))
+		else if (isStaticModel(filename, meshSource) || isKinematicModel(filename, meshSource))
 		{
-			return new NBStaticModel(filename, meshSource, new Transform3D());
-		}
-		else if (isKinematicModel(filename, meshSource))
-		{
-			return new NBKinematicModel(filename, meshSource, new Transform3D());
+			return new NBSimpleModel(filename, meshSource, new Transform3D());
 		}
 		else if (isSimpleDynamicModel(filename, meshSource, forcedMass))
 		{

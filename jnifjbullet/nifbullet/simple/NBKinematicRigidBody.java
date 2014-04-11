@@ -1,4 +1,4 @@
-package nifbullet.kin;
+package nifbullet.simple;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.Transform3D;

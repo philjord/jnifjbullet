@@ -13,7 +13,7 @@ import nif.gui.NifKfFileFilter;
 import nif.gui.util.ControllerInvokerThread;
 import nifbullet.BulletNifModel;
 import nifbullet.BulletNifModelClassifier;
-import nifbullet.kin.NBKinematicModel;
+import nifbullet.simple.NBSimpleModel;
 import nifbullet.util.debug.opengl.DebugOutput;
 import nifbullet.util.debug.opengl.LWJGL;
 import tools.swing.DetailsFileChooser;
@@ -148,9 +148,9 @@ public class NifBulletDisplay
 					bulletNifModels.add(nb);
 					startDisplay();
 
-					if (nb instanceof NBKinematicModel)
+					if (nb instanceof NBSimpleModel)
 					{
-						NBKinematicModel nbKinematicModel = (NBKinematicModel) nb;
+						NBSimpleModel nbKinematicModel = (NBSimpleModel) nb;
 						if (nbKinematicModel.getJ3dNiControllerManager() != null)
 						{
 							BranchGroup bg = new BranchGroup();

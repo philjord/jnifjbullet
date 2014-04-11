@@ -1,4 +1,4 @@
-package nifbullet.stat;
+package nifbullet.simple;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;

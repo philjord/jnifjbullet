@@ -1,4 +1,4 @@
-package nifbullet.kin;
+package nifbullet.simple;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
