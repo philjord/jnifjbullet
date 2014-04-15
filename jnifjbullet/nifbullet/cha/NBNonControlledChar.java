@@ -109,8 +109,12 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 	 */
 	public void addToDynamicsWorld(DynamicsWorld dynamicsWorld)
 	{
-		dynamicsWorld.addRigidBody(rigidBody);
 		this.dynamicsWorld = dynamicsWorld;
+		if (rigidBody != null)
+		{
+			dynamicsWorld.addRigidBody(rigidBody);
+		}
+
 	}
 
 	/** basically a set enabled false
@@ -118,7 +122,10 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 	 */
 	public void removeFromDynamicsWorld()
 	{
-		dynamicsWorld.removeRigidBody(rigidBody);
+		if (rigidBody != null)
+		{
+			dynamicsWorld.removeRigidBody(rigidBody);
+		}
 		dynamicsWorld = null;
 	}
 

@@ -33,7 +33,8 @@ public abstract class NBRigidBody
 
 	public void destroy()
 	{
-		rigidBody.destroy();
+		if (rigidBody != null)
+			rigidBody.destroy();
 	}
 
 	public RigidBody getRigidBody()

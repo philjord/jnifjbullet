@@ -115,7 +115,10 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 	public void addToDynamicsWorld(DynamicsWorld dynamicsWorld)
 	{
 		this.dynamicsWorld = dynamicsWorld;
-		dynamicsWorld.addRigidBody(rootDynamicBody.getRigidBody());
+		if (rootDynamicBody != null && rootDynamicBody.getRigidBody() != null)
+		{
+			dynamicsWorld.addRigidBody(rootDynamicBody.getRigidBody());
+		}
 	}
 
 	/** basically a set enabled false
@@ -123,7 +126,10 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 	 */
 	public void removeFromDynamicsWorld()
 	{
-		dynamicsWorld.removeRigidBody(rootDynamicBody.getRigidBody());
+		if (rootDynamicBody != null && rootDynamicBody.getRigidBody() != null)
+		{
+			dynamicsWorld.removeRigidBody(rootDynamicBody.getRigidBody());
+		}
 		dynamicsWorld = null;
 	}
 
