@@ -88,8 +88,11 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 	{
 		if (this.rootDynamicBody != null)
 		{
-			rootDynamicBody.applyRelCentralForce(linearForce);
-			rootDynamicBody.applyRelTorque(rotationalForce);
+			synchronized (dynamicsWorld)
+			{
+				rootDynamicBody.applyRelCentralForce(linearForce);
+				rootDynamicBody.applyRelTorque(rotationalForce);
+			}
 		}
 	}
 
@@ -105,6 +108,7 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 			new Throwable("destroy called whilst in dynamic world");
 		}
 
+		//can't synch on dynamics world as null
 		rootDynamicBody.destroy();
 
 	}
@@ -117,7 +121,10 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 		this.dynamicsWorld = dynamicsWorld;
 		if (rootDynamicBody != null && rootDynamicBody.getRigidBody() != null)
 		{
-			dynamicsWorld.addRigidBody(rootDynamicBody.getRigidBody());
+			synchronized (dynamicsWorld)
+			{
+				dynamicsWorld.addRigidBody(rootDynamicBody.getRigidBody());
+			}
 		}
 	}
 
@@ -128,7 +135,10 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 	{
 		if (rootDynamicBody != null && rootDynamicBody.getRigidBody() != null)
 		{
-			dynamicsWorld.removeRigidBody(rootDynamicBody.getRigidBody());
+			synchronized (dynamicsWorld)
+			{
+				dynamicsWorld.removeRigidBody(rootDynamicBody.getRigidBody());
+			}
 		}
 		dynamicsWorld = null;
 	}
@@ -149,7 +159,10 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 					{
 						bhkCollisionObject bhkCollisionObject = (bhkCollisionObject) niObject;
 						//throws an error if 2 pointers
-						rootDynamicBody.addPart(bhkCollisionObject, nifFile.blocks, pointer, rootTrans);
+						//synchronized (dynamicsWorld) can be null
+						{
+							rootDynamicBody.addPart(bhkCollisionObject, nifFile.blocks, pointer, rootTrans);
+						}
 					}
 				}
 			}
@@ -160,7 +173,10 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 	@Override
 	public void setPartTransform(Object pointer, Transform3D t)
 	{
-		rootDynamicBody.setPartTransform(pointer, t);
+		synchronized (dynamicsWorld)
+		{
+			rootDynamicBody.setPartTransform(pointer, t);
+		}
 	}
 
 	@Override
@@ -172,7 +188,10 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 	@Override
 	public void removePart(Object pointer)
 	{
-		rootDynamicBody.removePart(pointer);
+		synchronized (dynamicsWorld)
+		{
+			rootDynamicBody.removePart(pointer);
+		}
 	}
 
 	public String toString()
