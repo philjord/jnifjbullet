@@ -1,6 +1,7 @@
 package nifbullet.convert;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Color3f;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
@@ -12,6 +13,7 @@ import nif.compound.NifSphereBV;
 import nif.compound.NifTriangle;
 import nif.compound.NifbhkCMSDChunk;
 import nif.compound.NifbhkCMSDTransform;
+import nif.j3d.J3dNiTriBasedGeom;
 import nif.niobject.NiTriStripsData;
 import nif.niobject.bhk.bhkBoxShape;
 import nif.niobject.bhk.bhkCapsuleShape;
@@ -347,16 +349,12 @@ public abstract class BhkCollisionToNifBullet
 	{
 		GeometryInfo gi = new GeometryInfo(GeometryInfo.TRIANGLE_STRIP_ARRAY);
 
-		if (data.hasVertices)
-		{
-			Point3f[] vertices = new Point3f[data.numVertices];
-			for (int i = 0; i < data.numVertices; i++)
-			{
-				// NOTE!!!!! use the nif scale here!!!
-				vertices[i] = ConvertFromHavok.toJ3dP3fNif(data.vertices[i], scale);
-			}
-			gi.setCoordinates(vertices);
-		}
+		J3dNiTriBasedGeom.loadGIBaseData(gi, data);
+		// TODO: scale all vertices now!
+
+		// undo a bit of the usual stuff
+		gi.setNormals((float[]) null);
+		gi.setColors((Color3f[]) null);
 
 		if (data.hasPoints)
 		{
