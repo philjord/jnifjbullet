@@ -24,6 +24,8 @@ public class NBKinematicRigidBody extends NBRigidBody
 {
 	private J3dNiAVObject j3dNiNodeRoot;
 
+	private NiToJ3dData niToJ3dData;
+
 	private Transform3D rootTrans;
 
 	private J3dNiAVObject parentJ3dNiAVObject;
@@ -34,6 +36,7 @@ public class NBKinematicRigidBody extends NBRigidBody
 		super(parentModel, fixedScaleFactor);
 
 		this.j3dNiNodeRoot = j3dNiNodeRoot;
+		this.niToJ3dData = niToJ3dData;
 		this.rootTrans = rootTrans;
 
 		bhkRigidBody bhkRigidBody = (bhkRigidBody) niToJ3dData.get(bhkCollisionObject.body);
@@ -112,7 +115,7 @@ public class NBKinematicRigidBody extends NBRigidBody
 			if (getBhkRigidBody() instanceof bhkRigidBodyT)
 			{
 				temp.set(ConvertFromHavok.toJ3d(getBhkRigidBody().rotation),
-						ConvertFromHavok.toJ3d(getBhkRigidBody().translation, fixedScaleFactor), 1f);
+						ConvertFromHavok.toJ3d(getBhkRigidBody().translation, fixedScaleFactor, niToJ3dData.nifVer), 1f);
 				worldTransformCalc.mul(temp);
 			}
 		}

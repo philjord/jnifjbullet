@@ -130,12 +130,13 @@ public abstract class BhkShapeToCollisionShape
 		if (bhkShape instanceof bhkPackedNiTriStripsShape)
 		{
 			bhkPackedNiTriStripsShape bhkPackedNiTriStripsShape = (bhkPackedNiTriStripsShape) bhkShape;
-			
+
 			if (bhkPackedNiTriStripsShape.data.ref != -1)
 			{
 				hkPackedNiTriStripsData hkPackedNiTriStripsData = (hkPackedNiTriStripsData) niToJ3dData.get(bhkPackedNiTriStripsShape.data);
 				return BhkCollisionToNifBullet.hkPackedNiTriStripsData(hkPackedNiTriStripsData, isDynamic, scale,
-						bhkPackedNiTriStripsShape.scale.x, bhkPackedNiTriStripsShape.scale.y, bhkPackedNiTriStripsShape.scale.z);
+						bhkPackedNiTriStripsShape.scale.x, bhkPackedNiTriStripsShape.scale.y, bhkPackedNiTriStripsShape.scale.z,
+						niToJ3dData.nifVer);
 			}
 			System.out.println("bhkPackedNiTriStripsShape.data.ref == -1");
 			return null;
@@ -149,34 +150,35 @@ public abstract class BhkShapeToCollisionShape
 				bhkCompressedMeshShapeData bhkCompressedMeshShapeData = (bhkCompressedMeshShapeData) niToJ3dData
 						.get(bhkCompressedMeshShape.data);
 
-				return BhkCollisionToNifBullet.bhkCompressedMeshShape(bhkCompressedMeshShapeData, isDynamic, scale);
+				return BhkCollisionToNifBullet.bhkCompressedMeshShape(bhkCompressedMeshShapeData, isDynamic, scale, niToJ3dData.nifVer);
 			}
 			System.out.println("bhkCompressedMeshShape.data.ref == -1");
 			return null;
 		}
 		else if (bhkShape instanceof hkPackedNiTriStripsData)
 		{
-			return BhkCollisionToNifBullet.hkPackedNiTriStripsData((hkPackedNiTriStripsData) bhkShape, isDynamic, scale, 1, 1, 1);
+			return BhkCollisionToNifBullet.hkPackedNiTriStripsData((hkPackedNiTriStripsData) bhkShape, isDynamic, scale, 1, 1, 1,
+					niToJ3dData.nifVer);
 		}
 		else if (bhkShape instanceof bhkBoxShape)
 		{
-			return BhkCollisionToNifBullet.bhkBoxShape((bhkBoxShape) bhkShape, scale);
+			return BhkCollisionToNifBullet.bhkBoxShape((bhkBoxShape) bhkShape, scale, niToJ3dData.nifVer);
 		}
 		else if (bhkShape instanceof bhkCapsuleShape)
 		{
-			return BhkCollisionToNifBullet.bhkCapsuleShape((bhkCapsuleShape) bhkShape, scale);
+			return BhkCollisionToNifBullet.bhkCapsuleShape((bhkCapsuleShape) bhkShape, scale, niToJ3dData.nifVer);
 		}
 		else if (bhkShape instanceof bhkSphereShape)
 		{
-			return BhkCollisionToNifBullet.bhkSphereShape((bhkSphereShape) bhkShape, scale);
+			return BhkCollisionToNifBullet.bhkSphereShape((bhkSphereShape) bhkShape, scale, niToJ3dData.nifVer);
 		}
 		else if (bhkShape instanceof bhkConvexVerticesShape)
 		{
-			return BhkCollisionToNifBullet.bhkConvexVerticesShape((bhkConvexVerticesShape) bhkShape, scale);
+			return BhkCollisionToNifBullet.bhkConvexVerticesShape((bhkConvexVerticesShape) bhkShape, scale, niToJ3dData.nifVer);
 		}
 		else if (bhkShape instanceof bhkMultiSphereShape)
 		{
-			return BhkCollisionToNifBullet.bhkMultiSphereShape((bhkMultiSphereShape) bhkShape, scale);
+			return BhkCollisionToNifBullet.bhkMultiSphereShape((bhkMultiSphereShape) bhkShape, scale, niToJ3dData.nifVer);
 		}
 		else if (bhkShape instanceof bhkTransformShape)
 		{
@@ -200,7 +202,7 @@ public abstract class BhkShapeToCollisionShape
 			if (shape != null)
 			{
 				Quat4f q = ConvertFromHavok.toJ3dQ4f(data.transform);
-				Vector3f v = ConvertFromHavok.toJ3dV3f(data.transform, scale);
+				Vector3f v = ConvertFromHavok.toJ3dV3f(data.transform, scale, niToJ3dData.nifVer);
 
 				CompoundShape cs = new CompoundShape();
 				Transform t = NifBulletUtil.createTrans(q, v);

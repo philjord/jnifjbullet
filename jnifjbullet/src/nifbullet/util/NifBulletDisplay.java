@@ -18,7 +18,6 @@ import nifbullet.util.debug.opengl.DebugOutput;
 import nifbullet.util.debug.opengl.LWJGL;
 import tools.swing.DetailsFileChooser;
 import tools3d.universe.HeadlessUniverse;
-import utils.ESConfig;
 import utils.source.file.FileMeshSource;
 
 import com.bulletphysics.collision.broadphase.BroadphaseInterface;
@@ -130,10 +129,6 @@ public class NifBulletDisplay
 		}
 		else if (f.isFile())
 		{
-			if (f.getAbsolutePath().contains("skyrim"))
-			{
-				ESConfig.HAVOK_TO_METERS_SCALE = ESConfig.SKYRIM_HAVOK_TO_METERS_SCALE;
-			}
 			try
 			{
 				for (BulletNifModel bnm : bulletNifModels)

@@ -28,6 +28,7 @@ import com.sun.j3d.utils.geometry.GeometryInfo;
 public class NBStaticRigidBody extends NBRigidBody
 {
 	private NiAVObject parentNiObject;
+	private NiObjectList niObjectList;
 
 	/** send fixed scaling via the float not transform
 	 * 
@@ -41,6 +42,9 @@ public class NBStaticRigidBody extends NBRigidBody
 			float fixedScaleFactor)
 	{
 		super(parentModel, fixedScaleFactor);
+		
+		this.niObjectList = blocks;
+		
 		parentNiObject = (NiAVObject) blocks.get(bhkCollisionObject.target);
 		bhkRigidBody bhkRigidBody = (bhkRigidBody) blocks.get(bhkCollisionObject.body);
 		setBhkRigidBody(bhkRigidBody);
@@ -131,7 +135,7 @@ public class NBStaticRigidBody extends NBRigidBody
 		if (getBhkRigidBody() instanceof bhkRigidBodyT)
 		{
 			temp.setRotation(ConvertFromHavok.toJ3d(getBhkRigidBody().rotation));
-			temp.setTranslation(ConvertFromHavok.toJ3d(getBhkRigidBody().translation, fixedScaleFactor));
+			temp.setTranslation(ConvertFromHavok.toJ3d(getBhkRigidBody().translation, fixedScaleFactor, niObjectList.nifVer));
 			worldTransformCalc.mul(temp);
 		}
 

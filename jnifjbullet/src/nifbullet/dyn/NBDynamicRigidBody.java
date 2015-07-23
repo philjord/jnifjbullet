@@ -57,7 +57,7 @@ public class NBDynamicRigidBody extends NBRigidBody
 				if (bhkRigidBody instanceof bhkRigidBodyT)
 				{
 					colTrans = new Transform3D(ConvertFromHavok.toJ3d(bhkRigidBody.rotation), ConvertFromHavok.toJ3d(
-							bhkRigidBody.translation, fixedScaleFactor), 1.0f);
+							bhkRigidBody.translation, fixedScaleFactor, niToJ3dData.nifVer), 1.0f);
 				}
 				else
 				{

@@ -8,6 +8,7 @@ import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
+import nif.NifVer;
 import nif.compound.NifSphereBV;
 import nif.compound.NifTriangle;
 import nif.compound.NifbhkCMSDChunk;
@@ -45,16 +46,16 @@ import com.sun.j3d.utils.geometry.GeometryInfo;
  */
 public abstract class BhkCollisionToNifBullet
 {
-	public static CollisionShape bhkSphereShape(bhkSphereShape data, float scale)
+	public static CollisionShape bhkSphereShape(bhkSphereShape data, float scale, NifVer nifVer)
 	{
-		float radius = ConvertFromHavok.toJ3d(data.radius, scale);
+		float radius = ConvertFromHavok.toJ3d(data.radius, scale, nifVer);
 		SphereShape s = new SphereShape(radius);
 		return s;
 	}
 
-	public static CollisionShape bhkBoxShape(bhkBoxShape data, float scale)
+	public static CollisionShape bhkBoxShape(bhkBoxShape data, float scale, NifVer nifVer)
 	{
-		Vector3f v = ConvertFromHavok.toJ3dExtents(data.dimensions, scale);
+		Vector3f v = ConvertFromHavok.toJ3dExtents(data.dimensions, scale, nifVer);
 		BoxShape b = new BoxShape(v);
 		return b;
 
@@ -62,7 +63,7 @@ public abstract class BhkCollisionToNifBullet
 		//SphereShape does not work
 	}
 
-	public static CollisionShape bhkMultiSphereShape(bhkMultiSphereShape data, float scale)
+	public static CollisionShape bhkMultiSphereShape(bhkMultiSphereShape data, float scale, NifVer nifVer)
 	{
 
 		CompoundShape cs = new CompoundShape();
@@ -71,21 +72,21 @@ public abstract class BhkCollisionToNifBullet
 		{
 			NifSphereBV sphere = data.spheres[i];
 
-			float radius = ConvertFromHavok.toJ3d(sphere.radius, scale);
-			Vector3f loc = ConvertFromHavok.toJ3d(sphere.center, scale);
+			float radius = ConvertFromHavok.toJ3d(sphere.radius, scale, nifVer);
+			Vector3f loc = ConvertFromHavok.toJ3d(sphere.center, scale, nifVer);
 			SphereShape ss = new SphereShape(radius);
 			cs.addChildShape(NifBulletUtil.createTrans(loc), ss);
 		}
 		return cs;
 	}
 
-	public static CollisionShape bhkCapsuleShape(bhkCapsuleShape data, float scale)
+	public static CollisionShape bhkCapsuleShape(bhkCapsuleShape data, float scale, NifVer nifVer)
 	{
-		float radius = ConvertFromHavok.toJ3d(data.radius, scale);
-		Vector3f v1 = ConvertFromHavok.toJ3d(data.firstPoint, scale);
-		float radius1 = ConvertFromHavok.toJ3d(data.radius1, scale);
-		Vector3f v2 = ConvertFromHavok.toJ3d(data.secondPoint, scale);
-		float radius2 = ConvertFromHavok.toJ3d(data.radius2, scale);
+		float radius = ConvertFromHavok.toJ3d(data.radius, scale, nifVer);
+		Vector3f v1 = ConvertFromHavok.toJ3d(data.firstPoint, scale, nifVer);
+		float radius1 = ConvertFromHavok.toJ3d(data.radius1, scale, nifVer);
+		Vector3f v2 = ConvertFromHavok.toJ3d(data.secondPoint, scale, nifVer);
+		float radius2 = ConvertFromHavok.toJ3d(data.radius2, scale, nifVer);
 
 		if (radius != radius1 || radius != radius2)
 		{
@@ -126,13 +127,13 @@ public abstract class BhkCollisionToNifBullet
 		return parent;
 	}
 
-	public static CollisionShape bhkConvexVerticesShape(bhkConvexVerticesShape data, float scale)
+	public static CollisionShape bhkConvexVerticesShape(bhkConvexVerticesShape data, float scale, NifVer nifVer)
 	{
 		ObjectArrayList<Vector3f> points = new ObjectArrayList<Vector3f>();
 
 		for (int i = 0; i < data.numVertices; i++)
 		{
-			points.add(ConvertFromHavok.toJ3d(data.vertices[i], scale));
+			points.add(ConvertFromHavok.toJ3d(data.vertices[i], scale, nifVer));
 		}
 
 		ConvexHullShape chs = new ConvexHullShape(points);
@@ -142,7 +143,7 @@ public abstract class BhkCollisionToNifBullet
 
 	public static float CMD_VERT_SCALE = 1f / 1000f;
 
-	public static CollisionShape bhkCompressedMeshShape(bhkCompressedMeshShapeData data, boolean isDynamic, float scale)
+	public static CollisionShape bhkCompressedMeshShape(bhkCompressedMeshShapeData data, boolean isDynamic, float scale, NifVer nifVer)
 	{
 
 		//the masks are just low 17 bits for tri and highest bit for winding
@@ -162,7 +163,7 @@ public abstract class BhkCollisionToNifBullet
 				vertices[i] = ConvertFromHavok.toJ3dP3f(//
 						((data.BigVerts[i].x)),//
 						((data.BigVerts[i].y)),//
-						((data.BigVerts[i].z)), scale);
+						((data.BigVerts[i].z)), scale, nifVer);
 			}
 
 			int[] listPoints = new int[data.BigTris.length * 3];
@@ -193,7 +194,7 @@ public abstract class BhkCollisionToNifBullet
 				vertices[i] = ConvertFromHavok.toJ3dP3f(//
 						((chunk.Vertices[(i * 3) + 0]) * CMD_VERT_SCALE) + chunk.translation.x,//
 						((chunk.Vertices[(i * 3) + 1]) * CMD_VERT_SCALE) + chunk.translation.y,//
-						((chunk.Vertices[(i * 3) + 2]) * CMD_VERT_SCALE) + chunk.translation.z, scale);
+						((chunk.Vertices[(i * 3) + 2]) * CMD_VERT_SCALE) + chunk.translation.z, scale, nifVer);
 			}
 
 			int numStrips = chunk.NumStrips;
@@ -230,7 +231,7 @@ public abstract class BhkCollisionToNifBullet
 			}
 
 			NifbhkCMSDTransform cmsdt = data.ChunkTransforms[chunk.transformIndex];
-			Vector3f transformTrans = ConvertFromHavok.toJ3d(cmsdt.Translation, scale);
+			Vector3f transformTrans = ConvertFromHavok.toJ3d(cmsdt.Translation, scale, nifVer);
 			Quat4f transformRot = ConvertFromHavok.toJ3d(cmsdt.Rotation);
 			Transform t = NifBulletUtil.createTrans(transformRot, transformTrans);
 
@@ -299,7 +300,7 @@ public abstract class BhkCollisionToNifBullet
 	}
 
 	public static CollisionShape hkPackedNiTriStripsData(hkPackedNiTriStripsData data, boolean isDynamic, float scale, float xScale,
-			float yScale, float zScale)
+			float yScale, float zScale, NifVer nifVer)
 	{
 
 		int[] coordIndices = new int[data.numTriangles * 3];
@@ -316,7 +317,7 @@ public abstract class BhkCollisionToNifBullet
 		float[] coords = new float[data.numVertices * 3];
 		for (int i = 0; i < data.numVertices; i++)
 		{
-			Vector3f v = ConvertFromHavok.toJ3d(data.vertices[i], scale);
+			Vector3f v = ConvertFromHavok.toJ3d(data.vertices[i], scale, nifVer);
 			coords[i * 3 + 0] = v.x * xScale;
 			coords[i * 3 + 1] = v.y * yScale;
 			coords[i * 3 + 2] = v.z * zScale;
