@@ -12,13 +12,13 @@ import com.bulletphysics.collision.dispatch.PairCachingGhostObject;
 import com.bulletphysics.collision.shapes.CapsuleShape;
 import com.bulletphysics.collision.shapes.ConvexShape;
 import com.bulletphysics.dynamics.DynamicsWorld;
-import com.bulletphysics.dynamics.character.KinematicCharacterController3;
-import com.bulletphysics.dynamics.character.KinematicCharacterController3.CharacterPositionListener;
+import com.bulletphysics.dynamics.character.KinematicCharacterController;
+import com.bulletphysics.dynamics.character.KinematicCharacterController.CharacterPositionListener;
 import com.bulletphysics.linearmath.Transform;
 
 public class NBControlledChar implements NifBulletChar
 {
-	private KinematicCharacterController3 character;
+	private KinematicCharacterController character;
 
 	private PairCachingGhostObject ghostObject;
 
@@ -43,11 +43,11 @@ public class NBControlledChar implements NifBulletChar
 		ghostObject.setCollisionShape(capsule);
 		ghostObject.setCollisionFlags(CollisionFlags.CHARACTER_OBJECT);
 
-		character = new KinematicCharacterController3(ghostObject, capsule, stepHeight);
+		character = new KinematicCharacterController(ghostObject, capsule, stepHeight);
 
 	}
 
-	public KinematicCharacterController3 getCharacterController()
+	public KinematicCharacterController getCharacterController()
 	{
 		return character;
 	}

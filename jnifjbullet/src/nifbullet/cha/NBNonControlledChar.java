@@ -12,7 +12,7 @@ import com.bulletphysics.collision.shapes.CapsuleShape;
 import com.bulletphysics.dynamics.DynamicsWorld;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
-import com.bulletphysics.dynamics.character.KinematicCharacterController3.CharacterPositionListener;
+import com.bulletphysics.dynamics.character.KinematicCharacterController.CharacterPositionListener;
 import com.bulletphysics.linearmath.Transform;
 
 public class NBNonControlledChar extends BranchGroup implements NifBulletChar

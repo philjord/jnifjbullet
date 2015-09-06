@@ -4,7 +4,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import com.bulletphysics.dynamics.character.KinematicCharacterController3.CharacterPositionListener;
+import com.bulletphysics.dynamics.character.KinematicCharacterController.CharacterPositionListener;
 
 import nifbullet.BulletNifModel;
 

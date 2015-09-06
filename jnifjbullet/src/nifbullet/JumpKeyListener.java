@@ -3,7 +3,7 @@ package nifbullet;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-import com.bulletphysics.dynamics.character.KinematicCharacterController3;
+import com.bulletphysics.dynamics.character.KinematicCharacterController;
 
 import nifbullet.NavigationProcessorBullet.NbccProvider;
 
@@ -29,7 +29,7 @@ public class JumpKeyListener extends KeyAdapter
 
 			if (clientPhysicsSystem.getNBControlledChar() != null)
 			{
-				KinematicCharacterController3 kcc = clientPhysicsSystem.getNBControlledChar().getCharacterController();
+				KinematicCharacterController kcc = clientPhysicsSystem.getNBControlledChar().getCharacterController();
 				if (kcc.canJump())
 				{
 					kcc.jump(multi);
