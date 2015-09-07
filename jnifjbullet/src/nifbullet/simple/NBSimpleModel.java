@@ -13,6 +13,7 @@ import nif.j3d.J3dNiAVObject;
 import nif.j3d.NiToJ3dData;
 import nif.j3d.animation.J3dNiControllerManager;
 import nif.niobject.NiObject;
+import nif.niobject.RootCollisionNode;
 import nif.niobject.bhk.bhkCollisionObject;
 import nif.niobject.bhk.bhkRigidBody;
 import nifbullet.BulletNifModelClassifier;
@@ -141,7 +142,6 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 									this, sf);
 
 							updatePointers(pointer, nbbco);
-
 						}
 						else if (layer == OblivionLayer.OL_ANIM_STATIC)
 						{
@@ -161,6 +161,16 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 							// skipped 
 							new Throwable("what is this layer being given to me for? " + layer + " " + this).printStackTrace();
 						}
+					}
+					else if (niObject instanceof RootCollisionNode)
+					{						 
+						RootCollisionNode rootCollisionNode = (RootCollisionNode) niObject;
+						float sf = (float) rootTrans.getScale();
+						rootTrans.setScale(1.0f);
+						NBStaticRigidBody nbbco = new NBStaticRigidBody(rootCollisionNode, niToJ3dData.getNiObjects(), rootTrans,
+								this, sf);
+
+						updatePointers(pointer, nbbco);						
 					}
 				}
 

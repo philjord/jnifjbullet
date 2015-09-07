@@ -6,6 +6,7 @@ import javax.vecmath.Quat4f;
 import nif.NiObjectList;
 import nif.enums.OblivionLayer;
 import nif.niobject.NiAVObject;
+import nif.niobject.RootCollisionNode;
 import nif.niobject.bhk.bhkCollisionObject;
 import nif.niobject.bhk.bhkRigidBody;
 import nif.niobject.bhk.bhkRigidBodyT;
@@ -15,6 +16,7 @@ import nifbullet.BulletNifModel;
 import nifbullet.NBRigidBody;
 import nifbullet.convert.BhkCollisionToNifBullet;
 import nifbullet.convert.BhkShapeToCollisionShape;
+import nifbullet.convert.RootCollisionNodeToCollisionShape;
 import nifbullet.util.NifBulletUtil;
 import utils.convert.ConvertFromHavok;
 import utils.convert.ConvertFromNif;
@@ -28,6 +30,7 @@ import com.sun.j3d.utils.geometry.GeometryInfo;
 public class NBStaticRigidBody extends NBRigidBody
 {
 	private NiAVObject parentNiObject;
+
 	private NiObjectList niObjectList;
 
 	/** send fixed scaling via the float not transform
@@ -42,9 +45,9 @@ public class NBStaticRigidBody extends NBRigidBody
 			float fixedScaleFactor)
 	{
 		super(parentModel, fixedScaleFactor);
-		
+
 		this.niObjectList = blocks;
-		
+
 		parentNiObject = (NiAVObject) blocks.get(bhkCollisionObject.target);
 		bhkRigidBody bhkRigidBody = (bhkRigidBody) blocks.get(bhkCollisionObject.body);
 		setBhkRigidBody(bhkRigidBody);
@@ -78,7 +81,25 @@ public class NBStaticRigidBody extends NBRigidBody
 	}
 
 	/**
-	 * Special cut down verison for J3dLAND
+	 * Special cut down verison for J3dLAND  
+	 * @param physicsTriStripArray
+	 * @param rootTrans
+	 * @param parentModel
+	 */
+	public NBStaticRigidBody(RootCollisionNode rootCollisionNode, NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel,
+			float fixedScaleFactor)
+	{
+		super(parentModel, fixedScaleFactor);
+		colShape = RootCollisionNodeToCollisionShape.processRootCollisionNode(rootCollisionNode, blocks, fixedScaleFactor);
+		RigidBody rigidBody = new RigidBody(new RigidBodyConstructionInfo(0, null, colShape));
+		rigidBody.setCollisionFlags(CollisionFlags.STATIC_OBJECT);
+		setRigidBody(rigidBody);
+		updateRootTransform(rootTrans);
+
+	}
+
+	/**
+	 * Special cut down verison for morrowind
 	 * @param physicsTriStripArray
 	 * @param rootTrans
 	 * @param parentModel

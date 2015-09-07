@@ -10,6 +10,7 @@ import nif.niobject.NiBone;
 import nif.niobject.NiNode;
 import nif.niobject.NiObject;
 import nif.niobject.NiSkinInstance;
+import nif.niobject.RootCollisionNode;
 import nif.niobject.bhk.bhkConstraint;
 import nif.niobject.bhk.bhkRigidBody;
 import nif.niobject.controller.NiMultiTargetTransformController;
@@ -261,6 +262,11 @@ public abstract class BulletNifModelClassifier
 			{
 				ret++;
 			}
+			else if (niObject instanceof RootCollisionNode)
+			{
+				RootCollisionNode rootCollisionNode = (RootCollisionNode) niObject;
+				ret += rootCollisionNode.numChildren;
+			}
 		}
 		return ret;
 	}
@@ -286,11 +292,15 @@ public abstract class BulletNifModelClassifier
 		int ret = 0;
 		for (NiObject niObject : niToJ3dData.getNiObjects())
 		{
-
 			if (niObject instanceof bhkRigidBody)
 			{
 				bhkRigidBody bhkRigidBody = (bhkRigidBody) niObject;
 				ret += (bhkRigidBody.mass == 0 ? 1 : 0); // note count of 0 mass
+			}
+			else if (niObject instanceof RootCollisionNode)
+			{
+				RootCollisionNode rootCollisionNode = (RootCollisionNode) niObject;
+				ret += rootCollisionNode.numChildren;// all children are non massed rigids
 			}
 		}
 		return ret;
@@ -362,6 +372,15 @@ public abstract class BulletNifModelClassifier
 
 	private static boolean isOnlyAllowedLayers(NiToJ3dData niToJ3dData, int[] allowedLayers)
 	{
+		//return true if a RootCollisionNode exists (morrowind system, no layers all statics)
+		for (NiObject niObject : niToJ3dData.getNiObjects())
+		{
+			if (niObject instanceof RootCollisionNode)
+			{
+				return true;
+			}
+		}
+
 		int countOfAllowed = 0;
 		for (int l : allowedLayers)
 		{
