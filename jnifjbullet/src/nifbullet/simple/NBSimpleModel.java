@@ -42,6 +42,8 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 
 	private NifJ3dHavokRoot nifJ3dRoot;//TODO: what if multiples? currently just last set
 
+	private boolean hasKinematics = false;
+
 	public NBSimpleModel(String fileName, MeshSource meshSource, Transform3D rootTrans)
 	{
 		this.fileName = fileName;
@@ -151,6 +153,7 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 									rootTrans, this, sf);
 
 							updatePointers(pointer, kb);
+							hasKinematics = true;
 						}
 						else if (layer == OblivionLayer.OL_LINE_OF_SIGHT)
 						{
@@ -163,14 +166,13 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 						}
 					}
 					else if (niObject instanceof RootCollisionNode)
-					{						 
+					{
 						RootCollisionNode rootCollisionNode = (RootCollisionNode) niObject;
 						float sf = (float) rootTrans.getScale();
 						rootTrans.setScale(1.0f);
-						NBStaticRigidBody nbbco = new NBStaticRigidBody(rootCollisionNode, niToJ3dData.getNiObjects(), rootTrans,
-								this, sf);
+						NBStaticRigidBody nbbco = new NBStaticRigidBody(rootCollisionNode, niToJ3dData.getNiObjects(), rootTrans, this, sf);
 
-						updatePointers(pointer, nbbco);						
+						updatePointers(pointer, nbbco);
 					}
 				}
 
@@ -236,6 +238,11 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 	public J3dNiControllerManager getJ3dNiControllerManager()
 	{
 		return nifJ3dRoot.getHavokRoot().getJ3dNiControllerManager();
+	}
+
+	public boolean hasKinematics()
+	{
+		return hasKinematics;
 	}
 
 	public String getFileName()
