@@ -22,7 +22,6 @@ import nif.niobject.bhk.bhkMultiSphereShape;
 import nif.niobject.bhk.bhkSphereShape;
 import nif.niobject.bhk.hkPackedNiTriStripsData;
 import nifbullet.util.NifBulletUtil;
-import tools3d.utils.Utils3D;
 import utils.convert.ConvertFromHavok;
 
 import com.bulletphysics.collision.shapes.BoxShape;
@@ -111,16 +110,10 @@ public abstract class BhkCollisionToNifBullet
 		t2.rotX(Math.PI / 2);
 		t1.mul(t2);
 
-		Vector3f v = new Vector3f();
-		t1.get(v);
-		Quat4f q = new Quat4f();
-		Utils3D.safeGetQuat(t1, q);
-
 		CapsuleShape gcs = new CapsuleShape(radius, length);
 		Matrix4f m = new Matrix4f();
 		t1.get(m);
 		Transform gt = new Transform(m);
-		gt.setIdentity();
 		CompoundShape parent = new CompoundShape();
 		parent.addChildShape(gt, gcs);
 

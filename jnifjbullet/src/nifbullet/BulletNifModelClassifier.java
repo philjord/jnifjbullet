@@ -13,6 +13,7 @@ import nif.niobject.NiSkinInstance;
 import nif.niobject.RootCollisionNode;
 import nif.niobject.bhk.bhkConstraint;
 import nif.niobject.bhk.bhkRigidBody;
+import nif.niobject.bs.BSTreeNode;
 import nif.niobject.controller.NiMultiTargetTransformController;
 import nif.niobject.controller.NiTimeController;
 import nif.niobject.controller.NiTransformController;
@@ -126,7 +127,7 @@ public abstract class BulletNifModelClassifier
 		boolean ret = false;
 		if (nifFile != null)
 		{
-			if (nifFile.blocks.root() instanceof NiNode)
+			if (nifFile.blocks.root() instanceof NiNode || nifFile.blocks.root() instanceof BSTreeNode)
 			{
 				NiToJ3dData niToJ3dData = new NiToJ3dData(nifFile.blocks);
 
@@ -142,13 +143,16 @@ public abstract class BulletNifModelClassifier
 	//no bones or skins
 	public static boolean isStaticModel(String filename, MeshSource meshSource)
 	{
+		//TODO: need to handle switch nodes
+		//F:\game media\skyrim\meshes\landscape\trees\treepineforest03.nif
+		//F:\game media\Oblivion\meshes\Plants\FloraPrimrosePurple.NIF
 
 		NifFile nifFile = NifToJ3d.loadNiObjects(filename, meshSource);
 
 		boolean ret = false;
 		if (nifFile != null)
 		{
-			if (nifFile.blocks.root() instanceof NiNode)
+			if (nifFile.blocks.root() instanceof NiNode || nifFile.blocks.root() instanceof BSTreeNode)
 			{
 				NiToJ3dData niToJ3dData = new NiToJ3dData(nifFile.blocks);
 
@@ -156,9 +160,19 @@ public abstract class BulletNifModelClassifier
 						getNonMassedRigidBodyCount(niToJ3dData) > 0 && //
 						isOnlyAllowedLayers(niToJ3dData, new int[]
 						{ OblivionLayer.OL_STATIC, OblivionLayer.OL_LINE_OF_SIGHT, OblivionLayer.OL_UNIDENTIFIED, OblivionLayer.OL_STAIRS,
-								OblivionLayer.OL_TERRAIN, OblivionLayer.OL_TRANSPARENT }) && //
-						getConstraintCount(niToJ3dData) == 0 && //
-						getSkinAndBoneCount(niToJ3dData) == 0;
+								OblivionLayer.OL_TERRAIN, OblivionLayer.OL_TRANSPARENT, OblivionLayer.OL_TREES }) && //
+						getConstraintCount(niToJ3dData) == 0;// 
+				//getSkinAndBoneCount(niToJ3dData) == 0; // trees can be skinned but have simple phys
+
+				//	System.out.println("getMassedRigidBodyCount " + getMassedRigidBodyCount(niToJ3dData));
+				//	System.out.println("getNonMassedRigidBodyCount " + getNonMassedRigidBodyCount(niToJ3dData));
+				//	System.out.println("isOnlyAllowedLayers "
+				//			+ isOnlyAllowedLayers(niToJ3dData, new int[]
+				//			{ OblivionLayer.OL_STATIC, OblivionLayer.OL_LINE_OF_SIGHT, OblivionLayer.OL_UNIDENTIFIED, OblivionLayer.OL_STAIRS,
+				//					OblivionLayer.OL_TERRAIN, OblivionLayer.OL_TRANSPARENT, OblivionLayer.OL_TREES }));
+				//	System.out.println("getConstraintCount " + getConstraintCount(niToJ3dData));
+				//	System.out.println("getSkinAndBoneCount " + getSkinAndBoneCount(niToJ3dData));
+
 			}
 		}
 		return ret;
@@ -179,7 +193,7 @@ public abstract class BulletNifModelClassifier
 		boolean ret = false;
 		if (nifFile != null)
 		{
-			if (nifFile.blocks.root() instanceof NiNode)
+			if (nifFile.blocks.root() instanceof NiNode || nifFile.blocks.root() instanceof BSTreeNode)
 			{
 				NiToJ3dData niToJ3dData = new NiToJ3dData(nifFile.blocks);
 
@@ -189,8 +203,8 @@ public abstract class BulletNifModelClassifier
 								getLayerCount(niToJ3dData, OblivionLayer.OL_ANIM_STATIC)) == 0 && // 
 						getLayerCount(niToJ3dData, OblivionLayer.OL_ANIM_STATIC) > 0 && // 
 						getTransformControllerCount(niToJ3dData) >= 0 && //
-						getConstraintCount(niToJ3dData) == 0 && //
-						getSkinAndBoneCount(niToJ3dData) == 0;
+						getConstraintCount(niToJ3dData) == 0;
+				//getSkinAndBoneCount(niToJ3dData) == 0;
 			}
 		}
 		return ret;
@@ -208,7 +222,7 @@ public abstract class BulletNifModelClassifier
 		boolean ret = false;
 		if (nifFile != null)
 		{
-			if (nifFile.blocks.root() instanceof NiNode)
+			if (nifFile.blocks.root() instanceof NiNode || nifFile.blocks.root() instanceof BSTreeNode)
 			{
 				NiToJ3dData niToJ3dData = new NiToJ3dData(nifFile.blocks);
 				//or it has a forced mass which flips this to a dynamic from any layer type
@@ -239,7 +253,7 @@ public abstract class BulletNifModelClassifier
 		boolean ret = false;
 		if (nifFile != null)
 		{
-			if (nifFile.blocks.root() instanceof NiNode)
+			if (nifFile.blocks.root() instanceof NiNode || nifFile.blocks.root() instanceof BSTreeNode)
 			{
 				NiToJ3dData niToJ3dData = new NiToJ3dData(nifFile.blocks);
 
@@ -277,7 +291,6 @@ public abstract class BulletNifModelClassifier
 		int ret = 0;
 		for (NiObject niObject : niToJ3dData.getNiObjects())
 		{
-
 			if (niObject instanceof bhkRigidBody)
 			{
 				bhkRigidBody bhkRigidBody = (bhkRigidBody) niObject;

@@ -136,7 +136,8 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 						int layer = bhkRigidBody.layer.layer;
 						if (layer == OblivionLayer.OL_STATIC || layer == OblivionLayer.OL_LINE_OF_SIGHT
 								|| layer == OblivionLayer.OL_UNIDENTIFIED || layer == OblivionLayer.OL_STAIRS
-								|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT)
+								|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT
+								|| layer == OblivionLayer.OL_TREES)
 						{
 							float sf = (float) rootTrans.getScale();
 							rootTrans.setScale(1.0f);

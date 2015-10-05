@@ -54,7 +54,7 @@ public class NBStaticRigidBody extends NBRigidBody
 
 		int layer = bhkRigidBody.layer.layer;
 		if (layer == OblivionLayer.OL_STATIC || layer == OblivionLayer.OL_UNIDENTIFIED || layer == OblivionLayer.OL_STAIRS
-				|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT)
+				|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT || layer == OblivionLayer.OL_TREES)
 		{
 			if (bhkRigidBody.mass == 0)
 			{
@@ -75,8 +75,9 @@ public class NBStaticRigidBody extends NBRigidBody
 		}
 		else
 		{
-			new Throwable("Why is a non OL_STATIC, OL_LINE_OF_SIGHT, OL_UNIDENTIFID, OL_STAIRS, OL_TERRAIN, OL_TRANSPARENT handed to  me? "
-					+ layer + " " + this).printStackTrace();
+			new Throwable(
+					"Why is a non OL_STATIC, OL_LINE_OF_SIGHT, OL_UNIDENTIFID, OL_STAIRS, OL_TERRAIN, OL_TRANSPARENT, OL_TREES handed to  me? "
+							+ layer + " " + this).printStackTrace();
 		}
 	}
 
@@ -153,10 +154,12 @@ public class NBStaticRigidBody extends NBRigidBody
 			parent = parent.parent;
 		}
 
-		if (getBhkRigidBody() instanceof bhkRigidBodyT)
+		bhkRigidBody rb = getBhkRigidBody();
+		//land and morrwind can be null
+		if (rb != null && rb instanceof bhkRigidBodyT)
 		{
-			temp.setRotation(ConvertFromHavok.toJ3d(getBhkRigidBody().rotation));
-			temp.setTranslation(ConvertFromHavok.toJ3d(getBhkRigidBody().translation, fixedScaleFactor, niObjectList.nifVer));
+			temp.setRotation(ConvertFromHavok.toJ3d(rb.rotation));
+			temp.setTranslation(ConvertFromHavok.toJ3d(rb.translation, fixedScaleFactor, niObjectList.nifVer));
 			worldTransformCalc.mul(temp);
 		}
 

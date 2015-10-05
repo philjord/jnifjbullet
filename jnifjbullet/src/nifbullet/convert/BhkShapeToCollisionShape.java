@@ -1,7 +1,5 @@
 package nifbullet.convert;
 
-import java.util.WeakHashMap;
-
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
@@ -44,14 +42,15 @@ public abstract class BhkShapeToCollisionShape
 		return processBhkShape(bhkShape, niToJ3dData, false, scale);
 	}
 
-	private static WeakHashMap<bhkShape, CollisionShape> preloadedShapes = new WeakHashMap<bhkShape, CollisionShape>();
+	//TODO: Any shape can be scaled so preloading is bullshit, it would have to be by scale factor as well
+	//private static WeakHashMap<bhkShape, CollisionShape> preloadedShapes = new WeakHashMap<bhkShape, CollisionShape>();
 
 	public static CollisionShape processBhkShape(bhkShape bhkShape, NiObjectList niToJ3dData, boolean isDynamic, float scale)
 	{
 		CollisionShape ret = null;
-		ret = preloadedShapes.get(bhkShape);
-		if (ret != null)
-			return ret;
+		//ret = preloadedShapes.get(bhkShape);
+		//if (ret != null)
+		//	return ret;
 
 		if (bhkShape instanceof bhkListShape)
 		{
@@ -120,8 +119,8 @@ public abstract class BhkShapeToCollisionShape
 			ret = createCollisionShape(bhkShape, niToJ3dData, isDynamic, scale);
 		}
 
-		if (ret != null)
-			preloadedShapes.put(bhkShape, ret);
+		//if (ret != null)
+		//	preloadedShapes.put(bhkShape, ret);
 		return ret;
 	}
 
