@@ -1,5 +1,7 @@
 package nifbullet.convert;
 
+import java.util.WeakHashMap;
+
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
@@ -42,15 +44,18 @@ public abstract class BhkShapeToCollisionShape
 		return processBhkShape(bhkShape, niToJ3dData, false, scale);
 	}
 
-	//TODO: Any shape can be scaled so preloading is bullshit, it would have to be by scale factor as well
-	//private static WeakHashMap<bhkShape, CollisionShape> preloadedShapes = new WeakHashMap<bhkShape, CollisionShape>();
+	//Any shape can be scaled so preloading is hard, basically we do it for scale=1.0 ONLY
+	private static WeakHashMap<bhkShape, CollisionShape> preloadedScale1Shapes = new WeakHashMap<bhkShape, CollisionShape>();
 
 	public static CollisionShape processBhkShape(bhkShape bhkShape, NiObjectList niToJ3dData, boolean isDynamic, float scale)
 	{
 		CollisionShape ret = null;
-		//ret = preloadedShapes.get(bhkShape);
-		//if (ret != null)
-		//	return ret;
+		if (scale == 1.0f)
+		{			
+			ret = preloadedScale1Shapes.get(bhkShape);
+			if (ret != null)
+				return ret;
+		}
 
 		if (bhkShape instanceof bhkListShape)
 		{
@@ -119,8 +124,11 @@ public abstract class BhkShapeToCollisionShape
 			ret = createCollisionShape(bhkShape, niToJ3dData, isDynamic, scale);
 		}
 
-		//if (ret != null)
-		//	preloadedShapes.put(bhkShape, ret);
+		if (scale == 1.0f)
+		{
+			if (ret != null)
+				preloadedScale1Shapes.put(bhkShape, ret);
+		}
 		return ret;
 	}
 
