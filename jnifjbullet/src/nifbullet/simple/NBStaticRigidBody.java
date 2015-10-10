@@ -5,13 +5,13 @@ import javax.vecmath.Quat4f;
 
 import nif.NiObjectList;
 import nif.enums.OblivionLayer;
+import nif.j3d.J3dNiAVObject;
 import nif.niobject.NiAVObject;
 import nif.niobject.RootCollisionNode;
 import nif.niobject.bhk.bhkCollisionObject;
 import nif.niobject.bhk.bhkRigidBody;
 import nif.niobject.bhk.bhkRigidBodyT;
 import nif.niobject.bhk.bhkShape;
-import nif.niobject.bs.BSFadeNode;
 import nifbullet.BulletNifModel;
 import nifbullet.NBRigidBody;
 import nifbullet.convert.BhkCollisionToNifBullet;
@@ -140,7 +140,7 @@ public class NBStaticRigidBody extends NBRigidBody
 		NiAVObject parent = parentNiObject;
 		while (parent != null)
 		{
-			if (!(parent instanceof BSFadeNode))//BSFadeNodes are skipped
+			if (!J3dNiAVObject.ignoreTopTransform(parent))
 			{
 				temp.setRotation(ConvertFromNif.toJ3d(parent.rotation));
 			}
@@ -149,6 +149,8 @@ public class NBStaticRigidBody extends NBRigidBody
 				temp.setRotation(new Quat4f(0, 0, 0, 1));
 			}
 			temp.setTranslation(ConvertFromNif.toJ3d(parent.translation));
+			//TODO: check this!!!! I think it should in fact be 
+			//worldTransformCalc.mul(temp, worldTransformCalc);
 			worldTransformCalc.mul(temp);
 
 			parent = parent.parent;
