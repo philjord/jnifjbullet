@@ -116,14 +116,14 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 	/**
 	 * Basically a set enabled true
 	 */
-	public void addToDynamicsWorld(DynamicsWorld dynamicsWorld)
+	public void addToDynamicsWorld(DynamicsWorld dynamicsWorld1)
 	{
-		this.dynamicsWorld = dynamicsWorld;
+		this.dynamicsWorld = dynamicsWorld1;
 		if (rootDynamicBody != null && rootDynamicBody.getRigidBody() != null)
 		{
-			synchronized (dynamicsWorld)
+			synchronized (dynamicsWorld1)
 			{
-				dynamicsWorld.addRigidBody(rootDynamicBody.getRigidBody());
+				dynamicsWorld1.addRigidBody(rootDynamicBody.getRigidBody());
 			}
 		}
 	}

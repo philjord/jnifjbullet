@@ -1,7 +1,6 @@
 package nifbullet.dyn;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
 import com.bulletphysics.dynamics.RigidBody;
@@ -61,6 +60,7 @@ public class NBDynRBTransformListener extends DefaultMotionState
 
 		
 		temp.set(graphicsWorldTrans.basis, graphicsWorldTrans.origin, 1f);
+		temp.normalize();
 				
 		// Note world coords is correct at the nifbullet listener level
 		nifBulletTransformListener.transformChanged(temp, linearVel, angularVel);

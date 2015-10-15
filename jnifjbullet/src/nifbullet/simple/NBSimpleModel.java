@@ -48,6 +48,7 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 	{
 		this.fileName = fileName;
 		this.setName(this.getClass().getSimpleName() + ":" + fileName);
+		//TODO: really? possibly just a group would be fine for simplemodel
 		setCapability(BranchGroup.ALLOW_DETACH);
 		addPart(fileName, meshSource, this, rootTrans);
 	}
