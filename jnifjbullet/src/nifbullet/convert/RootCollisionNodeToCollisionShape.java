@@ -31,12 +31,14 @@ public abstract class RootCollisionNodeToCollisionShape
 	 * @return
 	 */
 
-	private static WeakHashMap<RootCollisionNode, CollisionShape> preloadedShapes = new WeakHashMap<RootCollisionNode, CollisionShape>();
+	//NOTE ONLY scale ==1 in here!
+	private static WeakHashMap<RootCollisionNode, CollisionShape> preloadedScale1Shapes = new WeakHashMap<RootCollisionNode, CollisionShape>();
 
 	public static CollisionShape processRootCollisionNode(RootCollisionNode rootCollisionNode, NiObjectList niToJ3dData, float scale)
 	{
 		CollisionShape ret = null;
-		ret = preloadedShapes.get(rootCollisionNode);
+		if (scale == 1)
+			ret = preloadedScale1Shapes.get(rootCollisionNode);
 		if (ret != null)
 			return ret;
 
@@ -58,15 +60,15 @@ public abstract class RootCollisionNodeToCollisionShape
 
 					Transform t = NifBulletUtil.createTrans(q, v);
 
-					cs.addChildShape(t, shape);					
+					cs.addChildShape(t, shape);
 				}
 			}
 		}
 		cs.recalculateLocalAabb();
 		ret = cs;
 
-		if (ret != null)
-			preloadedShapes.put(rootCollisionNode, ret);
+		if (ret != null && scale == 1)
+			preloadedScale1Shapes.put(rootCollisionNode, ret);
 		return ret;
 	}
 

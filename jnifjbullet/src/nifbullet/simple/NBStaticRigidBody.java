@@ -151,6 +151,8 @@ public class NBStaticRigidBody extends NBRigidBody
 			temp.setTranslation(ConvertFromNif.toJ3d(parent.translation));
 			//TODO: check this!!!! I think it should in fact be 
 			//worldTransformCalc.mul(temp, worldTransformCalc);
+			//megaton walls disagree
+			
 			worldTransformCalc.mul(temp);
 
 			parent = parent.parent;
