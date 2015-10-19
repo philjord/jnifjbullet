@@ -32,7 +32,6 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.PixelFormat;
 
-
 /**
  *
  * @author jezek2
@@ -40,6 +39,16 @@ import org.lwjgl.opengl.PixelFormat;
 public class LWJGL
 {
 	private static LwjglGL gl = new LwjglGL();
+
+	private static String title;
+
+	private static DemoApplication demoApp;
+
+	private static boolean doRun = false;
+
+	private static long lastTime = System.currentTimeMillis();
+
+	private static int frames = 0;
 
 	public static IGL getGL()
 	{
@@ -57,12 +66,9 @@ public class LWJGL
 	 */
 	public static void init(int width, int height, String title2, DemoApplication demoApp2) throws LWJGLException
 	{
-		
-		
 		LWJGL.title = title2;
 		LWJGL.demoApp = demoApp2;
-		
-		
+
 		Display.setDisplayMode(new DisplayMode(width, height));
 		Display.setTitle(title);
 		Display.create(new PixelFormat(0, 24, 0));
@@ -70,96 +76,104 @@ public class LWJGL
 		Keyboard.create();
 		Keyboard.enableRepeatEvents(true);
 		Mouse.create();
-		
+
 		gl.init();
-	
 
 		demoApp.myinit();
 		demoApp.reshape(width, height);
-
+		doRun = true;
 	}
 
-	static String title;
+	public static boolean isDoRun()
+	{
+		return doRun;
+	}
 
-	static DemoApplication demoApp;
+	public static void setDoRun(boolean doRun)
+	{
+		LWJGL.doRun = doRun;
+	}
 
-	static boolean quit = false;
-
-	static long lastTime = System.currentTimeMillis();
-
-	static int frames = 0;
+	public static void exit()
+	{
+		doRun = false;
+		Display.destroy();
+	}
 
 	public static void step()
 	{
-		
-		if (!Display.isCloseRequested() && !quit)
+		if (doRun)
 		{
-
-			demoApp.moveAndDisplay();
-			Display.update();
-
-			int modifiers = 0;
-			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))
-				modifiers |= InputEvent.SHIFT_DOWN_MASK;
-			if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
-				modifiers |= InputEvent.CTRL_DOWN_MASK;
-			if (Keyboard.isKeyDown(Keyboard.KEY_LMETA) || Keyboard.isKeyDown(Keyboard.KEY_RMETA))
-				modifiers |= InputEvent.ALT_DOWN_MASK;
-
-			while (Keyboard.next())
+			if (Display.isCloseRequested())
 			{
-				if (Keyboard.getEventCharacter() != '\0')
-				{
-					demoApp.keyboardCallback(Keyboard.getEventCharacter(), Mouse.getX(), Mouse.getY(), modifiers);
-				}
-
-				if (Keyboard.getEventKeyState())
-				{
-					demoApp.specialKeyboard(Keyboard.getEventKey(), Mouse.getX(), Mouse.getY(), modifiers);
-				}
-				else
-				{
-					demoApp.specialKeyboardUp(Keyboard.getEventKey(), Mouse.getX(), Mouse.getY(), modifiers);
-				}
-
-				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE)
-					quit = true;
-				if (Keyboard.getEventKey() == Keyboard.KEY_Q)
-					quit = true;
-			}
-
-			while (Mouse.next())
-			{
-				if (Mouse.getEventButton() != -1)
-				{
-					int btn = Mouse.getEventButton();
-					if (btn == 1)
-					{
-						btn = 2;
-					}
-					else if (btn == 2)
-					{
-						btn = 1;
-					}
-					demoApp.mouseFunc(btn, Mouse.getEventButtonState() ? 0 : 1, Mouse.getEventX(), Display.getDisplayMode().getHeight() - 1
-							- Mouse.getEventY());
-				}
-				demoApp.mouseMotionFunc(Mouse.getEventX(), Display.getDisplayMode().getHeight() - 1 - Mouse.getEventY());
-			}
-
-			long time = System.currentTimeMillis();
-			if (time - lastTime < 1000)
-			{
-				frames++;
+				exit();
 			}
 			else
 			{
-				Display.setTitle(title + " | FPS: " + frames);
-				lastTime = time;
-				frames = 0;
+				demoApp.moveAndDisplay();
+				Display.update();
+
+				int modifiers = 0;
+				if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))
+					modifiers |= InputEvent.SHIFT_DOWN_MASK;
+				if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
+					modifiers |= InputEvent.CTRL_DOWN_MASK;
+				if (Keyboard.isKeyDown(Keyboard.KEY_LMETA) || Keyboard.isKeyDown(Keyboard.KEY_RMETA))
+					modifiers |= InputEvent.ALT_DOWN_MASK;
+
+				while (Keyboard.next())
+				{
+					if (Keyboard.getEventCharacter() != '\0')
+					{
+						demoApp.keyboardCallback(Keyboard.getEventCharacter(), Mouse.getX(), Mouse.getY(), modifiers);
+					}
+
+					if (Keyboard.getEventKeyState())
+					{
+						demoApp.specialKeyboard(Keyboard.getEventKey(), Mouse.getX(), Mouse.getY(), modifiers);
+					}
+					else
+					{
+						demoApp.specialKeyboardUp(Keyboard.getEventKey(), Mouse.getX(), Mouse.getY(), modifiers);
+					}
+
+					if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE || Keyboard.getEventKey() == Keyboard.KEY_Q)
+						//can't use J as initn and exit are caled at once	|| Keyboard.getEventKey() == Keyboard.KEY_J)
+						exit();
+				}
+
+				while (Mouse.next())
+				{
+					if (Mouse.getEventButton() != -1)
+					{
+						int btn = Mouse.getEventButton();
+						if (btn == 1)
+						{
+							btn = 2;
+						}
+						else if (btn == 2)
+						{
+							btn = 1;
+						}
+						demoApp.mouseFunc(btn, Mouse.getEventButtonState() ? 0 : 1, Mouse.getEventX(), Display.getDisplayMode().getHeight()
+								- 1 - Mouse.getEventY());
+					}
+					demoApp.mouseMotionFunc(Mouse.getEventX(), Display.getDisplayMode().getHeight() - 1 - Mouse.getEventY());
+				}
+
+				long time = System.currentTimeMillis();
+				if (time - lastTime < 1000)
+				{
+					frames++;
+				}
+				else
+				{
+					Display.setTitle(title + " | FPS: " + frames);
+					lastTime = time;
+					frames = 0;
+				}
 			}
 		}
 
 	}
-
 }

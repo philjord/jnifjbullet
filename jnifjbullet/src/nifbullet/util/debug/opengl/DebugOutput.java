@@ -81,6 +81,11 @@ public class DebugOutput extends DemoApplication
 			e.printStackTrace();
 		}
 	}
+	
+	public static void disposeDebug()
+	{
+		LWJGL.exit();
+	}
 
 	public DebugOutput(IGL gl, DynamicsWorld dw, AvatarLocation al)
 	{
