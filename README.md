@@ -3,4 +3,4 @@ jnifjbullet
 
 This project loads nif file loaded by the jnif project into JBullet physics simulation bodies.
 
-See ElderScrollsExplorer for more information.
+See ElderScrollsExplorer for more information https://github.com/philjord/ElderScrollsExplorer
