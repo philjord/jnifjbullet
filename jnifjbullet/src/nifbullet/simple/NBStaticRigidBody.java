@@ -140,7 +140,7 @@ public class NBStaticRigidBody extends NBRigidBody
 		NiAVObject parent = parentNiObject;
 		while (parent != null)
 		{
-			if (!J3dNiAVObject.ignoreTopTransform(parent))
+			if (!J3dNiAVObject.ignoreTopTransformRot(parent))
 			{
 				temp.setRotation(ConvertFromNif.toJ3d(parent.rotation));
 			}
@@ -149,9 +149,6 @@ public class NBStaticRigidBody extends NBRigidBody
 				temp.setRotation(new Quat4f(0, 0, 0, 1));
 			}
 			temp.setTranslation(ConvertFromNif.toJ3d(parent.translation));
-			//TODO: check this!!!! I think it should in fact be 
-			//worldTransformCalc.mul(temp, worldTransformCalc);
-			//megaton walls disagree
 			
 			worldTransformCalc.mul(temp);
 
