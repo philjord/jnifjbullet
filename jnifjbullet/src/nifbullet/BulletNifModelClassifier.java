@@ -148,7 +148,11 @@ public abstract class BulletNifModelClassifier
 		//F:\game media\Oblivion\meshes\Plants\FloraPrimrosePurple.NIF
 
 		NifFile nifFile = NifToJ3d.loadNiObjects(filename, meshSource);
+		return isStaticModel(nifFile);
+	}
 
+	public static boolean isStaticModel(NifFile nifFile)
+	{
 		boolean ret = false;
 		if (nifFile != null)
 		{
@@ -189,7 +193,11 @@ public abstract class BulletNifModelClassifier
 	public static boolean isKinematicModel(String filename, MeshSource meshSource)
 	{
 		NifFile nifFile = NifToJ3d.loadNiObjects(filename, meshSource);
+		return isKinematicModel(nifFile);
+	}
 
+	public static boolean isKinematicModel(NifFile nifFile)
+	{
 		boolean ret = false;
 		if (nifFile != null)
 		{
@@ -218,7 +226,11 @@ public abstract class BulletNifModelClassifier
 	public static boolean isSimpleDynamicModel(String filename, MeshSource meshSource, float forcedMass)
 	{
 		NifFile nifFile = NifToJ3d.loadNiObjects(filename, meshSource);
+		return isSimpleDynamicModel(nifFile, forcedMass);
+	}
 
+	public static boolean isSimpleDynamicModel(NifFile nifFile, float forcedMass)
+	{
 		boolean ret = false;
 		if (nifFile != null)
 		{
@@ -249,7 +261,11 @@ public abstract class BulletNifModelClassifier
 	public static boolean isComplexDynamic(String filename, MeshSource meshSource)
 	{
 		NifFile nifFile = NifToJ3d.loadNiObjects(filename, meshSource);
+		return isStaticModel(nifFile);
+	}
 
+	public static boolean isComplexDynamic(NifFile nifFile)
+	{
 		boolean ret = false;
 		if (nifFile != null)
 		{
