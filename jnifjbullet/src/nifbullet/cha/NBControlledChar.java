@@ -22,20 +22,23 @@ public class NBControlledChar implements NifBulletChar
 
 	private PairCachingGhostObject ghostObject;
 
-	private float characterHeight = 0.9f;// capsule shape height is height+(2*radius)
-
-	private float characterWidth = 0.5f;
-
-	private float stepHeight = 0.35f;
+	private float stepHeight = 0.4f;
 
 	private DynamicsWorld dynamicsWorld = null;
 
 	public NBControlledChar(Transform3D baseTrans)
 	{
+		this(baseTrans, 0.9f, 0.5f);
+
+	}
+
+	public NBControlledChar(Transform3D baseTrans, float characterHeight, float characterRadius)
+	{
 		Transform tr = NifBulletUtil.createTrans(baseTrans);
 		tr.basis.setIdentity();// no rotation		
 
-		ConvexShape capsule = new CapsuleShape(characterWidth, characterHeight);
+		// capsule shape height is height+(2*radius) so we take the radius out
+		ConvexShape capsule = new CapsuleShape(characterRadius, characterHeight - (characterRadius * 2));
 
 		ghostObject = new PairCachingGhostObject();
 
@@ -44,7 +47,6 @@ public class NBControlledChar implements NifBulletChar
 		ghostObject.setCollisionFlags(CollisionFlags.CHARACTER_OBJECT);
 
 		character = new KinematicCharacterController(ghostObject, capsule, stepHeight);
-
 	}
 
 	public KinematicCharacterController getCharacterController()
@@ -81,12 +83,13 @@ public class NBControlledChar implements NifBulletChar
 	}
 
 	@Override
-	public void addToDynamicsWorld(DynamicsWorld dynamicsWorld)
+	public void addToDynamicsWorld(DynamicsWorld dynamicsWorld1)
 	{
+		this.dynamicsWorld = dynamicsWorld1;
 		dynamicsWorld.addCollisionObject(ghostObject, CollisionFilterGroups.CHARACTER_FILTER,
 				(short) (CollisionFilterGroups.STATIC_FILTER | CollisionFilterGroups.DEFAULT_FILTER));
 		dynamicsWorld.addAction(character);
-		this.dynamicsWorld = dynamicsWorld;
+
 	}
 
 	@Override
