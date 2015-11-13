@@ -2,8 +2,8 @@ package nifbullet.convert;
 
 import java.util.WeakHashMap;
 
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix4f;
 
 import nif.NiObjectList;
 import nif.niobject.NiTriStripsData;
@@ -51,7 +51,7 @@ public abstract class BhkShapeToCollisionShape
 	{
 		CollisionShape ret = null;
 		if (scale == 1.0f)
-		{			
+		{
 			ret = preloadedScale1Shapes.get(bhkShape);
 			if (ret != null)
 				return ret;
@@ -208,11 +208,12 @@ public abstract class BhkShapeToCollisionShape
 			CollisionShape shape = processBhkShape(bhkShape, niToJ3dData, isDynamic, scale);
 			if (shape != null)
 			{
-				Quat4f q = ConvertFromHavok.toJ3dQ4f(data.transform);
-				Vector3f v = ConvertFromHavok.toJ3dV3f(data.transform, scale, niToJ3dData.nifVer);
+				Transform3D t3d = new Transform3D();
+				Matrix4f m = ConvertFromHavok.toJ3dM4(data.transform, niToJ3dData.nifVer);
+				t3d.set(m);
 
 				CompoundShape cs = new CompoundShape();
-				Transform t = NifBulletUtil.createTrans(q, v);
+				Transform t = NifBulletUtil.createTrans(t3d);
 
 				cs.addChildShape(t, shape);
 				cs.recalculateLocalAabb();
