@@ -11,6 +11,7 @@ import nif.niobject.NiTriShape;
 import nif.niobject.NiTriShapeData;
 import nif.niobject.RootCollisionNode;
 import nifbullet.util.NifBulletUtil;
+import tools3d.utils.Utils3D;
 import utils.convert.ConvertFromHavok;
 
 import com.bulletphysics.collision.shapes.BvhTriangleMeshShape;
@@ -87,9 +88,10 @@ public abstract class RootCollisionNodeToCollisionShape
 			}
 			gi.setCoordinates(vertices);*/
 			// scale all vertices
-			float[] verts = new float[data.verticesOpt.length];
+			float[] origVerts = Utils3D.extractArrayFromFloatBuffer(data.verticesOptBuf);
+			float[] verts = new float[origVerts.length];
 			for (int i = 0; i < verts.length; i++)
-				verts[i] = data.verticesOpt[i] * scale;
+				verts[i] = origVerts[i] * scale;
 			gi.setCoordinates(verts);
 
 		}
