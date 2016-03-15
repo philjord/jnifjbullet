@@ -133,7 +133,8 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 	 */
 	public void removeFromDynamicsWorld()
 	{
-		if (rootDynamicBody != null && rootDynamicBody.getRigidBody() != null)
+		// not dynamicsWorld!= in case we have already been removed or not added yet
+		if (rootDynamicBody != null && rootDynamicBody.getRigidBody() != null && dynamicsWorld != null)
 		{
 			synchronized (dynamicsWorld)
 			{

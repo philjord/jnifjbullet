@@ -121,12 +121,15 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 	 * 
 	 */
 	public void removeFromDynamicsWorld()
-	{
-		if (rigidBody != null)
+	{// check for double remove or no add yet
+		if (dynamicsWorld != null)
 		{
-			dynamicsWorld.removeRigidBody(rigidBody);
+			if (rigidBody != null)
+			{
+				dynamicsWorld.removeRigidBody(rigidBody);
+			}
+			dynamicsWorld = null;
 		}
-		dynamicsWorld = null;
 	}
 
 	public String toString()

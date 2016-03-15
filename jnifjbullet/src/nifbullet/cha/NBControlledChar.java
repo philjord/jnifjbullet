@@ -95,9 +95,13 @@ public class NBControlledChar implements NifBulletChar
 	@Override
 	public void removeFromDynamicsWorld()
 	{
-		dynamicsWorld.removeCollisionObject(ghostObject);
-		dynamicsWorld.removeAction(character);
-		dynamicsWorld = null;
+		// check for double remove or no add yet
+		if (dynamicsWorld != null)
+		{
+			dynamicsWorld.removeCollisionObject(ghostObject);
+			dynamicsWorld.removeAction(character);
+			dynamicsWorld = null;
+		}
 	}
 
 }

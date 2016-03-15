@@ -106,13 +106,17 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 	 */
 	public void removeFromDynamicsWorld()
 	{
-		for (NBRigidBody rb : nbRigidBodys)
+		// check for double remove or no add yet
+		if (dynamicsWorld != null)
 		{
-			if (rb.getRigidBody() != null)
-				dynamicsWorld.removeRigidBody(rb.getRigidBody());
-		}
+			for (NBRigidBody rb : nbRigidBodys)
+			{
+				if (rb.getRigidBody() != null)
+					dynamicsWorld.removeRigidBody(rb.getRigidBody());
+			}
 
-		this.dynamicsWorld = null;
+			this.dynamicsWorld = null;
+		}
 	}
 
 	@Override
@@ -142,8 +146,8 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 						{
 							float sf = (float) rootTrans.getScale();
 							rootTrans.setScale(1.0f);
-							NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkCollisionObject, niToJ3dData.getNiObjects(), rootTrans,
-									this, sf);
+							NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkCollisionObject, niToJ3dData.getNiObjects(), rootTrans, this,
+									sf);
 
 							updatePointers(pointer, nbbco);
 						}
