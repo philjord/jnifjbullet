@@ -11,7 +11,6 @@ import javax.media.j3d.WakeupOr;
 
 import nif.j3d.J3dNiAVObject;
 import nif.j3d.NiToJ3dData;
-import nif.j3d.NifTransformGroup;
 
 public class SceneGraphTransformChangeBehavior extends Behavior
 {
@@ -28,11 +27,9 @@ public class SceneGraphTransformChangeBehavior extends Behavior
 		J3dNiAVObject current = source;
 		while (current != null)
 		{
-			NifTransformGroup nmtg = current.getTransformGroup();
-
-			if (!nmtg.isNoImpact())
+			if (!current.isNoImpact())
 			{
-				allTransformGroups.add(nmtg);
+				allTransformGroups.add(current);
 			}
 			current = niToJ3dData.get(current.getNiAVObject().parent);
 		}
@@ -52,8 +49,7 @@ public class SceneGraphTransformChangeBehavior extends Behavior
 		wakeupOn(wakeUp);
 	}
 
-	@SuppressWarnings(
-	{ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "rawtypes" })
 	public void processStimulus(Enumeration critiria)
 	{
 		destination.updateInternalWorldTransform();

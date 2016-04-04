@@ -183,7 +183,7 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 				}
 
 				// but must be placed so camera dist works too
-				j3dNiNodeRoot.getTransformGroup().setTransform(rootTrans);
+				j3dNiNodeRoot.setTransform(rootTrans);
 
 				// needed for animations to occur			
 				addChild(j3dNiNodeRoot);
