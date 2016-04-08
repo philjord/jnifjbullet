@@ -33,7 +33,9 @@ public class NBStaticRigidBody extends NBRigidBody
 
 	private NiObjectList niObjectList;
 
-	/** send fixed scaling via the float not transform
+	private Transform3D worldTransformCalc = new Transform3D();
+
+	/** 
 	 * 
 	 * @param bhkCollisionObject
 	 * @param blocks
@@ -41,10 +43,9 @@ public class NBStaticRigidBody extends NBRigidBody
 	 * @param parentModel
 	 * @param fixedScaleFactor
 	 */
-	public NBStaticRigidBody(bhkCollisionObject bhkCollisionObject, NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel,
-			float fixedScaleFactor)
+	public NBStaticRigidBody(bhkCollisionObject bhkCollisionObject, NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel)
 	{
-		super(parentModel, fixedScaleFactor);
+		super(parentModel);
 
 		this.niObjectList = blocks;
 
@@ -59,9 +60,11 @@ public class NBStaticRigidBody extends NBRigidBody
 			if (bhkRigidBody.mass == 0)
 			{
 				bhkShape bhkShape = (bhkShape) blocks.get(bhkRigidBody.shape);
-				colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, blocks, fixedScaleFactor);
+				//updateTransfrom MUST be called first, it sets scale
+				Transform worldTransform = calcWorldTransform(rootTrans);
+				colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, blocks, scale);
 				setRigidBody(NifBulletUtil.createStaticRigidBody(bhkRigidBody, colShape, this));
-				updateRootTransform(rootTrans);
+				getRigidBody().setWorldTransform(worldTransform);
 			}
 			else
 			{
@@ -82,48 +85,38 @@ public class NBStaticRigidBody extends NBRigidBody
 	}
 
 	/**
-	 * Special cut down verison for J3dLAND  
+	 * Special cut down version for J3dLAND  
 	 * @param physicsTriStripArray
 	 * @param rootTrans
 	 * @param parentModel
 	 */
-	public NBStaticRigidBody(RootCollisionNode rootCollisionNode, NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel,
-			float fixedScaleFactor)
+	public NBStaticRigidBody(RootCollisionNode rootCollisionNode, NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel)
 	{
-		super(parentModel, fixedScaleFactor);
-		colShape = RootCollisionNodeToCollisionShape.processRootCollisionNode(rootCollisionNode, blocks, fixedScaleFactor);
+		super(parentModel);
+		Transform worldTransform = calcWorldTransform(rootTrans);
+		colShape = RootCollisionNodeToCollisionShape.processRootCollisionNode(rootCollisionNode, blocks, 1f);
 		RigidBody rigidBody = new RigidBody(new RigidBodyConstructionInfo(0, null, colShape));
 		rigidBody.setCollisionFlags(CollisionFlags.STATIC_OBJECT);
 		setRigidBody(rigidBody);
-		updateRootTransform(rootTrans);
-
+		rigidBody.setWorldTransform(worldTransform);
 	}
 
 	/**
-	 * Special cut down verison for morrowind
+	 * Special cut down version for morrowind
 	 * @param physicsTriStripArray
 	 * @param rootTrans
 	 * @param parentModel
 	 */
 	public NBStaticRigidBody(GeometryInfo gi, Transform3D rootTrans, BulletNifModel parentModel)
 	{
-		super(parentModel, 1.0f);
+		super(parentModel);
+		Transform worldTransform = calcWorldTransform(rootTrans);
 		colShape = BhkCollisionToNifBullet.makeFromGeometryInfo(gi);
 		RigidBody rigidBody = new RigidBody(new RigidBodyConstructionInfo(0, null, colShape));
 		rigidBody.setCollisionFlags(CollisionFlags.STATIC_OBJECT);
 		setRigidBody(rigidBody);
-		updateRootTransform(rootTrans);
+		rigidBody.setWorldTransform(worldTransform);
 	}
-
-	public void updateRootTransform(Transform3D rootTrans)
-	{
-		getRigidBody().setWorldTransform(calcWorldTransform(rootTrans));
-	}
-
-	//deburners
-	private Transform3D worldTransformCalc = new Transform3D();
-
-	private Transform worldTransform = NifBulletUtil.newIdentityTransform();
 
 	/**
 	 * NOTICE this just uses the unchanging static niObject fixed rotr's
@@ -136,10 +129,43 @@ public class NBStaticRigidBody extends NBRigidBody
 		// add the root trans in
 		worldTransformCalc.set(rootTrans);
 
-		Transform3D temp = new Transform3D();
 		NiAVObject parent = parentNiObject;
-		while (parent != null)
+		// WAIT J3dNiAVObject goes from parent down wards this business goes 
+		// root then parent up to null then bhkRigidbody!
+		mulFromRootDown(parent);
+
+		bhkRigidBody rb = getBhkRigidBody();
+		//land and morrwind can be null
+		if (rb != null && rb instanceof bhkRigidBodyT)
 		{
+			temp.setRotation(ConvertFromHavok.toJ3d(rb.rotation));
+			temp.setTranslation(ConvertFromHavok.toJ3d(rb.translation, 1f, niObjectList.nifVer));
+			worldTransformCalc.mul(temp);
+		}
+
+		Transform worldTransform = NifBulletUtil.newIdentityTransform();
+		worldTransformCalc.get(worldTransform.origin);
+		worldTransformCalc.get(worldTransform.basis);
+
+		//NOTICE there is no scaling able to be done via
+		// bullet transforms, so scaling got sent to the 
+		// BhkShapeToCollisionShape call and is in the model now
+		// so we just record it here
+		this.scale = (float) worldTransformCalc.getScale();
+
+		return worldTransform;
+	}
+
+	// deburner
+	private Transform3D temp = new Transform3D();
+
+	private void mulFromRootDown(NiAVObject parent)
+	{
+		if (parent != null)
+		{
+			//note go up first then come back down and do multiplys
+			mulFromRootDown(parent.parent);
+
 			if (!J3dNiAVObject.ignoreTopTransformRot(parent))
 			{
 				temp.setRotation(ConvertFromNif.toJ3d(parent.rotation));
@@ -149,24 +175,17 @@ public class NBStaticRigidBody extends NBRigidBody
 				temp.setRotation(new Quat4f(0, 0, 0, 1));
 			}
 			temp.setTranslation(ConvertFromNif.toJ3d(parent.translation));
-			
-			worldTransformCalc.mul(temp);
+			temp.setScale(parent.scale);
 
-			parent = parent.parent;
-		}
-
-		bhkRigidBody rb = getBhkRigidBody();
-		//land and morrwind can be null
-		if (rb != null && rb instanceof bhkRigidBodyT)
-		{
-			temp.setRotation(ConvertFromHavok.toJ3d(rb.rotation));
-			temp.setTranslation(ConvertFromHavok.toJ3d(rb.translation, fixedScaleFactor, niObjectList.nifVer));
 			worldTransformCalc.mul(temp);
 		}
+	}
 
-		worldTransformCalc.get(worldTransform.origin);
-		worldTransformCalc.get(worldTransform.basis);
-		return worldTransform;
+	@Override
+	public void updateRootTransform(Transform3D rootTrans)
+	{
+		throw new UnsupportedOperationException();
+
 	}
 
 }

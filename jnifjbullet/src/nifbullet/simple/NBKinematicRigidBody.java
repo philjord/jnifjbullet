@@ -33,8 +33,9 @@ public class NBKinematicRigidBody extends NBRigidBody
 	public NBKinematicRigidBody(Group behaviourRootGroup, J3dNiAVObject j3dNiNodeRoot, bhkCollisionObject bhkCollisionObject,
 			NiToJ3dData niToJ3dData, Transform3D rootTrans, BulletNifModel parentModel, float fixedScaleFactor)
 	{
-		super(parentModel, fixedScaleFactor);
+		super(parentModel);
 
+		this.scale = fixedScaleFactor;
 		this.j3dNiNodeRoot = j3dNiNodeRoot;
 		this.niToJ3dData = niToJ3dData;
 		this.rootTrans = rootTrans;
@@ -115,7 +116,7 @@ public class NBKinematicRigidBody extends NBRigidBody
 			if (getBhkRigidBody() instanceof bhkRigidBodyT)
 			{
 				temp.set(ConvertFromHavok.toJ3d(getBhkRigidBody().rotation),
-						ConvertFromHavok.toJ3d(getBhkRigidBody().translation, fixedScaleFactor, niToJ3dData.nifVer), 1f);
+						ConvertFromHavok.toJ3d(getBhkRigidBody().translation, scale, niToJ3dData.nifVer), 1f);
 				worldTransformCalc.mul(temp);
 			}
 		}

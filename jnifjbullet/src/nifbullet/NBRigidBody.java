@@ -15,15 +15,14 @@ public abstract class NBRigidBody
 
 	private bhkRigidBody bhkRigidBody;
 
-	protected float fixedScaleFactor = 1.0f;
+	protected float scale = 1f;
 
 	// root shape to allow multi parts to be added as required
 	protected CollisionShape colShape;
 
-	public NBRigidBody(BulletNifModel parentModel, float fixedScaleFactor)
+	public NBRigidBody(BulletNifModel parentModel)
 	{
 		this.parentModel = parentModel;
-		this.fixedScaleFactor = fixedScaleFactor;
 	}
 
 	public BulletNifModel getParentModel()

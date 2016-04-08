@@ -144,10 +144,8 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 								|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT
 								|| layer == OblivionLayer.OL_TREES)
 						{
-							float sf = (float) rootTrans.getScale();
-							rootTrans.setScale(1.0f);
-							NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkCollisionObject, niToJ3dData.getNiObjects(), rootTrans, this,
-									sf);
+							NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkCollisionObject, niToJ3dData.getNiObjects(), rootTrans,
+									this);
 
 							updatePointers(pointer, nbbco);
 						}
@@ -174,10 +172,7 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 					else if (niObject instanceof RootCollisionNode)
 					{
 						RootCollisionNode rootCollisionNode = (RootCollisionNode) niObject;
-						float sf = (float) rootTrans.getScale();
-						rootTrans.setScale(1.0f);
-						NBStaticRigidBody nbbco = new NBStaticRigidBody(rootCollisionNode, niToJ3dData.getNiObjects(), rootTrans, this, sf);
-
+						NBStaticRigidBody nbbco = new NBStaticRigidBody(rootCollisionNode, niToJ3dData.getNiObjects(), rootTrans, this);
 						updatePointers(pointer, nbbco);
 					}
 				}
