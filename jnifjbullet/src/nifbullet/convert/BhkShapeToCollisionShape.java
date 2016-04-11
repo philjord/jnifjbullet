@@ -1,5 +1,7 @@
 package nifbullet.convert;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.WeakHashMap;
 
 import javax.media.j3d.Transform3D;
@@ -45,7 +47,8 @@ public abstract class BhkShapeToCollisionShape
 	}
 
 	//Any shape can be scaled so preloading is hard, basically we do it for scale=1.0 ONLY
-	private static WeakHashMap<bhkShape, CollisionShape> preloadedScale1Shapes = new WeakHashMap<bhkShape, CollisionShape>();
+	private static Map<bhkShape, CollisionShape> preloadedScale1Shapes = Collections
+			.synchronizedMap(new WeakHashMap<bhkShape, CollisionShape>());
 
 	public static CollisionShape processBhkShape(bhkShape bhkShape, NiObjectList niToJ3dData, boolean isDynamic, float scale)
 	{

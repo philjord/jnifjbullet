@@ -1,5 +1,7 @@
 package nifbullet.convert;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.WeakHashMap;
 
 import javax.vecmath.Quat4f;
@@ -25,7 +27,7 @@ import com.sun.j3d.utils.geometry.GeometryInfo;
 public abstract class RootCollisionNodeToCollisionShape
 {
 	/**
-	 * Convinience for non dynamic shapes
+	 * Convenience for non dynamic shapes
 	 * @param bhkShape
 	 * @param niToJ3dData
 	 * @param scale 
@@ -33,7 +35,8 @@ public abstract class RootCollisionNodeToCollisionShape
 	 */
 
 	//NOTE ONLY scale ==1 in here!
-	private static WeakHashMap<RootCollisionNode, CollisionShape> preloadedScale1Shapes = new WeakHashMap<RootCollisionNode, CollisionShape>();
+	private static Map<RootCollisionNode, CollisionShape> preloadedScale1Shapes = Collections
+			.synchronizedMap(new WeakHashMap<RootCollisionNode, CollisionShape>());
 
 	public static CollisionShape processRootCollisionNode(RootCollisionNode rootCollisionNode, NiObjectList niToJ3dData, float scale)
 	{

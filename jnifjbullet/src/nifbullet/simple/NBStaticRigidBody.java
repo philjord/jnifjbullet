@@ -85,8 +85,8 @@ public class NBStaticRigidBody extends NBRigidBody
 	}
 
 	/**
-	 * Special cut down version for J3dLAND  
-	 * @param physicsTriStripArray
+	 * Special cut down version for morrowind
+	 * @param  
 	 * @param rootTrans
 	 * @param parentModel
 	 */
@@ -102,8 +102,9 @@ public class NBStaticRigidBody extends NBRigidBody
 	}
 
 	/**
-	 * Special cut down version for morrowind
-	 * @param physicsTriStripArray
+	 * 
+	 * Special cut down version for J3dLAND  
+	 * @param  
 	 * @param rootTrans
 	 * @param parentModel
 	 */
