@@ -34,6 +34,7 @@ import com.bulletphysics.collision.shapes.ConvexHullShape;
 import com.bulletphysics.collision.shapes.IndexedMesh;
 import com.bulletphysics.collision.shapes.SphereShape;
 import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
+import com.bulletphysics.dom.HeightfieldTerrainShape;
 import com.bulletphysics.extras.gimpact.GImpactMeshShape;
 import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.util.ObjectArrayList;
@@ -155,8 +156,8 @@ public abstract class BhkCollisionToNifBullet
 			for (int i = 0; i < data.BigVerts.length; i++)
 			{
 				vertices[i] = ConvertFromHavok.toJ3dP3f(//
-						((data.BigVerts[i].x)),//
-						((data.BigVerts[i].y)),//
+						((data.BigVerts[i].x)), //
+						((data.BigVerts[i].y)), //
 						((data.BigVerts[i].z)), scale, nifVer);
 			}
 
@@ -186,8 +187,8 @@ public abstract class BhkCollisionToNifBullet
 			for (int i = 0; i < chunk.Vertices.length / 3; i++)
 			{
 				vertices[i] = ConvertFromHavok.toJ3dP3f(//
-						((chunk.Vertices[(i * 3) + 0]) * CMD_VERT_SCALE) + chunk.translation.x,//
-						((chunk.Vertices[(i * 3) + 1]) * CMD_VERT_SCALE) + chunk.translation.y,//
+						((chunk.Vertices[(i * 3) + 0]) * CMD_VERT_SCALE) + chunk.translation.x, //
+						((chunk.Vertices[(i * 3) + 1]) * CMD_VERT_SCALE) + chunk.translation.y, //
 						((chunk.Vertices[(i * 3) + 2]) * CMD_VERT_SCALE) + chunk.translation.z, scale, nifVer);
 			}
 
@@ -432,6 +433,45 @@ public abstract class BhkCollisionToNifBullet
 
 		BvhTriangleMeshShape trimesh = new BvhTriangleMeshShape(indexVertexArrays, true);
 		return trimesh;
+
+	}
+
+	/**
+	 * returns a terrain
+	 * 
+	 * @param heights
+	 * @return
+	 */
+
+	public static HeightfieldTerrainShape makeHeightfieldTerrainShape(float[][] heights)
+	{
+		float heightScale = 1;
+		int upAxis = 1;
+		boolean flipQuadEdges = false;
+
+		int heightStickWidth = heights.length;
+		int heightStickLength = heights[0].length;
+		float minHeight = Float.POSITIVE_INFINITY;
+		float maxHeight = Float.NEGATIVE_INFINITY;
+		float[] heightfieldData = new float[heightStickWidth * heightStickLength];
+		for (int w = 0; w < heightStickWidth; w++)
+		{
+			for (int h = 0; h < heightStickLength; h++)
+			{
+				float x = heights[w][h];
+				minHeight = minHeight > x ? x : minHeight;
+				maxHeight = maxHeight < x ? x : maxHeight;
+
+				heightfieldData[(w * heightStickLength) + h] = x;
+			}
+		}
+
+		HeightfieldTerrainShape heightfieldTerrainShape = new HeightfieldTerrainShape(heightStickWidth, heightStickLength, heightfieldData,
+				heightScale, minHeight, maxHeight, upAxis, flipQuadEdges);
+		
+		//FIXME:!!!! this has hard coding from J3dLAND in it!!!
+		heightfieldTerrainShape.setLocalScaling(new Vector3f(2.56f, 1, 2.56f));
+		return heightfieldTerrainShape;
 
 	}
 

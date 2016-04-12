@@ -71,6 +71,18 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 		}
 	}
 
+	public NBSimpleModel(float[][] heights, Transform3D rootTrans)
+	{
+		this.fileName = "LAND";
+		this.setName(this.getClass().getSimpleName() + ":" + fileName);
+		setCapability(BranchGroup.ALLOW_DETACH);
+		if (heights != null)
+		{
+			NBStaticRigidBody nbbco = new NBStaticRigidBody(heights, rootTrans, this);
+			add(nbbco);
+		}
+	}
+
 	public void destroy()
 	{
 		if (dynamicsWorld != null)

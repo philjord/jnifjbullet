@@ -2,6 +2,7 @@ package nifbullet.simple;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;
+import javax.vecmath.Vector3f;
 
 import nif.NiObjectList;
 import nif.enums.OblivionLayer;
@@ -22,6 +23,7 @@ import utils.convert.ConvertFromHavok;
 import utils.convert.ConvertFromNif;
 
 import com.bulletphysics.collision.dispatch.CollisionFlags;
+import com.bulletphysics.dom.HeightfieldTerrainShape;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.linearmath.Transform;
@@ -113,6 +115,34 @@ public class NBStaticRigidBody extends NBRigidBody
 		super(parentModel);
 		Transform worldTransform = calcWorldTransform(rootTrans);
 		colShape = BhkCollisionToNifBullet.makeFromGeometryInfo(gi);
+		RigidBody rigidBody = new RigidBody(new RigidBodyConstructionInfo(0, null, colShape));
+		rigidBody.setCollisionFlags(CollisionFlags.STATIC_OBJECT);
+		setRigidBody(rigidBody);
+		rigidBody.setWorldTransform(worldTransform);
+	}
+
+	/**
+	 * 
+	 * Special cut down version for J3dLAND  
+	 * @param  
+	 * @param rootTrans
+	 * @param parentModel
+	 */
+	public NBStaticRigidBody(float[][] heights, Transform3D rootTrans, NBSimpleModel parentModel)
+	{
+		super(parentModel);
+		HeightfieldTerrainShape hfts = BhkCollisionToNifBullet.makeHeightfieldTerrainShape(heights);
+		// Interesting note, height field moves everything down by ((max-min)/2)+min height in order
+		// to centralize the field in it's AABB, so we must place it back up by that amount
+		//http://www.bulletphysics.com/Bullet/BulletFull/classbtHeightfieldTerrainShape.html
+		Vector3f trans = new Vector3f();
+		rootTrans.get(trans);
+		//trans.y should be 0 now
+		trans.y = ((hfts.getMaxHeight() - hfts.getMinHeight()) / 2) + hfts.getMinHeight();
+		rootTrans.setTranslation(trans);
+		Transform worldTransform = calcWorldTransform(rootTrans);
+
+		colShape = BhkCollisionToNifBullet.makeHeightfieldTerrainShape(heights);
 		RigidBody rigidBody = new RigidBody(new RigidBodyConstructionInfo(0, null, colShape));
 		rigidBody.setCollisionFlags(CollisionFlags.STATIC_OBJECT);
 		setRigidBody(rigidBody);
