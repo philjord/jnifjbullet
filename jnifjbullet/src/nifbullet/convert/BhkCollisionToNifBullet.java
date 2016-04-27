@@ -443,7 +443,7 @@ public abstract class BhkCollisionToNifBullet
 	 * @return
 	 */
 
-	public static HeightfieldTerrainShape makeHeightfieldTerrainShape(float[][] heights)
+	public static HeightfieldTerrainShape makeHeightfieldTerrainShape(float[][] heights, float terrainSquareSize)
 	{
 		float heightScale = 1;
 		int upAxis = 1;
@@ -470,7 +470,7 @@ public abstract class BhkCollisionToNifBullet
 				heightScale, minHeight, maxHeight, upAxis, flipQuadEdges);
 		
 		//FIXME:!!!! this has hard coding from J3dLAND in it!!!
-		heightfieldTerrainShape.setLocalScaling(new Vector3f(2.56f, 1, 2.56f));
+		heightfieldTerrainShape.setLocalScaling(new Vector3f(terrainSquareSize, 1, terrainSquareSize));
 		return heightfieldTerrainShape;
 
 	}

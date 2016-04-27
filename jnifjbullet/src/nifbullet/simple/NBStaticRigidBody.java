@@ -128,10 +128,10 @@ public class NBStaticRigidBody extends NBRigidBody
 	 * @param rootTrans
 	 * @param parentModel
 	 */
-	public NBStaticRigidBody(float[][] heights, Transform3D rootTrans, NBSimpleModel parentModel)
+	public NBStaticRigidBody(float[][] heights, Transform3D rootTrans, NBSimpleModel parentModel, float terrainSquareSize)
 	{
 		super(parentModel);
-		HeightfieldTerrainShape hfts = BhkCollisionToNifBullet.makeHeightfieldTerrainShape(heights);
+		HeightfieldTerrainShape hfts = BhkCollisionToNifBullet.makeHeightfieldTerrainShape(heights, terrainSquareSize);
 		// Interesting note, height field moves everything down by ((max-min)/2)+min height in order
 		// to centralize the field in it's AABB, so we must place it back up by that amount
 		//http://www.bulletphysics.com/Bullet/BulletFull/classbtHeightfieldTerrainShape.html
@@ -142,7 +142,7 @@ public class NBStaticRigidBody extends NBRigidBody
 		rootTrans.setTranslation(trans);
 		Transform worldTransform = calcWorldTransform(rootTrans);
 
-		colShape = BhkCollisionToNifBullet.makeHeightfieldTerrainShape(heights);
+		colShape = hfts;
 		RigidBody rigidBody = new RigidBody(new RigidBodyConstructionInfo(0, null, colShape));
 		rigidBody.setCollisionFlags(CollisionFlags.STATIC_OBJECT);
 		setRigidBody(rigidBody);
