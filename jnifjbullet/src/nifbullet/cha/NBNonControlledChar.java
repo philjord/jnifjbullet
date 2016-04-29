@@ -112,7 +112,13 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 		this.dynamicsWorld = dynamicsWorld;
 		if (rigidBody != null)
 		{
-			dynamicsWorld.addRigidBody(rigidBody);
+			if (dynamicsWorld != null)
+			{
+				synchronized (dynamicsWorld)
+				{
+					dynamicsWorld.addRigidBody(rigidBody);
+				}
+			}
 		}
 
 	}
@@ -124,9 +130,12 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 	{// check for double remove or no add yet
 		if (dynamicsWorld != null)
 		{
-			if (rigidBody != null)
+			synchronized (dynamicsWorld)
 			{
-				dynamicsWorld.removeRigidBody(rigidBody);
+				if (rigidBody != null)
+				{
+					dynamicsWorld.removeRigidBody(rigidBody);
+				}
 			}
 			dynamicsWorld = null;
 		}

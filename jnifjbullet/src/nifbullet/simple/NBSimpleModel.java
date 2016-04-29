@@ -106,25 +106,32 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 	public void addToDynamicsWorld(DynamicsWorld _dynamicsWorld)
 	{
 		this.dynamicsWorld = _dynamicsWorld;
-		for (NBRigidBody rb : nbRigidBodys)
+		if (dynamicsWorld != null)
 		{
-			if (rb.getRigidBody() != null)
-				dynamicsWorld.addRigidBody(rb.getRigidBody());
+			synchronized (dynamicsWorld)
+			{
+				for (NBRigidBody rb : nbRigidBodys)
+				{
+					if (rb.getRigidBody() != null)
+						dynamicsWorld.addRigidBody(rb.getRigidBody());
+				}
+			}
 		}
 	}
 
-	/** basically a set enabled false
-	 * 
-	 */
+
 	public void removeFromDynamicsWorld()
 	{
 		// check for double remove or no add yet
 		if (dynamicsWorld != null)
 		{
-			for (NBRigidBody rb : nbRigidBodys)
+			synchronized (dynamicsWorld)
 			{
-				if (rb.getRigidBody() != null)
-					dynamicsWorld.removeRigidBody(rb.getRigidBody());
+				for (NBRigidBody rb : nbRigidBodys)
+				{
+					if (rb.getRigidBody() != null)
+						dynamicsWorld.removeRigidBody(rb.getRigidBody());
+				}
 			}
 
 			this.dynamicsWorld = null;
