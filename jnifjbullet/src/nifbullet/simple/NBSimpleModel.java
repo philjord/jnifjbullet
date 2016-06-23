@@ -3,8 +3,10 @@ package nifbullet.simple;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.media.j3d.Alpha;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Transform3D;
+import javax.media.j3d.TransformGroup;
 
 import nif.NifJ3dHavokRoot;
 import nif.NifToJ3d;
@@ -19,6 +21,7 @@ import nif.niobject.bhk.bhkRigidBody;
 import nifbullet.BulletNifModelClassifier;
 import nifbullet.NBRigidBody;
 import nifbullet.PartedBulletNifModel;
+import tools3d.utils.TimedRunnableBehavior;
 import utils.source.MeshSource;
 
 import com.bulletphysics.collision.shapes.CollisionShape;
@@ -44,13 +47,32 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 
 	private boolean hasKinematics = false;
 
+	private boolean hasPivot;
+
+	
+
 	public NBSimpleModel(String fileName, MeshSource meshSource, Transform3D rootTrans)
+	{
+		this(fileName, meshSource, rootTrans, false);
+	}
+
+	// for TES3 doors
+	public NBSimpleModel(String fileName, MeshSource meshSource, Transform3D rootTrans, boolean hasPivot)
 	{
 		this.fileName = fileName;
 		this.setName(this.getClass().getSimpleName() + ":" + fileName);
+		this.hasPivot = hasPivot;
 		//TODO: really? possibly just a group would be fine for simplemodel
 		setCapability(BranchGroup.ALLOW_DETACH);
 		addPart(fileName, meshSource, this, rootTrans);
+
+		if (hasPivot)
+		{
+			doorPivot.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+			addChild(doorPivot);
+
+			doorPivot.addChild(pivotBehavior);
+		}
 	}
 
 	/**
@@ -119,7 +141,6 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 		}
 	}
 
-
 	public void removeFromDynamicsWorld()
 	{
 		// check for double remove or no add yet
@@ -143,7 +164,7 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 	{
 		if (partFileName != null && partFileName.length() > 0)
 		{
-			//NOTE! we don't actually add parts per se, they are all static so we just create tehm
+			//NOTE! we don't actually add parts per se, they are all static so we just create them
 			if (BulletNifModelClassifier.isStaticModel(partFileName, meshSource)
 					|| BulletNifModelClassifier.isKinematicModel(partFileName, meshSource))
 			{
@@ -158,8 +179,7 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 						bhkCollisionObject bhkCollisionObject = (bhkCollisionObject) niObject;
 						bhkRigidBody bhkRigidBody = (bhkRigidBody) niToJ3dData.get(bhkCollisionObject.body);
 						int layer = bhkRigidBody.layer.layer;
-						if (layer == OblivionLayer.OL_STATIC || layer == OblivionLayer.OL_LINE_OF_SIGHT
-								|| layer == OblivionLayer.OL_UNIDENTIFIED || layer == OblivionLayer.OL_STAIRS
+						if (layer == OblivionLayer.OL_STATIC || layer == OblivionLayer.OL_UNIDENTIFIED || layer == OblivionLayer.OL_STAIRS
 								|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT
 								|| layer == OblivionLayer.OL_TREES)
 						{
@@ -191,8 +211,22 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 					else if (niObject instanceof RootCollisionNode)
 					{
 						RootCollisionNode rootCollisionNode = (RootCollisionNode) niObject;
-						NBStaticRigidBody nbbco = new NBStaticRigidBody(rootCollisionNode, niToJ3dData.getNiObjects(), rootTrans, this);
-						updatePointers(pointer, nbbco);
+						if (!hasPivot)
+						{
+							NBStaticRigidBody nbbco = new NBStaticRigidBody(rootCollisionNode, niToJ3dData.getNiObjects(), rootTrans, this);
+							updatePointers(pointer, nbbco);
+						}
+						else
+						{
+							float sf = (float) rootTrans.getScale();
+							rootTrans.setScale(1.0f);
+							NBKinematicRigidBody kb = new NBKinematicRigidBody(this, doorPivot, rootCollisionNode, niToJ3dData, rootTrans,
+									this, sf);
+
+							updatePointers(pointer, kb);
+							hasKinematics = true;
+						}
+
 					}
 				}
 
@@ -275,4 +309,34 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 		return "NifBullet, file: " + getFileName() + " class;" + this.getClass().getSimpleName();
 	}
 
+	private Alpha alpha;
+
+	private TimedRunnableBehavior pivotBehavior = new TimedRunnableBehavior(10);
+
+	private TransformGroup doorPivot = new TransformGroup();
+
+	public void pivotTes3Door(final boolean isOpen)
+	{
+		//wow TES3 door have no animation, they look like they just artificially pivot around 
+		alpha = new Alpha(1, 500);
+		alpha.setStartTime(System.currentTimeMillis());
+
+		Runnable callback = new Runnable() {
+			@Override
+			public void run()
+			{
+				Transform3D t = new Transform3D();
+				double a = (Math.PI / 2f) * alpha.value();
+				a = isOpen ? a : (Math.PI / 2f) - a;
+				t.rotY(a);
+				doorPivot.setTransform(t);
+				System.out.println("door pivot sett transform now " + a);
+			}
+		};
+		pivotBehavior.start(50, callback);
+	}
+	public boolean hasPivot()
+	{
+		return hasPivot;
+	}
 }

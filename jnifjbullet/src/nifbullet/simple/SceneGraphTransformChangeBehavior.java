@@ -44,6 +44,20 @@ public class SceneGraphTransformChangeBehavior extends Behavior
 		wakeUp = new WakeupOr(criteria.toArray(new WakeupOnTransformChange[criteria.size()]));
 	}
 
+	public SceneGraphTransformChangeBehavior(TransformGroup tg, NBKinematicRigidBody destination, NiToJ3dData niToJ3dData)
+	{
+		this.destination = destination;
+
+		allTransformGroups.add(tg);
+
+		ArrayList<WakeupOnTransformChange> criteria = new ArrayList<WakeupOnTransformChange>();
+
+		tg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+		criteria.add(new WakeupOnTransformChange(tg));
+
+		wakeUp = new WakeupOr(criteria.toArray(new WakeupOnTransformChange[criteria.size()]));
+	}
+
 	public void initialize()
 	{
 		wakeupOn(wakeUp);

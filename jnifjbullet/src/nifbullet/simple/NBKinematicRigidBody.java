@@ -2,11 +2,13 @@ package nifbullet.simple;
 
 import javax.media.j3d.Group;
 import javax.media.j3d.Transform3D;
+import javax.media.j3d.TransformGroup;
 
 import nif.enums.OblivionLayer;
 import nif.j3d.J3dNiAVObject;
 import nif.j3d.NiToJ3dData;
 import nif.niobject.NiAVObject;
+import nif.niobject.RootCollisionNode;
 import nif.niobject.bhk.bhkCollisionObject;
 import nif.niobject.bhk.bhkRigidBody;
 import nif.niobject.bhk.bhkRigidBodyT;
@@ -14,10 +16,15 @@ import nif.niobject.bhk.bhkShape;
 import nifbullet.BulletNifModel;
 import nifbullet.NBRigidBody;
 import nifbullet.convert.BhkShapeToCollisionShape;
+import nifbullet.convert.RootCollisionNodeToCollisionShape;
 import nifbullet.util.NifBulletUtil;
 import tools3d.utils.Utils3D;
 import utils.convert.ConvertFromHavok;
 
+import com.bulletphysics.collision.dispatch.CollisionFlags;
+import com.bulletphysics.dynamics.RigidBody;
+import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
+import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.Transform;
 
 public class NBKinematicRigidBody extends NBRigidBody
@@ -29,6 +36,8 @@ public class NBKinematicRigidBody extends NBRigidBody
 	private Transform3D rootTrans;
 
 	private J3dNiAVObject parentJ3dNiAVObject;
+
+	private TransformGroup simpleTG;
 
 	public NBKinematicRigidBody(Group behaviourRootGroup, J3dNiAVObject j3dNiNodeRoot, bhkCollisionObject bhkCollisionObject,
 			NiToJ3dData niToJ3dData, Transform3D rootTrans, BulletNifModel parentModel, float fixedScaleFactor)
@@ -72,6 +81,30 @@ public class NBKinematicRigidBody extends NBRigidBody
 		}
 	}
 
+	// for tes3 doors
+	public NBKinematicRigidBody(Group behaviourRootGroup, TransformGroup simpleTG, RootCollisionNode rootCollisionNode,
+			NiToJ3dData niToJ3dData, Transform3D rootTrans, BulletNifModel parentModel, float fixedScaleFactor)
+	{
+		super(parentModel);
+
+		this.scale = fixedScaleFactor;
+		this.rootTrans = rootTrans;
+		this.simpleTG = simpleTG;
+
+		colShape = RootCollisionNodeToCollisionShape.processRootCollisionNode(rootCollisionNode, niToJ3dData.getNiObjects(), 1f);
+		DefaultMotionState myMotionState = new DefaultMotionState(calcWorldTransform());
+		RigidBody rigidBody = new RigidBody(new RigidBodyConstructionInfo(0, myMotionState, colShape));
+		rigidBody.setCollisionFlags(CollisionFlags.KINEMATIC_OBJECT);
+		setRigidBody(rigidBody);
+
+		SceneGraphTransformChangeBehavior behave = new SceneGraphTransformChangeBehavior(simpleTG, this, niToJ3dData);
+
+		behaviourRootGroup.addChild(behave);
+		behave.setSchedulingBounds(Utils3D.defaultBounds);
+		behave.setEnable(true);
+
+	}
+
 	public void updateRootTransform(Transform3D newRootTrans)
 	{
 		rootTrans.set(newRootTrans);
@@ -105,6 +138,7 @@ public class NBKinematicRigidBody extends NBRigidBody
 	{
 		// add the root trans in
 		worldTransformCalc.set(rootTrans);
+
 		if (parentJ3dNiAVObject != null)
 		{
 			// get teh transform up to the root
@@ -119,6 +153,12 @@ public class NBKinematicRigidBody extends NBRigidBody
 						ConvertFromHavok.toJ3d(getBhkRigidBody().translation, scale, niToJ3dData.nifVer), 1f);
 				worldTransformCalc.mul(temp);
 			}
+		}
+		else if (simpleTG != null)
+		{
+			Transform3D temp = new Transform3D();
+			simpleTG.getTransform(temp);
+			worldTransformCalc.mul(temp);
 		}
 
 		worldTransformCalc.get(worldTransform.origin);
