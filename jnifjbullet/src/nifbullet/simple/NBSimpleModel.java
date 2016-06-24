@@ -49,8 +49,6 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 
 	private boolean hasPivot;
 
-	
-
 	public NBSimpleModel(String fileName, MeshSource meshSource, Transform3D rootTrans)
 	{
 		this(fileName, meshSource, rootTrans, false);
@@ -105,6 +103,7 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 		}
 	}
 
+	@Override
 	public void destroy()
 	{
 		if (dynamicsWorld != null)
@@ -125,6 +124,7 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 		nbRigidBodys.add(rb);
 	}
 
+	@Override
 	public void addToDynamicsWorld(DynamicsWorld _dynamicsWorld)
 	{
 		this.dynamicsWorld = _dynamicsWorld;
@@ -141,6 +141,7 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 		}
 	}
 
+	@Override
 	public void removeFromDynamicsWorld()
 	{
 		// check for double remove or no add yet
@@ -304,6 +305,7 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 		return fileName;
 	}
 
+	@Override
 	public String toString()
 	{
 		return "NifBullet, file: " + getFileName() + " class;" + this.getClass().getSimpleName();
@@ -330,11 +332,11 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 				a = isOpen ? a : (Math.PI / 2f) - a;
 				t.rotY(a);
 				doorPivot.setTransform(t);
-				System.out.println("door pivot sett transform now " + a);
 			}
 		};
 		pivotBehavior.start(50, callback);
 	}
+
 	public boolean hasPivot()
 	{
 		return hasPivot;
