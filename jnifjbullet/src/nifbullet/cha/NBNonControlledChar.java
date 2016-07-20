@@ -5,21 +5,23 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import nifbullet.util.NifBulletUtil;
-
 import com.bulletphysics.collision.dispatch.CollisionFlags;
-import com.bulletphysics.collision.shapes.CapsuleShape;
+import com.bulletphysics.collision.shapes.BoxShape;
 import com.bulletphysics.dynamics.DynamicsWorld;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.dynamics.character.KinematicCharacterController.CharacterPositionListener;
 import com.bulletphysics.linearmath.Transform;
 
+import nifbullet.util.NifBulletUtil;
+
 public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 {
-	private float characterHeight = 0.9f;// capsule shape height is height+(2*radius)
+	private int recordId = -1;
 
-	private float characterWidth = 0.5f;
+	private float characterHeight = 1f;//notice half extents so 2m tall
+
+	private float characterWidth = 0.5f;//something odd in the shape here?
 
 	private RigidBody rigidBody;
 
@@ -27,12 +29,13 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 
 	private CharacterPositionListener listener;
 
-	public NBNonControlledChar(Transform3D rootTrans, float mass)
+	public NBNonControlledChar(Transform3D rootTrans, float mass, int recordId)
 	{
+		this.recordId = recordId;
 		setCapability(BranchGroup.ALLOW_DETACH);
 
-		CapsuleShape capsuleShape = new CapsuleShape(characterWidth, characterHeight);
-		RigidBodyConstructionInfo rbInfo = new RigidBodyConstructionInfo(mass, null, capsuleShape);
+		BoxShape boxShape = new BoxShape(new Vector3f(characterWidth, characterHeight, characterWidth));
+		RigidBodyConstructionInfo rbInfo = new RigidBodyConstructionInfo(mass, null, boxShape);
 
 		rigidBody = new RigidBody(rbInfo);
 		rigidBody.setCollisionFlags(CollisionFlags.KINEMATIC_OBJECT);
@@ -40,17 +43,25 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 		setTransform(rootTrans);
 	}
 
+	public int getRecordId()
+	{
+		return recordId;
+	}
+
+	@Override
 	public void setCharacterPositionListener(CharacterPositionListener listener)
 	{
 		this.listener = listener;
 	}
 
+	@Override
 	public void setTransform(Quat4f q, Vector3f v)
 	{
 		Transform3D t = new Transform3D(q, v, 1f);
 		setTransform(t);
 	}
 
+	@Override
 	public void setTransform(Transform3D trans)
 	{
 		Transform worldTransform = NifBulletUtil.createTrans(trans);
@@ -94,6 +105,7 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 		return rigidBody;
 	}
 
+	@Override
 	public void destroy()
 	{
 		if (dynamicsWorld != null)
@@ -107,6 +119,7 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 	/**
 	 * Basically a set enabled true
 	 */
+	@Override
 	public void addToDynamicsWorld(DynamicsWorld dynamicsWorld)
 	{
 		this.dynamicsWorld = dynamicsWorld;
@@ -126,6 +139,7 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 	/** basically a set enabled false
 	 * 
 	 */
+	@Override
 	public void removeFromDynamicsWorld()
 	{// check for double remove or no add yet
 		if (dynamicsWorld != null)
@@ -141,6 +155,7 @@ public class NBNonControlledChar extends BranchGroup implements NifBulletChar
 		}
 	}
 
+	@Override
 	public String toString()
 	{
 		return "NBNoncontrollerCharModel in class of " + this.getClass();
