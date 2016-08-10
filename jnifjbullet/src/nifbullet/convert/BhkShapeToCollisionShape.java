@@ -72,7 +72,6 @@ public abstract class BhkShapeToCollisionShape
 				{
 					Transform idTransform = NifBulletUtil.newIdentityTransform();
 					cs.addChildShape(idTransform, s);
-					cs.recalculateLocalAabb();
 				}
 			}
 			ret = cs;
@@ -90,7 +89,6 @@ public abstract class BhkShapeToCollisionShape
 				{
 					Transform idTransform = NifBulletUtil.newIdentityTransform();
 					cs.addChildShape(idTransform, s);
-					cs.recalculateLocalAabb();
 				}
 			}
 			ret = cs;
@@ -104,7 +102,6 @@ public abstract class BhkShapeToCollisionShape
 				NiTriStripsData niTriStripsData = (NiTriStripsData) niToJ3dData.get(bhkNiTriStripsShape.stripsData[i]);
 				Transform idTransform = NifBulletUtil.newIdentityTransform();
 				cs.addChildShape(idTransform, BhkCollisionToNifBullet.processNiTriStripsData(niTriStripsData, isDynamic, scale));
-				cs.recalculateLocalAabb();
 			}
 			ret = cs;
 		}
@@ -219,7 +216,6 @@ public abstract class BhkShapeToCollisionShape
 				Transform t = NifBulletUtil.createTrans(t3d);
 
 				cs.addChildShape(t, shape);
-				cs.recalculateLocalAabb();
 				return cs;
 			}
 			else
