@@ -29,7 +29,7 @@ import static nifbullet.util.debug.opengl.IGL.GL_TRIANGLES;
 
 import java.util.HashMap;
 
-import javax.vecmath.Vector3f;
+import org.jogamp.vecmath.Vector3f;
 
 import com.bulletphysics.collision.broadphase.BroadphaseNativeType;
 import com.bulletphysics.collision.shapes.BoxShape;

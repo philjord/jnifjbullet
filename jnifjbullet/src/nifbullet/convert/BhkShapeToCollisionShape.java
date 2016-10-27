@@ -4,9 +4,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import javax.vecmath.Matrix4f;
-
 import org.jogamp.java3d.Transform3D;
+import org.jogamp.vecmath.Matrix4f;
 
 import nif.NiObjectList;
 import nif.niobject.NiTriStripsData;

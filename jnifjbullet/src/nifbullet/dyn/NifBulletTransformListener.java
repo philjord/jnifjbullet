@@ -1,8 +1,7 @@
 package nifbullet.dyn;
 
-import javax.vecmath.Vector3f;
-
 import org.jogamp.java3d.Transform3D;
+import org.jogamp.vecmath.Vector3f;
 
 /**
  * Interface for nifbullet to update a listener

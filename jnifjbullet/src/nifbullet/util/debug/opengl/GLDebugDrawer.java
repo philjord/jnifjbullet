@@ -26,7 +26,7 @@ package nifbullet.util.debug.opengl;
 import static nifbullet.util.debug.opengl.IGL.GL_LINES;
 import static nifbullet.util.debug.opengl.IGL.GL_POINTS;
 
-import javax.vecmath.Vector3f;
+import org.jogamp.vecmath.Vector3f;
 
 import com.bulletphysics.linearmath.DebugDrawModes;
 import com.bulletphysics.linearmath.IDebugDraw;

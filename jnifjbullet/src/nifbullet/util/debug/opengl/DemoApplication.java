@@ -36,13 +36,12 @@ import static nifbullet.util.debug.opengl.IGL.GL_PROJECTION;
 import static nifbullet.util.debug.opengl.IGL.GL_SMOOTH;
 import static nifbullet.util.debug.opengl.IGL.GL_SPECULAR;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Matrix3f;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
-
 import nifbullet.util.NifBulletUtil;
 
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Matrix3f;
+import org.jogamp.vecmath.Quat4f;
+import org.jogamp.vecmath.Vector3f;
 import org.lwjgl.input.Keyboard;
 
 import com.bulletphysics.BulletGlobals;

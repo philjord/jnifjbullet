@@ -1,10 +1,9 @@
 package nifbullet.cha;
 
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
-
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Transform3D;
+import org.jogamp.vecmath.Quat4f;
+import org.jogamp.vecmath.Vector3f;
 
 import com.bulletphysics.collision.dispatch.CollisionFlags;
 import com.bulletphysics.collision.shapes.BoxShape;

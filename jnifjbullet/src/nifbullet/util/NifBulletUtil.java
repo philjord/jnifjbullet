@@ -3,12 +3,11 @@ package nifbullet.util;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import javax.vecmath.Matrix3f;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
-
 import org.jogamp.java3d.Transform3D;
+import org.jogamp.vecmath.Matrix3f;
+import org.jogamp.vecmath.Point3f;
+import org.jogamp.vecmath.Quat4f;
+import org.jogamp.vecmath.Vector3f;
 
 import nif.niobject.bhk.bhkRigidBody;
 

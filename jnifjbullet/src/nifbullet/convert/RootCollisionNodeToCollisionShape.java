@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
+import org.jogamp.vecmath.Quat4f;
+import org.jogamp.vecmath.Vector3f;
 
 import nif.NiObjectList;
 import nif.niobject.NiAVObject;
