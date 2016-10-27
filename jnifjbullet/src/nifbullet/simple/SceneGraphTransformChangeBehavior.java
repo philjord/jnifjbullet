@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import javax.media.j3d.Behavior;
-import javax.media.j3d.TransformGroup;
-import javax.media.j3d.WakeupOnTransformChange;
-import javax.media.j3d.WakeupOr;
+import org.jogamp.java3d.Behavior;
+import org.jogamp.java3d.TransformGroup;
+import org.jogamp.java3d.WakeupOnTransformChange;
+import org.jogamp.java3d.WakeupOr;
 
 import nif.j3d.J3dNiAVObject;
 import nif.j3d.NiToJ3dData;

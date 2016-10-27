@@ -1,6 +1,6 @@
 package nifbullet;
 
-import javax.media.j3d.Transform3D;
+import org.jogamp.java3d.Transform3D;
 
 import nif.NifFile;
 import nif.NifToJ3d;

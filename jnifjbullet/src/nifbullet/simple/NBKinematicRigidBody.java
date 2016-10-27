@@ -1,9 +1,5 @@
 package nifbullet.simple;
 
-import javax.media.j3d.Group;
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.TransformGroup;
-
 import nif.enums.OblivionLayer;
 import nif.j3d.J3dNiAVObject;
 import nif.j3d.NiToJ3dData;
@@ -20,6 +16,10 @@ import nifbullet.convert.RootCollisionNodeToCollisionShape;
 import nifbullet.util.NifBulletUtil;
 import tools3d.utils.Utils3D;
 import utils.convert.ConvertFromHavok;
+
+import org.jogamp.java3d.Group;
+import org.jogamp.java3d.Transform3D;
+import org.jogamp.java3d.TransformGroup;
 
 import com.bulletphysics.collision.dispatch.CollisionFlags;
 import com.bulletphysics.dynamics.RigidBody;

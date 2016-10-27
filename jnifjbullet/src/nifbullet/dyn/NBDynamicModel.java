@@ -1,9 +1,10 @@
 package nifbullet.dyn;
 
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
+
+import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.Transform3D;
 
 import nif.NifFile;
 import nif.NifToJ3d;

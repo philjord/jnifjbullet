@@ -1,8 +1,8 @@
 package nifbullet;
 
-import javax.media.j3d.Transform3D;
-
 import nif.niobject.bhk.bhkRigidBody;
+
+import org.jogamp.java3d.Transform3D;
 
 import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.dynamics.RigidBody;

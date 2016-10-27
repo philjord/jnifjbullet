@@ -1,7 +1,8 @@
 package nifbullet.dyn;
 
-import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3f;
+
+import org.jogamp.java3d.Transform3D;
 
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.linearmath.DefaultMotionState;

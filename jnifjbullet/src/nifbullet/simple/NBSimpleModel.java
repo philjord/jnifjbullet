@@ -3,10 +3,10 @@ package nifbullet.simple;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.media.j3d.Alpha;
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.TransformGroup;
+import org.jogamp.java3d.Alpha;
+import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.Transform3D;
+import org.jogamp.java3d.TransformGroup;
 
 import nif.NifJ3dHavokRoot;
 import nif.NifToJ3d;
