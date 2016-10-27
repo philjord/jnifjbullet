@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.jogamp.java3d.utils.geometry.GeometryInfo;
 import org.jogamp.vecmath.Quat4f;
 import org.jogamp.vecmath.Vector3f;
 
@@ -22,7 +23,6 @@ import com.bulletphysics.collision.shapes.CompoundShape;
 import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
 import com.bulletphysics.extras.gimpact.GImpactMeshShape;
 import com.bulletphysics.linearmath.Transform;
-import com.sun.j3d.utils.geometry.GeometryInfo;
 
 public abstract class RootCollisionNodeToCollisionShape
 {

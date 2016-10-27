@@ -7,6 +7,7 @@ import org.jogamp.java3d.Alpha;
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
+import org.jogamp.java3d.utils.geometry.GeometryInfo;
 
 import nif.NifJ3dHavokRoot;
 import nif.NifToJ3d;
@@ -26,7 +27,6 @@ import utils.source.MeshSource;
 
 import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.dynamics.DynamicsWorld;
-import com.sun.j3d.utils.geometry.GeometryInfo;
 
 //I need to continue merging but check kinematics work and ship parts too
 // I notice stuff by spring field elementary are dynamic but not updating the visuals?

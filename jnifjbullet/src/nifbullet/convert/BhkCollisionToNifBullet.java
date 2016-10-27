@@ -1,6 +1,7 @@
 package nifbullet.convert;
 
 import org.jogamp.java3d.Transform3D;
+import org.jogamp.java3d.utils.geometry.GeometryInfo;
 import org.jogamp.vecmath.Matrix4f;
 import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Point3f;
@@ -38,7 +39,6 @@ import com.bulletphysics.dom.HeightfieldTerrainShape;
 import com.bulletphysics.extras.gimpact.GImpactMeshShape;
 import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.util.ObjectArrayList;
-import com.sun.j3d.utils.geometry.GeometryInfo;
 
 /**
  * NOTE! compundShapes are expensive adn cause jitter possibly multi shper will be ok?

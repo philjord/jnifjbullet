@@ -1,6 +1,7 @@
 package nifbullet.simple;
 
 import org.jogamp.java3d.Transform3D;
+import org.jogamp.java3d.utils.geometry.GeometryInfo;
 import org.jogamp.vecmath.Quat4f;
 import org.jogamp.vecmath.Vector3f;
 
@@ -27,7 +28,6 @@ import com.bulletphysics.dom.HeightfieldTerrainShape;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.linearmath.Transform;
-import com.sun.j3d.utils.geometry.GeometryInfo;
 
 public class NBStaticRigidBody extends NBRigidBody
 {
