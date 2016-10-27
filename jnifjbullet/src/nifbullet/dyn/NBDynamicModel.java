@@ -205,7 +205,7 @@ public abstract class NBDynamicModel extends BranchGroup implements PartedBullet
 		@Override
 		/**
 		 * Sending changes from teh NBSimpleDynamicRigidBody out to the registered listener
-		 * @see nifbullet.dyn.NifBulletTransformListener#transformChanged(javax.media.j3d.Transform3D, javax.vecmath.Vector3f, javax.vecmath.Vector3f)
+		 * @see nifbullet.dyn.NifBulletTransformListener#transformChanged(org.jogamp.java3d.Transform3D, javax.vecmath.Vector3f, javax.vecmath.Vector3f)
 		 */
 		public void transformChanged(Transform3D trans, Vector3f linearVelocity, Vector3f rotationalVelocity)
 		{
