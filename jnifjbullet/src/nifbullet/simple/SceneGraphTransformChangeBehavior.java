@@ -1,11 +1,12 @@
 package nifbullet.simple;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 
 import org.jogamp.java3d.Behavior;
 import org.jogamp.java3d.TransformGroup;
+import org.jogamp.java3d.WakeupCriterion;
 import org.jogamp.java3d.WakeupOnTransformChange;
 import org.jogamp.java3d.WakeupOr;
 
@@ -58,13 +59,14 @@ public class SceneGraphTransformChangeBehavior extends Behavior
 		wakeUp = new WakeupOr(criteria.toArray(new WakeupOnTransformChange[criteria.size()]));
 	}
 
+	@Override
 	public void initialize()
 	{
 		wakeupOn(wakeUp);
 	}
 
-	@SuppressWarnings({ "rawtypes" })
-	public void processStimulus(Enumeration critiria)
+	@Override
+	public void processStimulus(Iterator<WakeupCriterion> critiria)
 	{
 		destination.updateInternalWorldTransform();
 
