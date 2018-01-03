@@ -11,8 +11,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/vecmath"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/java3d-utils-and"/>
 	<classpathentry exported="true" kind="lib" path="lib/lwjgl-2.8.5/lwjglnative.jar"/>
-	<classpathentry kind="lib" path="lib/lwjgl-2.8.5/jar/jinput.jar"/>
-	<classpathentry kind="lib" path="lib/lwjgl-2.8.5/jar/lwjgl_util.jar"/>
-	<classpathentry kind="lib" path="lib/lwjgl-2.8.5/jar/lwjgl.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-2.8.5/jar/jinput.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-2.8.5/jar/lwjgl_util.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-2.8.5/jar/lwjgl.jar"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>
