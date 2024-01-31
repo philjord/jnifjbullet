@@ -154,7 +154,11 @@ public class NavigationProcessorBullet implements NavigationProcessorInterface
 					// *********ROTATION HANDLING ****************
 					tempYawPitch.set(avatarRot);
 					tempYawPitch.setYaw(tempYawPitch.getYaw() + rotY);
-					tempYawPitch.setPitch(noPitch ? 0 : tempYawPitch.getPitch() + rotX);
+					
+					// avoid gimble lock issues
+					double p = noPitch ? 0 : tempYawPitch.getPitch() + rotX;
+					p = p > 0.495*Math.PI ? 0.495*Math.PI : p < 0.495*-Math.PI ? 0.495*-Math.PI : p;//pi/2 is up/down
+					tempYawPitch.setPitch(p);
 
 					tempYawPitch.get(avatarRot);
 					avatarLocation.setRotation(avatarRot);//we also set this to make the screen nice and smooth for now
