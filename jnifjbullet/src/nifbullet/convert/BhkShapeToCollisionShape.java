@@ -47,6 +47,7 @@ public abstract class BhkShapeToCollisionShape
 	}
 
 	//Any shape can be scaled so preloading is hard, basically we do it for scale=1.0 ONLY
+	public static boolean CACHE_WEAK = true;
 	private static Map<bhkShape, CollisionShape> preloadedScale1Shapes = Collections
 			.synchronizedMap(new WeakHashMap<bhkShape, CollisionShape>());
 
@@ -55,6 +56,7 @@ public abstract class BhkShapeToCollisionShape
 		CollisionShape ret = null;
 		if (scale == 1.0f)
 		{
+
 			ret = preloadedScale1Shapes.get(bhkShape);
 			if (ret != null)
 				return ret;
@@ -127,6 +129,7 @@ public abstract class BhkShapeToCollisionShape
 		if (scale == 1.0f)
 		{
 			if (ret != null)
+				if(CACHE_WEAK)
 				preloadedScale1Shapes.put(bhkShape, ret);
 		}
 		return ret;

@@ -35,6 +35,7 @@ public abstract class RootCollisionNodeToCollisionShape
 	 */
 
 	//NOTE ONLY scale ==1 in here!
+	public static boolean CACHE_WEAK = true;
 	private static Map<RootCollisionNode, CollisionShape> preloadedScale1Shapes = Collections
 			.synchronizedMap(new WeakHashMap<RootCollisionNode, CollisionShape>());
 
@@ -72,7 +73,8 @@ public abstract class RootCollisionNodeToCollisionShape
 		ret = cs;
 
 		if (ret != null && scale == 1)
-			preloadedScale1Shapes.put(rootCollisionNode, ret);
+			if(CACHE_WEAK)
+				preloadedScale1Shapes.put(rootCollisionNode, ret);
 		return ret;
 	}
 
