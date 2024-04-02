@@ -9,6 +9,9 @@ import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.utils.geometry.GeometryInfo;
 
+import com.bulletphysics.collision.shapes.CollisionShape;
+import com.bulletphysics.dynamics.DynamicsWorld;
+
 import nif.NifJ3dHavokRoot;
 import nif.NifToJ3d;
 import nif.enums.OblivionLayer;
@@ -18,15 +21,15 @@ import nif.j3d.animation.J3dNiControllerManager;
 import nif.niobject.NiObject;
 import nif.niobject.RootCollisionNode;
 import nif.niobject.bhk.bhkCollisionObject;
+import nif.niobject.bhk.bhkNPCollisionObject;
+import nif.niobject.bhk.bhkPhysicsSystem;
 import nif.niobject.bhk.bhkRigidBody;
+import nif.niobject.bs.BSbhkNPObject;
 import nifbullet.BulletNifModelClassifier;
 import nifbullet.NBRigidBody;
 import nifbullet.PartedBulletNifModel;
 import tools3d.utils.TimedRunnableBehavior;
 import utils.source.MeshSource;
-
-import com.bulletphysics.collision.shapes.CollisionShape;
-import com.bulletphysics.dynamics.DynamicsWorld;
 
 //I need to continue merging but check kinematics work and ship parts too
 // I notice stuff by spring field elementary are dynamic but not updating the visuals?
@@ -175,38 +178,53 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 
 				for (NiObject niObject : niToJ3dData.getNiObjects())
 				{
-					if (niObject instanceof bhkCollisionObject)
-					{
-						bhkCollisionObject bhkCollisionObject = (bhkCollisionObject) niObject;
-						bhkRigidBody bhkRigidBody = (bhkRigidBody) niToJ3dData.get(bhkCollisionObject.body);
-						int layer = bhkRigidBody.layer.layer;
-						if (layer == OblivionLayer.OL_STATIC || layer == OblivionLayer.OL_UNIDENTIFIED || layer == OblivionLayer.OL_STAIRS
-								|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT
-								|| layer == OblivionLayer.OL_TREES)
-						{
-							NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkCollisionObject, niToJ3dData.getNiObjects(), rootTrans,
-									this);
-
+					if(niObject instanceof bhkCollisionObject) { 
+						bhkNPCollisionObject bhkNPCollisionObject = (bhkNPCollisionObject) niObject;
+						NiObject nio = niToJ3dData.get(bhkNPCollisionObject.body);
+						if(nio instanceof bhkPhysicsSystem) {
+							bhkPhysicsSystem bhkPhysicsSystem = (bhkPhysicsSystem)nio;
+	
+							NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkNPCollisionObject, bhkPhysicsSystem, niToJ3dData.getNiObjects(), rootTrans, this);
+	
 							updatePointers(pointer, nbbco);
 						}
-						else if (layer == OblivionLayer.OL_ANIM_STATIC)
-						{
-							float sf = (float) rootTrans.getScale();
-							rootTrans.setScale(1.0f);
-							NBKinematicRigidBody kb = new NBKinematicRigidBody(this, j3dNiNodeRoot, bhkCollisionObject, niToJ3dData,
-									rootTrans, this, sf);
-
-							updatePointers(pointer, kb);
-							hasKinematics = true;
-						}
-						else if (layer == OblivionLayer.OL_LINE_OF_SIGHT)
-						{
-							//skipped for now
-						}
-						else
-						{
-							// skipped 
-							new Throwable("what is this layer being given to me for? " + layer + " " + this).printStackTrace();
+					}else if (niObject instanceof bhkCollisionObject)
+					{
+						bhkCollisionObject bhkCollisionObject = (bhkCollisionObject) niObject;
+						
+						NiObject nio = niToJ3dData.get(bhkCollisionObject.body);
+						
+						if(nio instanceof bhkRigidBody) {
+							bhkRigidBody bhkRigidBody = (bhkRigidBody) niToJ3dData.get(bhkCollisionObject.body);
+							int layer = bhkRigidBody.layer.layer;
+							if (layer == OblivionLayer.OL_STATIC || layer == OblivionLayer.OL_UNIDENTIFIED || layer == OblivionLayer.OL_STAIRS
+									|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT
+									|| layer == OblivionLayer.OL_TREES)
+							{
+								NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkCollisionObject, niToJ3dData.getNiObjects(), rootTrans,
+										this);
+	
+								updatePointers(pointer, nbbco);
+							}
+							else if (layer == OblivionLayer.OL_ANIM_STATIC)
+							{
+								float sf = (float) rootTrans.getScale();
+								rootTrans.setScale(1.0f);
+								NBKinematicRigidBody kb = new NBKinematicRigidBody(this, j3dNiNodeRoot, bhkCollisionObject, niToJ3dData,
+										rootTrans, this, sf);
+	
+								updatePointers(pointer, kb);
+								hasKinematics = true;
+							}
+							else if (layer == OblivionLayer.OL_LINE_OF_SIGHT)
+							{
+								//skipped for now
+							}
+							else
+							{
+								// skipped 
+								new Throwable("what is this layer being given to me for? " + layer + " " + this).printStackTrace();
+							}
 						}
 					}
 					else if (niObject instanceof RootCollisionNode)
@@ -228,6 +246,10 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 							hasKinematics = true;
 						}
 
+					} 
+					else if (niObject instanceof BSbhkNPObject)
+					{
+						System.out.println("This is jnifjbullet speaking...");
 					}
 				}
 

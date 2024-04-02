@@ -12,11 +12,16 @@ import nif.niobject.NiObject;
 import nif.niobject.NiSkinInstance;
 import nif.niobject.RootCollisionNode;
 import nif.niobject.bhk.bhkConstraint;
+import nif.niobject.bhk.bhkPhysicsSystem;
 import nif.niobject.bhk.bhkRigidBody;
 import nif.niobject.bs.BSTreeNode;
 import nif.niobject.controller.NiMultiTargetTransformController;
 import nif.niobject.controller.NiTimeController;
 import nif.niobject.controller.NiTransformController;
+import nif.niobject.hkx.hknpBodyCinfo;
+import nif.niobject.hkx.hknpMotionCinfo;
+import nif.niobject.hkx.hknpPhysicsSystemData;
+import nif.niobject.hkx.reader.HKXContents;
 import nifbullet.dyn.NBSimpleDynamicModel;
 import nifbullet.simple.NBSimpleModel;
 import utils.source.MeshSource;
@@ -331,6 +336,20 @@ public abstract class BulletNifModelClassifier
 				RootCollisionNode rootCollisionNode = (RootCollisionNode) niObject;
 				ret += rootCollisionNode.numChildren;// all children are non massed rigids
 			}
+			else if (niObject instanceof bhkPhysicsSystem)
+			{
+				bhkPhysicsSystem bhkPhysicsSystem = (bhkPhysicsSystem) niObject;
+				
+				HKXContents contents = bhkPhysicsSystem.hkxContents;
+				// the first one had better be a system
+				hknpPhysicsSystemData hknpPhysicsSystemData = (hknpPhysicsSystemData)contents.getContentCollection().iterator().next();
+				hknpBodyCinfo[] bodyCinfos = hknpPhysicsSystemData.bodyCinfos;
+				hknpMotionCinfo[] motionCinfos = hknpPhysicsSystemData.motionCinfos;
+				
+				if(motionCinfos == null || (bodyCinfos.length == motionCinfos.length) )
+					ret += bodyCinfos.length;				
+			}
+					
 		}
 		return ret;
 	}

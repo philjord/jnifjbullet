@@ -10,6 +10,7 @@ import org.jogamp.vecmath.Quat4f;
 import org.jogamp.vecmath.Vector3f;
 
 import nif.niobject.bhk.bhkRigidBody;
+import nif.niobject.hkx.hknpMaterial;
 
 import com.bulletphysics.collision.dispatch.CollisionFlags;
 import com.bulletphysics.collision.shapes.CollisionShape;
@@ -38,6 +39,17 @@ public abstract class NifBulletUtil
 		return rigidBody;
 	}
 
+	public static RigidBody createStaticRigidBody(hknpMaterial hknpMaterial, CollisionShape colShape, Object userPointer)
+	{
+		RigidBodyConstructionInfo rbInfo = new RigidBodyConstructionInfo(0, null, colShape);
+		rbInfo.friction = hknpMaterial.staticFriction;//TODO: could be dynamic
+		rbInfo.restitution = hknpMaterial.restitution;
+		RigidBody rigidBody = new RigidBody(rbInfo);
+		rigidBody.setUserPointer(userPointer);
+		rigidBody.setCollisionFlags(CollisionFlags.STATIC_OBJECT);
+		return rigidBody;
+	}
+	
 	/**
 	 * DO NOT hand static into this call
 	 * Note, in space damping needs to be 0! just make sure the damn models are correct!
