@@ -7,9 +7,13 @@ import java.util.WeakHashMap;
 import com.bulletphysics.collision.shapes.CollisionShape;
 
 import nif.NifVer;
+import nif.niobject.bhk.bhkCapsuleShape;
+import nif.niobject.hkx.hknpCapsuleShape;
 import nif.niobject.hkx.hknpCompressedMeshShape;
 import nif.niobject.hkx.hknpCompressedMeshShapeData;
 import nif.niobject.hkx.hknpConvexPolytopeShape;
+import nif.niobject.hkx.hknpDynamicCompoundShape;
+import nif.niobject.hkx.hknpScaledConvexShape;
 import nif.niobject.hkx.hknpShape;
 import nif.niobject.hkx.hknpSphereShape;
 import nif.niobject.hkx.reader.HKXContents;
@@ -80,10 +84,20 @@ public abstract class hkxShapeToCollisionShape
 		{
 			return hkxCollisionToNifBullet.hknpConvexPolytopeShape((hknpConvexPolytopeShape) hknpShape, scale, nifVer);
 		}
-		//else if (hknpShape instanceof bhkCapsuleShape)
-		//{
+		else if (hknpShape instanceof hknpCapsuleShape)
+		{//TODO:
 		//	return hkxCollisionToNifBullet.bhkCapsuleShape((bhkCapsuleShape) hknpShape, scale, niToJ3dData.nifVer);
-		//}
+			return null;
+		}
+		else if (hknpShape instanceof hknpDynamicCompoundShape) {
+			//TODO:
+			//bhkTransformShape((bhkTransformShape) bhkShape, group, niToJ3dData);
+			return null;
+		} else if (hknpShape instanceof hknpScaledConvexShape) {
+			//TODO:
+			//hknpScaledConvexShape((hknpScaledConvexShape) bhkShape, group, niToJ3dData);
+			return null;
+		} 
 		else if (hknpShape instanceof hknpSphereShape)
 		{
 			return hkxCollisionToNifBullet.hknpSphereShape((hknpSphereShape) hknpShape, scale, nifVer);

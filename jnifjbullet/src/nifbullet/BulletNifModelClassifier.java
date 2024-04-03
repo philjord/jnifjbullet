@@ -302,6 +302,16 @@ public abstract class BulletNifModelClassifier
 				RootCollisionNode rootCollisionNode = (RootCollisionNode) niObject;
 				ret += rootCollisionNode.numChildren;
 			}
+			//TODO: this breaks things?
+			/*else if (niObject instanceof bhkPhysicsSystem)
+			{
+				bhkPhysicsSystem bhkPhysicsSystem = (bhkPhysicsSystem) niObject;
+				
+				HKXContents contents = bhkPhysicsSystem.hkxContents;
+				// the first one had better be a system
+				hknpPhysicsSystemData hknpPhysicsSystemData = (hknpPhysicsSystemData)contents.getContentCollection().iterator().next();
+				return hknpPhysicsSystemData.bodyCinfos.length;
+			}*/
 		}
 		return ret;
 	}
@@ -317,6 +327,20 @@ public abstract class BulletNifModelClassifier
 				bhkRigidBody bhkRigidBody = (bhkRigidBody) niObject;
 				ret += (bhkRigidBody.mass > 0 ? 1 : 0);
 			}
+			/*else if (niObject instanceof bhkPhysicsSystem)
+			{
+				bhkPhysicsSystem bhkPhysicsSystem = (bhkPhysicsSystem) niObject;
+				
+				HKXContents contents = bhkPhysicsSystem.hkxContents;
+				// the first one had better be a system
+				hknpPhysicsSystemData hknpPhysicsSystemData = (hknpPhysicsSystemData)contents.getContentCollection().iterator().next();
+				hknpBodyCinfo[] bodyCinfos = hknpPhysicsSystemData.bodyCinfos;
+				hknpMotionCinfo[] motionCinfos = hknpPhysicsSystemData.motionCinfos;
+				
+				// if we have motion for all parts then we are not nonmassed, but massed
+				if(motionCinfos != null && (bodyCinfos.length == motionCinfos.length) )
+					ret = 1;// in case its a single mesha nd the rampy things			
+			}*/
 		}
 		return ret;
 	}
@@ -346,7 +370,8 @@ public abstract class BulletNifModelClassifier
 				hknpBodyCinfo[] bodyCinfos = hknpPhysicsSystemData.bodyCinfos;
 				hknpMotionCinfo[] motionCinfos = hknpPhysicsSystemData.motionCinfos;
 				
-				if(motionCinfos == null || (bodyCinfos.length == motionCinfos.length) )
+				// if we have motion for all parts then we are not nonmassed, but massed
+				if(motionCinfos == null || (bodyCinfos.length != motionCinfos.length) )
 					ret += bodyCinfos.length;				
 			}
 					

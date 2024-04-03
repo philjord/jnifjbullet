@@ -178,7 +178,7 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 
 				for (NiObject niObject : niToJ3dData.getNiObjects())
 				{
-					if(niObject instanceof bhkCollisionObject) { 
+					if(niObject instanceof bhkNPCollisionObject) { 
 						bhkNPCollisionObject bhkNPCollisionObject = (bhkNPCollisionObject) niObject;
 						NiObject nio = niToJ3dData.get(bhkNPCollisionObject.body);
 						if(nio instanceof bhkPhysicsSystem) {
@@ -188,7 +188,8 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 	
 							updatePointers(pointer, nbbco);
 						}
-					}else if (niObject instanceof bhkCollisionObject)
+					}
+					else if (niObject instanceof bhkCollisionObject)
 					{
 						bhkCollisionObject bhkCollisionObject = (bhkCollisionObject) niObject;
 						
@@ -247,10 +248,6 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 						}
 
 					} 
-					else if (niObject instanceof BSbhkNPObject)
-					{
-						System.out.println("This is jnifjbullet speaking...");
-					}
 				}
 
 				// but must be placed so camera dist works too
