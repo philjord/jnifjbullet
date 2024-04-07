@@ -1,6 +1,5 @@
 package nifbullet.convert;
 
-import org.jogamp.java3d.Group;
 import org.jogamp.java3d.utils.geometry.GeometryInfo;
 import org.jogamp.vecmath.Point3f;
 import org.jogamp.vecmath.Vector3f;
@@ -112,8 +111,6 @@ public abstract class hkxCollisionToNifBullet
 		TriangleIndexVertexArray indexVertexArrays = new TriangleIndexVertexArray();
 		// we are in fact dealing only with the meshTree not the simdTree
 		hknpCompressedMeshShapeTree meshTree = data.meshTree;
-
-		Group group = new Group();		
 		
 		// first decompress shared Vertices against the full AABB
 		hkAabb meshTreehkAabb = meshTree.domain; // full AABB of all sections
@@ -200,20 +197,23 @@ public abstract class hkxCollisionToNifBullet
 				// each section has numSharedIndices of the sharedVerticesIndex as it's own
 				// the index found is then used as an index into the shared vertex area of the vertices, which for now is at the end starting at 
 				// numPackedVertices, but when a single packed and shared vertex array is used will be at the end of all packed vertices
-								 				
-				int[] sharedVerticesIndex = meshTree.sharedVerticesIndex;										 				
-				//quad?
-				if(indices[2] != indices[3]) {
-					listPoints[idx++] = indices[0] < numPackedVertices ? indices[0] : sharedVerticesIndex[(indices[0]-numPackedVertices)+sharedOffset]+numPackedVertices;
-					listPoints[idx++] = indices[1] < numPackedVertices ? indices[1] : sharedVerticesIndex[(indices[1]-numPackedVertices)+sharedOffset]+numPackedVertices;
-					listPoints[idx++] = indices[2] < numPackedVertices ? indices[2] : sharedVerticesIndex[(indices[2]-numPackedVertices)+sharedOffset]+numPackedVertices;
-					listPoints[idx++] = indices[2] < numPackedVertices ? indices[2] : sharedVerticesIndex[(indices[2]-numPackedVertices)+sharedOffset]+numPackedVertices;
-					listPoints[idx++] = indices[3] < numPackedVertices ? indices[3] : sharedVerticesIndex[(indices[3]-numPackedVertices)+sharedOffset]+numPackedVertices;
-					listPoints[idx++] = indices[0] < numPackedVertices ? indices[0] : sharedVerticesIndex[(indices[0]-numPackedVertices)+sharedOffset]+numPackedVertices;
-				} else {//just a tri					
-					listPoints[idx++] = indices[0] < numPackedVertices ? indices[0] : sharedVerticesIndex[(indices[0]-numPackedVertices)+sharedOffset]+numPackedVertices;
-					listPoints[idx++] = indices[1] < numPackedVertices ? indices[1] : sharedVerticesIndex[(indices[1]-numPackedVertices)+sharedOffset]+numPackedVertices;
-					listPoints[idx++] = indices[2] < numPackedVertices ? indices[2] : sharedVerticesIndex[(indices[2]-numPackedVertices)+sharedOffset]+numPackedVertices;
+				try {			 				
+					int[] sharedVerticesIndex = meshTree.sharedVerticesIndex;										 				
+					//quad?
+					if(indices[2] != indices[3]) {
+						listPoints[idx++] = indices[0] < numPackedVertices ? indices[0] : sharedVerticesIndex[(indices[0]-numPackedVertices)+sharedOffset]+numPackedVertices;
+						listPoints[idx++] = indices[1] < numPackedVertices ? indices[1] : sharedVerticesIndex[(indices[1]-numPackedVertices)+sharedOffset]+numPackedVertices;
+						listPoints[idx++] = indices[2] < numPackedVertices ? indices[2] : sharedVerticesIndex[(indices[2]-numPackedVertices)+sharedOffset]+numPackedVertices;
+						listPoints[idx++] = indices[2] < numPackedVertices ? indices[2] : sharedVerticesIndex[(indices[2]-numPackedVertices)+sharedOffset]+numPackedVertices;
+						listPoints[idx++] = indices[3] < numPackedVertices ? indices[3] : sharedVerticesIndex[(indices[3]-numPackedVertices)+sharedOffset]+numPackedVertices;
+						listPoints[idx++] = indices[0] < numPackedVertices ? indices[0] : sharedVerticesIndex[(indices[0]-numPackedVertices)+sharedOffset]+numPackedVertices;
+					} else {//just a tri					
+						listPoints[idx++] = indices[0] < numPackedVertices ? indices[0] : sharedVerticesIndex[(indices[0]-numPackedVertices)+sharedOffset]+numPackedVertices;
+						listPoints[idx++] = indices[1] < numPackedVertices ? indices[1] : sharedVerticesIndex[(indices[1]-numPackedVertices)+sharedOffset]+numPackedVertices;
+						listPoints[idx++] = indices[2] < numPackedVertices ? indices[2] : sharedVerticesIndex[(indices[2]-numPackedVertices)+sharedOffset]+numPackedVertices;
+					}
+				} catch(ArrayIndexOutOfBoundsException e) {
+					System.out.println("hkxCollisionToNifBullet ArrayIndexOutOfBoundsException " + e.getMessage());
 				}
 			}	
 			
