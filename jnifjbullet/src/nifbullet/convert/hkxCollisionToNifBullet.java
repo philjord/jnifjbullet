@@ -1,11 +1,17 @@
 package nifbullet.convert;
 
+import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.utils.geometry.GeometryInfo;
+import org.jogamp.vecmath.Matrix4f;
+import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Point3f;
+import org.jogamp.vecmath.Vector3d;
 import org.jogamp.vecmath.Vector3f;
 
 import com.bulletphysics.collision.shapes.BvhTriangleMeshShape;
+import com.bulletphysics.collision.shapes.CapsuleShape;
 import com.bulletphysics.collision.shapes.CollisionShape;
+import com.bulletphysics.collision.shapes.CompoundShape;
 import com.bulletphysics.collision.shapes.ConvexHullShape;
 import com.bulletphysics.collision.shapes.IndexedMesh;
 import com.bulletphysics.collision.shapes.SphereShape;
@@ -13,6 +19,7 @@ import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
 import com.bulletphysics.extras.gimpact.GImpactMeshShape;
 import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.util.ObjectArrayList;
+ 
 
 import nif.NifVer;
 import nif.niobject.hkx.hkAabb;
@@ -21,6 +28,7 @@ import nif.niobject.hkx.hknpCompressedMeshShapeData;
 import nif.niobject.hkx.hknpCompressedMeshShapeTree;
 import nif.niobject.hkx.hknpConvexPolytopeShape;
 import nif.niobject.hkx.hknpSphereShape;
+import nif.niobject.hkx.hknpCapsuleShape;
 import nifbullet.util.NifBulletUtil;
 import utils.convert.ConvertFromHavok;
 
@@ -39,13 +47,13 @@ public abstract class hkxCollisionToNifBullet
 	}
 
 	
-/*	public static CollisionShape hknpCapsuleShape(hknpCapsuleShape data, float scale, NifVer nifVer)
+	public static CollisionShape hknpCapsuleShape(hknpCapsuleShape data, float scale, NifVer nifVer)
 	{
-		float radius = ConvertFromHavok.toJ3d(data.radius, scale, nifVer);
-		Vector3f v1 = ConvertFromHavok.toJ3d(data.firstPoint, scale, nifVer);
-		float radius1 = ConvertFromHavok.toJ3d(data.radius1, scale, nifVer);
-		Vector3f v2 = ConvertFromHavok.toJ3d(data.secondPoint, scale, nifVer);
-		float radius2 = ConvertFromHavok.toJ3d(data.radius2, scale, nifVer);
+		float radius = ConvertFromHavok.toJ3d(data.convexRadius, nifVer);
+		Vector3f v1 = ConvertFromHavok.toJ3d(data.a, nifVer);
+		float radius1 = ConvertFromHavok.toJ3d(data.a.w, nifVer);
+		Vector3f v2 = ConvertFromHavok.toJ3d(data.b, nifVer);
+		float radius2 = ConvertFromHavok.toJ3d(data.b.w, nifVer);
 
 		if (radius != radius1 || radius != radius2)
 		{
@@ -78,7 +86,7 @@ public abstract class hkxCollisionToNifBullet
 		parent.addChildShape(gt, gcs);
 
 		return parent;
-	}*/
+	}
 
 	public static CollisionShape hknpConvexPolytopeShape(hknpConvexPolytopeShape data, float scale, NifVer nifVer)
 	{

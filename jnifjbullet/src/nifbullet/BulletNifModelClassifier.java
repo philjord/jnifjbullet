@@ -1,5 +1,7 @@
 package nifbullet;
 
+import java.util.Iterator;
+
 import org.jogamp.java3d.Transform3D;
 
 import nif.NifFile;
@@ -18,6 +20,7 @@ import nif.niobject.bs.BSTreeNode;
 import nif.niobject.controller.NiMultiTargetTransformController;
 import nif.niobject.controller.NiTimeController;
 import nif.niobject.controller.NiTransformController;
+import nif.niobject.hkx.hkBaseObject;
 import nif.niobject.hkx.hknpBodyCinfo;
 import nif.niobject.hkx.hknpMotionCinfo;
 import nif.niobject.hkx.hknpPhysicsSystemData;
@@ -365,14 +368,17 @@ public abstract class BulletNifModelClassifier
 				bhkPhysicsSystem bhkPhysicsSystem = (bhkPhysicsSystem) niObject;
 				
 				HKXContents contents = bhkPhysicsSystem.hkxContents;
-				// the first one had better be a system
-				hknpPhysicsSystemData hknpPhysicsSystemData = (hknpPhysicsSystemData)contents.getContentCollection().iterator().next();
-				hknpBodyCinfo[] bodyCinfos = hknpPhysicsSystemData.bodyCinfos;
-				hknpMotionCinfo[] motionCinfos = hknpPhysicsSystemData.motionCinfos;
-				
-				// if we have motion for all parts then we are not nonmassed, but massed
-				if(motionCinfos == null || (bodyCinfos.length != motionCinfos.length) )
-					ret += bodyCinfos.length;				
+				Iterator<hkBaseObject> iter = contents.getContentCollection().iterator();
+				if(iter.hasNext()) {
+					// the first one had better be a system
+					hknpPhysicsSystemData hknpPhysicsSystemData = (hknpPhysicsSystemData)iter.next();
+					hknpBodyCinfo[] bodyCinfos = hknpPhysicsSystemData.bodyCinfos;
+					hknpMotionCinfo[] motionCinfos = hknpPhysicsSystemData.motionCinfos;
+					
+					// if we have motion for all parts then we are not nonmassed, but massed
+					if(motionCinfos == null || (bodyCinfos.length != motionCinfos.length) )
+						ret += bodyCinfos.length;	
+				}
 			}
 					
 		}
