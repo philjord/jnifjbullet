@@ -51,9 +51,9 @@ public abstract class hkxCollisionToNifBullet
 	{
 		float radius = ConvertFromHavok.toJ3d(data.convexRadius, nifVer);
 		Vector3f v1 = ConvertFromHavok.toJ3d(data.a, nifVer);
-		float radius1 = ConvertFromHavok.toJ3d(data.a.w, nifVer);
+		float radius1 = ConvertFromHavok.toJ3d(data.convexRadius, nifVer);
 		Vector3f v2 = ConvertFromHavok.toJ3d(data.b, nifVer);
-		float radius2 = ConvertFromHavok.toJ3d(data.b.w, nifVer);
+		float radius2 = ConvertFromHavok.toJ3d(data.convexRadius, nifVer);
 
 		if (radius != radius1 || radius != radius2)
 		{
@@ -93,9 +93,9 @@ public abstract class hkxCollisionToNifBullet
 		ObjectArrayList<Vector3f> points = new ObjectArrayList<Vector3f>();
 
 		if( data.vertices.length > 3 && data.planes.length > 3) { 
-			for (int i = 0; i < 3; i++) {
+			//for (int i = 0; i < 3; i++) {
 				//System.out.println("i " + i + "" + ConvertFromHavok.toJ3dP3f(data.vertices[i], nifVer));
-			}
+			//}
 			for (int i = 3; i < data.vertices.length; i++) {
 				points.add(new Vector3f(ConvertFromHavok.toJ3dP3f(data.vertices[i], nifVer)));
 			}
