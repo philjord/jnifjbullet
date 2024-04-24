@@ -96,12 +96,47 @@ public abstract class hkxCollisionToNifBullet
 			//for (int i = 0; i < 3; i++) {
 				//System.out.println("i " + i + "" + ConvertFromHavok.toJ3dP3f(data.vertices[i], nifVer));
 			//}
-			for (int i = 3; i < data.vertices.length; i++) {
-				points.add(new Vector3f(ConvertFromHavok.toJ3dP3f(data.vertices[i], nifVer)));
+			
+			boolean centerAtOrgin = false;
+			// used if the centering is required below
+			Vector3f min = new Vector3f(Float.MAX_VALUE,Float.MAX_VALUE,Float.MAX_VALUE);
+			Vector3f max = new Vector3f(Float.MIN_VALUE,Float.MIN_VALUE,Float.MIN_VALUE);
+			if( data.vertices.length > 3 && data.planes.length > 3) { 			
+				for (int i = 3; i < data.vertices.length; i++) {
+					Vector3f v = new Vector3f(ConvertFromHavok.toJ3dP3f(data.vertices[i], scale, nifVer));
+					if(centerAtOrgin) {
+						min.x = v.x < min.x ? v.x : min.x;
+						max.x = v.x > max.x ? v.x : max.x;
+						min.y = v.y < min.y ? v.y : min.y;
+						max.y = v.y > max.y ? v.y : max.y;
+						min.z = v.z < min.z ? v.z : min.z;
+						max.z = v.z > max.z ? v.z : max.z;
+					}
+					points.add(v);
+				}
+				for (int i = 0; i < data.planes.length - 3; i++) {
+					Vector3f p = new Vector3f(ConvertFromHavok.toJ3dP3f(data.planes[i], scale, nifVer));
+					if(centerAtOrgin) {
+						min.x = p.x < min.x ? p.x : min.x;
+						max.x = p.x > max.x ? p.x : max.x;
+						min.y = p.y < min.y ? p.y : min.y;
+						max.y = p.y > max.y ? p.y : max.y;
+						min.z = p.z < min.z ? p.z : min.z;
+						max.z = p.z > max.z ? p.z : max.z;
+					}
+					points.add(p);
+				}
+			} else {
+				System.out.println("Interesting hknpConvexPolytopeShape " + data.vertices.length + " " + data.planes.length);
 			}
-			for (int i = 0; i < data.planes.length - 3; i++) {
-				points.add(new Vector3f(ConvertFromHavok.toJ3dP3f(data.planes[i], nifVer)));
+
+			if(centerAtOrgin) {
+				Vector3f mod = new Vector3f(((max.x+min.x)/2f), ((max.y+min.y)/2f), ((max.z+min.z)/2f));		
+				for(int  i = 0; i < points.size(); i++) {
+					points.get(i).sub(mod);
+				}
 			}
+			
 		} else {
 			System.out.println("Interesting hknpConvexPolytopeShape " + data.vertices.length + " " + data.planes.length);
 		}
