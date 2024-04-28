@@ -368,16 +368,18 @@ public abstract class BulletNifModelClassifier
 				bhkPhysicsSystem bhkPhysicsSystem = (bhkPhysicsSystem) niObject;
 				
 				HKXContents contents = bhkPhysicsSystem.hkxContents;
-				Iterator<hkBaseObject> iter = contents.getContentCollection().iterator();
-				if(iter.hasNext()) {
-					// the first one had better be a system
-					hknpPhysicsSystemData hknpPhysicsSystemData = (hknpPhysicsSystemData)iter.next();
-					hknpBodyCinfo[] bodyCinfos = hknpPhysicsSystemData.bodyCinfos;
-					hknpMotionCinfo[] motionCinfos = hknpPhysicsSystemData.motionCinfos;
-					
-					// if we have motion for all parts then we are not nonmassed, but massed
-					if(motionCinfos == null || (bodyCinfos.length != motionCinfos.length) )
-						ret += bodyCinfos.length;	
+				if(contents != null) {
+					Iterator<hkBaseObject> iter = contents.getContentCollection().iterator();
+					if(iter.hasNext()) {
+						// the first one had better be a system
+						hknpPhysicsSystemData hknpPhysicsSystemData = (hknpPhysicsSystemData)iter.next();
+						hknpBodyCinfo[] bodyCinfos = hknpPhysicsSystemData.bodyCinfos;
+						hknpMotionCinfo[] motionCinfos = hknpPhysicsSystemData.motionCinfos;
+						
+						// if we have motion for all parts then we are not nonmassed, but massed
+						if(motionCinfos == null || (bodyCinfos.length != motionCinfos.length) )
+							ret += bodyCinfos.length;	
+					}
 				}
 			}
 					
