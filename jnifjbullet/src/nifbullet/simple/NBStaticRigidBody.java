@@ -128,7 +128,7 @@ public class NBStaticRigidBody extends NBRigidBody
 							 
 							//updateTransfrom MUST be called first, it sets scale
 							Transform worldTransform = calcWorldTransform(rootTrans);
-							colShape = hkxShapeToCollisionShape.processBhkShape(hknpShape, contents, scale);
+							colShape = hkxShapeToCollisionShape.processBhkShape(hknpShape, contents, blocks.nifVer, scale);
 							setRigidBody(NifBulletUtil.createStaticRigidBody(hknpMaterial, colShape, this));
 							getRigidBody().setWorldTransform(worldTransform);
 					//	}

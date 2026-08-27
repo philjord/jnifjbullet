@@ -37,10 +37,9 @@ public abstract class hkxShapeToCollisionShape {
 	 * @return
 	 */
 
-	public static NifVer nifVer = new NifVer("FO4", NifVer.VER_20_2_0_7, 12, 130);
-
-	public static CollisionShape processBhkShape(hknpShape hknpShape, HKXContents contents, float scale) {
-		return processBhkShape(hknpShape, contents, false, scale);
+	public static CollisionShape processBhkShape(	hknpShape hknpShape, HKXContents contents, NifVer nifVer,
+													float scale) {
+		return processBhkShape(hknpShape, contents, nifVer, false, scale);
 	}
 
 	//Any shape can be scaled so preloading is hard, basically we do it for scale=1.0 ONLY
@@ -48,7 +47,7 @@ public abstract class hkxShapeToCollisionShape {
 	private static Map<hknpShape, CollisionShape>	preloadedScale1Shapes	= Collections
 			.synchronizedMap(new WeakHashMap<hknpShape, CollisionShape>());
 
-	public static CollisionShape processBhkShape(	hknpShape hknpShape, HKXContents contents, boolean isDynamic,
+	public static CollisionShape processBhkShape(	hknpShape hknpShape, HKXContents contents, NifVer nifVer, boolean isDynamic,
 													float scale) {
 		CollisionShape ret = null;
 		if (scale == 1.0f) {
@@ -57,7 +56,7 @@ public abstract class hkxShapeToCollisionShape {
 				return ret;
 		}
 
-		ret = createCollisionShape(hknpShape, contents, isDynamic, scale);
+		ret = createCollisionShape(hknpShape, contents, nifVer, isDynamic, scale);
 
 		if (scale == 1.0f) {
 			if (ret != null)
@@ -67,25 +66,25 @@ public abstract class hkxShapeToCollisionShape {
 		return ret;
 	}
 
-	private static CollisionShape createCollisionShape(hknpShape hknpShape, HKXContents contents, boolean isDynamic,
-														float scale) {
-		
+	private static CollisionShape createCollisionShape(	hknpShape hknpShape, HKXContents contents, NifVer nifVer,
+														boolean isDynamic, float scale) {
+
 		if (hknpShape instanceof hknpSphereShape) {
 			return hkxCollisionToNifBullet.hknpSphereShape((hknpSphereShape)hknpShape, scale, nifVer);
 		} else if (hknpShape instanceof hknpCapsuleShape) {
 			return hkxCollisionToNifBullet.hknpCapsuleShape((hknpCapsuleShape)hknpShape, scale, nifVer);
-		} else	if (hknpShape instanceof hknpDynamicCompoundShape) {
-			if(!isDynamic)
+		} else if (hknpShape instanceof hknpDynamicCompoundShape) {
+			if (!isDynamic)
 				System.out.println("createCollisionShape hknpDynamicCompoundShape! isDynamic=" + isDynamic);
-			hknpCompoundShape((hknpDynamicCompoundShape)hknpShape, contents, isDynamic, scale);
+			hknpCompoundShape((hknpDynamicCompoundShape)hknpShape, contents, nifVer, isDynamic, scale);
 			return null;
-		} else	if (hknpShape instanceof hknpStaticCompoundShape) {			
-			if(isDynamic)
+		} else if (hknpShape instanceof hknpStaticCompoundShape) {
+			if (isDynamic)
 				System.out.println("createCollisionShape hknpStaticCompoundShape! isDynamic=" + isDynamic);
-			hknpCompoundShape((hknpStaticCompoundShape)hknpShape, contents, isDynamic, scale);
+			hknpCompoundShape((hknpStaticCompoundShape)hknpShape, contents, nifVer, isDynamic, scale);
 			return null;
 		} else if (hknpShape instanceof hknpScaledConvexShape) {
-			hknpScaledConvexShape((hknpScaledConvexShape) hknpShape, contents, isDynamic, scale);
+			hknpScaledConvexShape((hknpScaledConvexShape)hknpShape, contents, nifVer, isDynamic, scale);
 			return null;
 		} else if (hknpShape instanceof hknpCompressedMeshShape) {
 			hknpCompressedMeshShape hknpCompressedMeshShape = (hknpCompressedMeshShape)hknpShape;
@@ -102,68 +101,68 @@ public abstract class hkxShapeToCollisionShape {
 			}
 		} else if (hknpShape instanceof hknpConvexPolytopeShape) {
 			return hkxCollisionToNifBullet.hknpConvexPolytopeShape((hknpConvexPolytopeShape)hknpShape, scale, nifVer);
-		}  else {
+		} else {
 			System.out.println("NifHavokToj3d - unknown bhkShape " + hknpShape);
 			return null;
 		}
 	}
-	
-	private static CollisionShape hknpScaledConvexShape(hknpScaledConvexShape data, HKXContents contents, boolean isDynamic, float scale)
-	{
+
+	private static CollisionShape hknpScaledConvexShape(hknpScaledConvexShape data, HKXContents contents, NifVer nifVer,
+														boolean isDynamic, float scale) {
 		CompoundShape cs = new CompoundShape();
- 
+
 		long shapeId = data.coreShape;
-		if(shapeId > 0) {
+		if (shapeId > 0) {
 			hknpShape hknpShape = (hknpShape)contents.get(shapeId);
-			CollisionShape shape = createCollisionShape(hknpShape, contents, isDynamic, scale);
+			CollisionShape shape = createCollisionShape(hknpShape, contents, nifVer, isDynamic, scale);
 			if (shape != null) {
 				Transform3D t3d = new Transform3D();
 
 				t3d.set(ConvertFromHavok.toJ3d(data.position, nifVer));
-				
+
 				//Note no ConvertFromHavok as these are just straight multipliers 
 				t3d.setScale(new Vector3d(data.scale.x, data.scale.z, data.scale.y));
- 
+
 				Transform t = NifBulletUtil.createTrans(t3d);
-				
+
 				cs.addChildShape(t, shape);
 			} else {
 				System.out.println("shape == null " + hknpShape);
 				return null;
 			}
 		}
-		
+
 		return cs;
 	}
-	
-	private static CollisionShape hknpCompoundShape(hknpCompoundShape data, HKXContents contents, boolean isDynamic, float scale)
-	{
+
+	private static CollisionShape hknpCompoundShape(hknpCompoundShape data, HKXContents contents, NifVer nifVer,
+													boolean isDynamic, float scale) {
 		CompoundShape cs = new CompoundShape();
-		for(int i = 0 ; i < data.instances.elements.length;i++) {
+		for (int i = 0; i < data.instances.elements.length; i++) {
 			hknpShapeInstance s = data.instances.elements[i];
 			long shapeId = s.shape;
-			if(shapeId > 0) {
+			if (shapeId > 0) {
 				hknpShape hknpShape = (hknpShape)contents.get(shapeId);
-				CollisionShape shape = createCollisionShape(hknpShape, contents, isDynamic, scale);
+				CollisionShape shape = createCollisionShape(hknpShape, contents, nifVer, isDynamic, scale);
 				if (shape != null) {
- 					Transform3D t3d = new Transform3D();
-	
+					Transform3D t3d = new Transform3D();
+
 					Matrix4f m = ConvertFromHavok.toJ3dM4(s.transform, nifVer);
 					t3d.set(m);
-					
+
 					//Note no ConvertFromHavok as these are just straight multipliers 
 					t3d.setScale(new Vector3d(s.scale.x, s.scale.z, s.scale.y));
-	 
+
 					Transform t = NifBulletUtil.createTrans(t3d);
-					
+
 					cs.addChildShape(t, shape);
 				} else {
 					System.out.println("shape == null " + hknpShape);
 					return null;
 				}
-			}			
+			}
 		}
-		
+
 		return cs;
 	}
 
