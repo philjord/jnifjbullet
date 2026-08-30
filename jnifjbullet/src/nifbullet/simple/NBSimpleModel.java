@@ -182,9 +182,9 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 						bhkNPCollisionObject bhkNPCollisionObject = (bhkNPCollisionObject) niObject;
 						NiObject nio = niToJ3dData.get(bhkNPCollisionObject.body);
 						if(nio instanceof bhkPhysicsSystem) {
-							bhkPhysicsSystem bhkPhysicsSystem = (bhkPhysicsSystem)nio;
-	
-							NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkNPCollisionObject, bhkPhysicsSystem, niToJ3dData.getNiObjects(), rootTrans, this);
+							bhkPhysicsSystem bhkPhysicsSystem = (bhkPhysicsSystem)nio;							 
+							int bodyId = bhkNPCollisionObject.BodyID;	
+							NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkNPCollisionObject, bhkPhysicsSystem, niToJ3dData.getNiObjects(), rootTrans, this, bodyId);
 	
 							updatePointers(pointer, nbbco);
 						}

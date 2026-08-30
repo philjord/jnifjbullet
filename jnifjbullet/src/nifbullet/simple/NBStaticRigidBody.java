@@ -37,13 +37,12 @@ import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.linearmath.Transform;
 
-public class NBStaticRigidBody extends NBRigidBody
-{
-	private NiAVObject parentNiObject;
+public class NBStaticRigidBody extends NBRigidBody {
+	private NiAVObject		parentNiObject;
 
-	private NiObjectList niObjectList;
+	private NiObjectList	niObjectList;
 
-	private Transform3D worldTransformCalc = new Transform3D();
+	private Transform3D		worldTransformCalc	= new Transform3D();
 
 	/** 
 	 * 
@@ -53,103 +52,101 @@ public class NBStaticRigidBody extends NBRigidBody
 	 * @param parentModel
 	 * @param fixedScaleFactor
 	 */
-	public NBStaticRigidBody(bhkCollisionObject bhkCollisionObject, NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel)
-	{
+	public NBStaticRigidBody(	bhkCollisionObject bhkCollisionObject, NiObjectList blocks, Transform3D rootTrans,
+								BulletNifModel parentModel) {
 		super(parentModel);
 
 		this.niObjectList = blocks;
 
-		parentNiObject = (NiAVObject) blocks.get(bhkCollisionObject.target);
-		bhkRigidBody bhkRigidBody = (bhkRigidBody) blocks.get(bhkCollisionObject.body);
+		parentNiObject = (NiAVObject)blocks.get(bhkCollisionObject.target);
+		bhkRigidBody bhkRigidBody = (bhkRigidBody)blocks.get(bhkCollisionObject.body);
 		setBhkRigidBody(bhkRigidBody);
 
 		int layer = bhkRigidBody.layer.layer;
-		if (layer == OblivionLayer.OL_STATIC || layer == OblivionLayer.OL_UNIDENTIFIED || layer == OblivionLayer.OL_STAIRS
-				|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT || layer == OblivionLayer.OL_TREES)
-		{
-			if (bhkRigidBody.mass == 0)
-			{
-				bhkShape bhkShape = (bhkShape) blocks.get(bhkRigidBody.shape);
+		if (layer == OblivionLayer.OL_STATIC	|| layer == OblivionLayer.OL_UNIDENTIFIED
+			|| layer == OblivionLayer.OL_STAIRS || layer == OblivionLayer.OL_TERRAIN
+			|| layer == OblivionLayer.OL_TRANSPARENT || layer == OblivionLayer.OL_TREES) {
+			if (bhkRigidBody.mass == 0) {
+				bhkShape bhkShape = (bhkShape)blocks.get(bhkRigidBody.shape);
 				//updateTransfrom MUST be called first, it sets scale
 				Transform worldTransform = calcWorldTransform(rootTrans);
 				colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, blocks, scale);
 				setRigidBody(NifBulletUtil.createStaticRigidBody(bhkRigidBody, colShape, this));
 				getRigidBody().setWorldTransform(worldTransform);
-			}
-			else
-			{
+			} else {
 				new Throwable("bhkRigidBody.mass != 0 " + this).printStackTrace();
 			}
 
-		}
-		else if (layer == OblivionLayer.OL_LINE_OF_SIGHT)
-		{
+		} else if (layer == OblivionLayer.OL_LINE_OF_SIGHT) {
 			//skipped for now
-		}
-		else
-		{
+		} else {
 			new Throwable(
 					"Why is a non OL_STATIC, OL_LINE_OF_SIGHT, OL_UNIDENTIFID, OL_STAIRS, OL_TERRAIN, OL_TRANSPARENT, OL_TREES handed to  me? "
 							+ layer + " " + this).printStackTrace();
 		}
 	}
-	
-	public NBStaticRigidBody(bhkNPCollisionObject bhkNPCollisionObject, bhkPhysicsSystem bhkPhysicsSystem, NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel)
-	{
+
+	public NBStaticRigidBody(	bhkNPCollisionObject bhkNPCollisionObject, bhkPhysicsSystem bhkPhysicsSystem,
+								NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel,
+								int bodyCinfosIdx) {
 		super(parentModel);
-		
+
 		this.niObjectList = blocks;
-		parentNiObject = (NiAVObject) blocks.get(bhkNPCollisionObject.target);
-		
+		parentNiObject = (NiAVObject)blocks.get(bhkNPCollisionObject.target);
+
 		HKXContents contents = bhkPhysicsSystem.hkxContents;
-		if(contents != null) {
-			hknpPhysicsSystemData hknpPhysicsSystemData = (hknpPhysicsSystemData)contents.getContentCollection().iterator().next();
+		if (contents != null) {
+			hknpPhysicsSystemData hknpPhysicsSystemData = (hknpPhysicsSystemData)contents.getContentCollection()
+					.iterator().next();
 			hknpBodyCinfo[] bodyCinfos = hknpPhysicsSystemData.bodyCinfos;
 			hknpMaterial[] materials = hknpPhysicsSystemData.materials;
-			for(int  i= 0 ; i < bodyCinfos.length; i++) {
-				hknpBodyCinfo hknpBodyCinfo = bodyCinfos[i];
-				hknpMaterial hknpMaterial = materials[i];
-	
-				long shapeId = hknpBodyCinfo.shape;
-				if(shapeId > 0) {
-					hknpShape hknpShape = (hknpShape)contents.get(shapeId);
-									
-					
-					//a shape is dymanic if for the asme index there is a motionProperty
-					 
-					//setBhkRigidBody(bhkRigidBody);
-			
-					//int layer = hknpShape.layer.layer;
-					//if (layer == OblivionLayer.OL_STATIC || layer == OblivionLayer.OL_UNIDENTIFIED || layer == OblivionLayer.OL_STAIRS
-					//		|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT || layer == OblivionLayer.OL_TREES)
-					//{
-					//	if (bhkRigidBody.mass == 0)
-					//	{
-							 
-							//updateTransfrom MUST be called first, it sets scale
-							Transform worldTransform = calcWorldTransform(rootTrans);
-							colShape = hkxShapeToCollisionShape.processBhkShape(hknpShape, contents, blocks.nifVer, scale);
-							setRigidBody(NifBulletUtil.createStaticRigidBody(hknpMaterial, colShape, this));
-							getRigidBody().setWorldTransform(worldTransform);
-					//	}
-					//	else
-					//	{
-					//		new Throwable("bhkRigidBody.mass != 0 " + this).printStackTrace();
-					//	}
-			
-					//}
+			for (int i = 0; i < bodyCinfos.length; i++) {
+				if (bodyCinfosIdx == -1 || i == bodyCinfosIdx) {
+					hknpBodyCinfo hknpBodyCinfo = bodyCinfos[i];
+					hknpMaterial hknpMaterial = materials[i];
+
+					long shapeId = hknpBodyCinfo.shape;
+					if (shapeId > 0) {
+						hknpShape hknpShape = (hknpShape)contents.get(shapeId);
+
+						//a shape is dymanic if for the same index there is a motionProperty
+
+						//setBhkRigidBody(bhkRigidBody);
+
+						//int layer = hknpShape.layer.layer;
+						//if (layer == OblivionLayer.OL_STATIC || layer == OblivionLayer.OL_UNIDENTIFIED || layer == OblivionLayer.OL_STAIRS
+						//		|| layer == OblivionLayer.OL_TERRAIN || layer == OblivionLayer.OL_TRANSPARENT || layer == OblivionLayer.OL_TREES)
+						//{
+						//	if (bhkRigidBody.mass == 0)
+						//	{
+
+						//updateTransfrom MUST be called first, it sets scale
+						Transform worldTransform = calcWorldTransform(rootTrans);
+						colShape = hkxShapeToCollisionShape.processBhkShape(hknpShape, contents, blocks.nifVer, scale);
+						setRigidBody(NifBulletUtil.createStaticRigidBody(hknpMaterial, colShape, this));
+						getRigidBody().setWorldTransform(worldTransform);
+						//	}
+						//	else
+						//	{
+						//		new Throwable("bhkRigidBody.mass != 0 " + this).printStackTrace();
+						//	}
+
+						//}
+
+					}
 				}
 			}
 		}
 	}
+
 	/**
 	 * Special cut down version for morrowind
 	 * @param  
 	 * @param rootTrans
 	 * @param parentModel
 	 */
-	public NBStaticRigidBody(RootCollisionNode rootCollisionNode, NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel)
-	{
+	public NBStaticRigidBody(	RootCollisionNode rootCollisionNode, NiObjectList blocks, Transform3D rootTrans,
+								BulletNifModel parentModel) {
 		super(parentModel);
 		Transform worldTransform = calcWorldTransform(rootTrans);
 		colShape = RootCollisionNodeToCollisionShape.processRootCollisionNode(rootCollisionNode, blocks, 1f);
@@ -166,8 +163,7 @@ public class NBStaticRigidBody extends NBRigidBody
 	 * @param rootTrans
 	 * @param parentModel
 	 */
-	public NBStaticRigidBody(GeometryInfo gi, Transform3D rootTrans, BulletNifModel parentModel)
-	{
+	public NBStaticRigidBody(GeometryInfo gi, Transform3D rootTrans, BulletNifModel parentModel) {
 		super(parentModel);
 		Transform worldTransform = calcWorldTransform(rootTrans);
 		colShape = BhkCollisionToNifBullet.makeFromGeometryInfo(gi);
@@ -184,8 +180,8 @@ public class NBStaticRigidBody extends NBRigidBody
 	 * @param rootTrans
 	 * @param parentModel
 	 */
-	public NBStaticRigidBody(float[][] heights, Transform3D rootTrans, NBSimpleModel parentModel, float terrainSquareSize)
-	{
+	public NBStaticRigidBody(	float[][] heights, Transform3D rootTrans, NBSimpleModel parentModel,
+								float terrainSquareSize) {
 		super(parentModel);
 		HeightfieldTerrainShape hfts = BhkCollisionToNifBullet.makeHeightfieldTerrainShape(heights, terrainSquareSize);
 		// Interesting note, height field moves everything down by ((max-min)/2)+min height in order
@@ -211,8 +207,7 @@ public class NBStaticRigidBody extends NBRigidBody
 	 * @param rootTrans
 	 * @return
 	 */
-	private Transform calcWorldTransform(Transform3D rootTrans)
-	{
+	private Transform calcWorldTransform(Transform3D rootTrans) {
 		// add the root trans in
 		worldTransformCalc.set(rootTrans);
 
@@ -223,8 +218,7 @@ public class NBStaticRigidBody extends NBRigidBody
 
 		bhkRigidBody rb = getBhkRigidBody();
 		//land and morrwind can be null
-		if (rb != null && rb instanceof bhkRigidBodyT)
-		{
+		if (rb != null && rb instanceof bhkRigidBodyT) {
 			temp.setRotation(ConvertFromHavok.toJ3d(rb.rotation));
 			temp.setTranslation(ConvertFromHavok.toJ3d(rb.translation, 1f, niObjectList.nifVer));
 			worldTransformCalc.mul(temp);
@@ -238,7 +232,7 @@ public class NBStaticRigidBody extends NBRigidBody
 		// bullet transforms, so scaling got sent to the 
 		// BhkShapeToCollisionShape call and is in the model now
 		// so we just record it here
-		this.scale = (float) worldTransformCalc.getScale();
+		this.scale = (float)worldTransformCalc.getScale();
 
 		return worldTransform;
 	}
@@ -246,19 +240,14 @@ public class NBStaticRigidBody extends NBRigidBody
 	// deburner
 	private Transform3D temp = new Transform3D();
 
-	private void mulFromRootDown(NiAVObject parent)
-	{
-		if (parent != null)
-		{
+	private void mulFromRootDown(NiAVObject parent) {
+		if (parent != null) {
 			//note go up first then come back down and do multiplys
 			mulFromRootDown(parent.parent);
 
-			if (!J3dNiAVObject.ignoreTopTransformRot(parent))
-			{
+			if (!J3dNiAVObject.ignoreTopTransformRot(parent)) {
 				temp.setRotation(ConvertFromNif.toJ3d(parent.rotation));
-			}
-			else
-			{
+			} else {
 				temp.setRotation(new Quat4f(0, 0, 0, 1));
 			}
 			temp.setTranslation(ConvertFromNif.toJ3d(parent.translation));
@@ -269,8 +258,7 @@ public class NBStaticRigidBody extends NBRigidBody
 	}
 
 	@Override
-	public void updateRootTransform(Transform3D rootTrans)
-	{
+	public void updateRootTransform(Transform3D rootTrans) {
 		throw new UnsupportedOperationException();
 
 	}

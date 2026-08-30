@@ -47,8 +47,8 @@ public abstract class hkxShapeToCollisionShape {
 	private static Map<hknpShape, CollisionShape>	preloadedScale1Shapes	= Collections
 			.synchronizedMap(new WeakHashMap<hknpShape, CollisionShape>());
 
-	public static CollisionShape processBhkShape(	hknpShape hknpShape, HKXContents contents, NifVer nifVer, boolean isDynamic,
-													float scale) {
+	public static CollisionShape processBhkShape(	hknpShape hknpShape, HKXContents contents, NifVer nifVer,
+													boolean isDynamic, float scale) {
 		CollisionShape ret = null;
 		if (scale == 1.0f) {
 			ret = preloadedScale1Shapes.get(hknpShape);
@@ -101,6 +101,8 @@ public abstract class hkxShapeToCollisionShape {
 			}
 		} else if (hknpShape instanceof hknpConvexPolytopeShape) {
 			return hkxCollisionToNifBullet.hknpConvexPolytopeShape((hknpConvexPolytopeShape)hknpShape, scale, nifVer);
+		} else if (hknpShape instanceof hknpCompoundShape) {
+			return hknpCompoundShape((hknpCompoundShape)hknpShape, contents, nifVer, isDynamic, scale);
 		} else {
 			System.out.println("NifHavokToj3d - unknown bhkShape " + hknpShape);
 			return null;
