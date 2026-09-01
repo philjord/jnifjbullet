@@ -18,6 +18,7 @@ import nif.niobject.hkx.hknpCompoundShape;
 import nif.niobject.hkx.hknpCompressedMeshShape;
 import nif.niobject.hkx.hknpCompressedMeshShapeData;
 import nif.niobject.hkx.hknpConvexPolytopeShape;
+import nif.niobject.hkx.hknpConvexShape;
 import nif.niobject.hkx.hknpDynamicCompoundShape;
 import nif.niobject.hkx.hknpScaledConvexShape;
 import nif.niobject.hkx.hknpShape;
@@ -69,13 +70,14 @@ public abstract class hkxShapeToCollisionShape {
 	private static CollisionShape createCollisionShape(	hknpShape hknpShape, HKXContents contents, NifVer nifVer,
 														boolean isDynamic, float scale) {
 
-		if (hknpShape instanceof hknpSphereShape) {
+		if (hknpShape instanceof hknpSphereShape) {//BEFORE hknpConvexShape
 			return hkxCollisionToNifBullet.hknpSphereShape((hknpSphereShape)hknpShape, scale, nifVer);
-		} else if (hknpShape instanceof hknpCapsuleShape) {
+		} else if (hknpShape instanceof hknpCapsuleShape) {//BEFORE hknpConvexPolytopeShape
 			return hkxCollisionToNifBullet.hknpCapsuleShape((hknpCapsuleShape)hknpShape, scale, nifVer);
 		} else if (hknpShape instanceof hknpDynamicCompoundShape) {
-			if (!isDynamic)
-				System.out.println("createCollisionShape hknpDynamicCompoundShape! isDynamic=" + isDynamic);
+			if (!isDynamic) {
+				System.out.println("createCollisionShape hknpDynamicCompoundShape! isDynamic=false in file " + nifVer.fileName);				
+			}
 			hknpCompoundShape((hknpDynamicCompoundShape)hknpShape, contents, nifVer, isDynamic, scale);
 			return null;
 		} else if (hknpShape instanceof hknpStaticCompoundShape) {
@@ -99,12 +101,14 @@ public abstract class hkxShapeToCollisionShape {
 				System.out.println("hknpCompressedMeshShape.data == -1");
 				return null;
 			}
-		} else if (hknpShape instanceof hknpConvexPolytopeShape) {
+		} else if (hknpShape instanceof hknpConvexPolytopeShape) {//BEFORE hknpConvexShape
 			return hkxCollisionToNifBullet.hknpConvexPolytopeShape((hknpConvexPolytopeShape)hknpShape, scale, nifVer);
+		} else if (hknpShape instanceof hknpConvexShape) {//AFTER hknpConvexPolytopeShape, hknpCapsuleShape, hknpSphereShape
+			return hkxCollisionToNifBullet.hknpConvexShape((hknpConvexShape)hknpShape, scale, nifVer);
 		} else if (hknpShape instanceof hknpCompoundShape) {
 			return hknpCompoundShape((hknpCompoundShape)hknpShape, contents, nifVer, isDynamic, scale);
 		} else {
-			System.out.println("NifHavokToj3d - unknown bhkShape " + hknpShape);
+			System.out.println("hkxShapeToCollisionShape.createCollisionShape - unknown bhkShape " + hknpShape);
 			return null;
 		}
 	}

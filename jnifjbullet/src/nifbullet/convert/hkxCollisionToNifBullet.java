@@ -1,5 +1,8 @@
 package nifbullet.convert;
 
+import org.jogamp.java3d.Group;
+import org.jogamp.java3d.Node;
+import org.jogamp.java3d.Shape3D;
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.utils.geometry.GeometryInfo;
 import org.jogamp.vecmath.Matrix4f;
@@ -14,10 +17,12 @@ import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.collision.shapes.CompoundShape;
 import com.bulletphysics.collision.shapes.ConvexHullShape;
 import com.bulletphysics.collision.shapes.IndexedMesh;
+import com.bulletphysics.collision.shapes.ShapeHull;
 import com.bulletphysics.collision.shapes.SphereShape;
 import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
 import com.bulletphysics.extras.gimpact.GImpactMeshShape;
 import com.bulletphysics.linearmath.Transform;
+import com.bulletphysics.util.IntArrayList;
 import com.bulletphysics.util.ObjectArrayList;
 
 import nif.NifVer;
@@ -26,9 +31,12 @@ import nif.niobject.hkx.hkcdStaticMeshTreeBasePrimitive;
 import nif.niobject.hkx.hknpCompressedMeshShapeData;
 import nif.niobject.hkx.hknpCompressedMeshShapeTree;
 import nif.niobject.hkx.hknpConvexPolytopeShape;
+import nif.niobject.hkx.hknpConvexShape;
 import nif.niobject.hkx.hknpSphereShape;
+import nif.niobject.hkx.reader.HKXContents;
 import nif.niobject.hkx.hknpCapsuleShape;
 import nifbullet.util.NifBulletUtil;
+import tools3d.utils.PhysAppearance;
 import utils.convert.ConvertFromHavok;
 
 /**
@@ -82,6 +90,28 @@ public abstract class hkxCollisionToNifBullet {
 		return parent;
 	}
 
+	
+	/**
+	 * Same as hknpConvexPolytopeShape but there are no faces or indices or planes
+	 * @param data
+	 * @param contents
+	 * @param nifVer
+	 * @return
+	 */
+	public static CollisionShape hknpConvexShape(hknpConvexShape data, float scale, NifVer nifVer) {
+		ObjectArrayList<Vector3f> points = new ObjectArrayList<Vector3f>();
+
+		for (int i = 0; i < data.vertices.length; i++) {
+			Vector3f v = new Vector3f(ConvertFromHavok.toJ3dP3f(data.vertices[i], scale, nifVer));
+			points.add(v);
+		}
+
+		ConvexHullShape chs = new ConvexHullShape(points);
+
+		return chs;
+	}
+	
+	
 	public static CollisionShape hknpConvexPolytopeShape(hknpConvexPolytopeShape data, float scale, NifVer nifVer) {
 		ObjectArrayList<Vector3f> points = new ObjectArrayList<Vector3f>();
 
