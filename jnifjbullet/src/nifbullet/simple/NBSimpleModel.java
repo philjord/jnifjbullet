@@ -24,7 +24,6 @@ import nif.niobject.bhk.bhkCollisionObject;
 import nif.niobject.bhk.bhkNPCollisionObject;
 import nif.niobject.bhk.bhkPhysicsSystem;
 import nif.niobject.bhk.bhkRigidBody;
-import nif.niobject.bs.BSbhkNPObject;
 import nifbullet.BulletNifModelClassifier;
 import nifbullet.NBRigidBody;
 import nifbullet.PartedBulletNifModel;
@@ -65,15 +64,18 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 		this.hasPivot = hasPivot;
 		//TODO: really? possibly just a group would be fine for simplemodel
 		setCapability(BranchGroup.ALLOW_DETACH);
-		addPart(fileName, meshSource, this, rootTrans);
 
 		if (hasPivot)
 		{
+			pivotBehavior = new TimedRunnableBehavior(10);
+			doorPivot = new TransformGroup();
 			doorPivot.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 			addChild(doorPivot);
 
 			doorPivot.addChild(pivotBehavior);
 		}
+		
+		addPart(fileName, meshSource, this, rootTrans);
 	}
 
 	/**
@@ -332,9 +334,9 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 
 	private Alpha alpha;
 
-	private TimedRunnableBehavior pivotBehavior = new TimedRunnableBehavior(10);
+	private TimedRunnableBehavior pivotBehavior;
 
-	private TransformGroup doorPivot = new TransformGroup();
+	private TransformGroup doorPivot;
 
 	public void pivotTes3Door(final boolean isOpen)
 	{

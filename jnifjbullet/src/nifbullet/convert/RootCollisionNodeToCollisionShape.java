@@ -5,8 +5,16 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.jogamp.java3d.utils.geometry.GeometryInfo;
+import org.jogamp.vecmath.Matrix3f;
 import org.jogamp.vecmath.Quat4f;
 import org.jogamp.vecmath.Vector3f;
+
+import com.bulletphysics.collision.shapes.BvhTriangleMeshShape;
+import com.bulletphysics.collision.shapes.CollisionShape;
+import com.bulletphysics.collision.shapes.CompoundShape;
+import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
+import com.bulletphysics.extras.gimpact.GImpactMeshShape;
+import com.bulletphysics.linearmath.Transform;
 
 import nif.NiObjectList;
 import nif.niobject.NiAVObject;
@@ -16,13 +24,6 @@ import nif.niobject.RootCollisionNode;
 import nifbullet.util.NifBulletUtil;
 import tools3d.utils.Utils3D;
 import utils.convert.ConvertFromHavok;
-
-import com.bulletphysics.collision.shapes.BvhTriangleMeshShape;
-import com.bulletphysics.collision.shapes.CollisionShape;
-import com.bulletphysics.collision.shapes.CompoundShape;
-import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
-import com.bulletphysics.extras.gimpact.GImpactMeshShape;
-import com.bulletphysics.linearmath.Transform;
 
 public abstract class RootCollisionNodeToCollisionShape
 {
@@ -59,11 +60,15 @@ public abstract class RootCollisionNodeToCollisionShape
 					NiTriShapeData data = (NiTriShapeData) niToJ3dData.get(niTriShape.data);
 
 					CollisionShape shape = processNiTriStripsData(data, false, scale);
-
-					Quat4f q = ConvertFromHavok.toJ3dQ4f(niTriShape.rotation);
+					
+					//Matrix3f m = ConvertFromHavok.toJ3dM3(niTriShape.rotation);
 					Vector3f v = new Vector3f(ConvertFromHavok.toJ3dP3fNif(niTriShape.translation, scale));
-
+					//TODO: the M3 convert above should work better, but does not, probably due to morrowind 4DP isse
+					Quat4f q = ConvertFromHavok.toJ3dQ4f(niTriShape.rotation);
 					Transform t = NifBulletUtil.createTrans(q, v);
+					//Transform t = new Transform();
+					//t.origin.set(v);
+					//t.basis.set(m);
 
 					cs.addChildShape(t, shape);
 				}

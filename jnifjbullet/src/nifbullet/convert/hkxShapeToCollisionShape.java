@@ -76,15 +76,14 @@ public abstract class hkxShapeToCollisionShape {
 			return hkxCollisionToNifBullet.hknpCapsuleShape((hknpCapsuleShape)hknpShape, scale, nifVer);
 		} else if (hknpShape instanceof hknpDynamicCompoundShape) {
 			if (!isDynamic) {
+				// this seems to make no odds
 				System.out.println("createCollisionShape hknpDynamicCompoundShape! isDynamic=false in file " + nifVer.fileName);				
 			}
-			hknpCompoundShape((hknpDynamicCompoundShape)hknpShape, contents, nifVer, isDynamic, scale);
-			return null;
+			return hknpCompoundShape((hknpDynamicCompoundShape)hknpShape, contents, nifVer, isDynamic, scale);
 		} else if (hknpShape instanceof hknpStaticCompoundShape) {
 			if (isDynamic)
 				System.out.println("createCollisionShape hknpStaticCompoundShape! isDynamic=" + isDynamic);
-			hknpCompoundShape((hknpStaticCompoundShape)hknpShape, contents, nifVer, isDynamic, scale);
-			return null;
+			return hknpCompoundShape((hknpStaticCompoundShape)hknpShape, contents, nifVer, isDynamic, scale);
 		} else if (hknpShape instanceof hknpScaledConvexShape) {
 			hknpScaledConvexShape((hknpScaledConvexShape)hknpShape, contents, nifVer, isDynamic, scale);
 			return null;
@@ -133,7 +132,7 @@ public abstract class hkxShapeToCollisionShape {
 
 				cs.addChildShape(t, shape);
 			} else {
-				System.out.println("shape == null " + hknpShape);
+				System.out.println("shape == null " + hknpShape + " " + nifVer.fileName);
 				return null;
 			}
 		}
@@ -155,15 +154,19 @@ public abstract class hkxShapeToCollisionShape {
 
 					Matrix4f m = ConvertFromHavok.toJ3dM4(s.transform, nifVer);
 					t3d.set(m);
-
-					//Note no ConvertFromHavok as these are just straight multipliers 
-					t3d.setScale(new Vector3d(s.scale.x, s.scale.z, s.scale.y));
-
+					
+					if(s.scale.x != 1.0 || s.scale.z != 1.0 || s.scale.y != 1.0) {
+						//Note no ConvertFromHavok as these are just straight multipliers 
+						//using t3d.setScale(vec3) appears to be taking the rotation out!!
+						Transform3D t3d2 = new Transform3D();
+						t3d2.setScale(new Vector3d(s.scale.x, s.scale.z, s.scale.y));
+						t3d.mul(t3d2);
+					}	
 					Transform t = NifBulletUtil.createTrans(t3d);
 
 					cs.addChildShape(t, shape);
 				} else {
-					System.out.println("shape == null " + hknpShape);
+					System.out.println("shape == null " + hknpShape + " " + nifVer.fileName);
 					return null;
 				}
 			}
