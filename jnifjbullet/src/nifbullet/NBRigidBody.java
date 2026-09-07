@@ -15,6 +15,7 @@ public abstract class NBRigidBody
 
 	private bhkRigidBody bhkRigidBody;
 
+	//NOTE!! this is baked into the collision shape, not part of a Transform
 	protected float scale = 1f;
 
 	// root shape to allow multi parts to be added as required

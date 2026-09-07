@@ -119,18 +119,11 @@ public abstract class hkxShapeToCollisionShape {
 		long shapeId = data.coreShape;
 		if (shapeId > 0) {
 			hknpShape hknpShape = (hknpShape)contents.get(shapeId);
-			CollisionShape shape = createCollisionShape(hknpShape, contents, nifVer, isDynamic, scale);
+			// there is no scaling in Bullet transforms so the scale is passed into the model create
+			// along with the REFER scale value
+			CollisionShape shape = createCollisionShape(hknpShape, contents, nifVer, isDynamic, data.scale.x * scale);
 			if (shape != null) {
-				Transform3D t3d = new Transform3D();
-
-				t3d.set(ConvertFromHavok.toJ3d(data.position, nifVer));
-
-				//Note no ConvertFromHavok as these are just straight multipliers 
-				t3d.setScale(new Vector3d(data.scale.x, data.scale.z, data.scale.y));
-
-				Transform t = NifBulletUtil.createTrans(t3d);
-
-				cs.addChildShape(t, shape);
+				cs.addChildShape(new Transform(), shape);
 			} else {
 				System.out.println("shape == null " + hknpShape + " " + nifVer.fileName);
 				return null;
@@ -148,20 +141,15 @@ public abstract class hkxShapeToCollisionShape {
 			long shapeId = s.shape;
 			if (shapeId > 0) {
 				hknpShape hknpShape = (hknpShape)contents.get(shapeId);
-				CollisionShape shape = createCollisionShape(hknpShape, contents, nifVer, isDynamic, scale);
+				// there is no scaling in Bullet transforms so the scale is passed into the model create
+				// along with the REFER scale value
+				CollisionShape shape = createCollisionShape(hknpShape, contents, nifVer, isDynamic, s.scale.x* scale);
 				if (shape != null) {
 					Transform3D t3d = new Transform3D();
 
 					Matrix4f m = ConvertFromHavok.toJ3dM4(s.transform, nifVer);
-					t3d.set(m);
-					
-					if(s.scale.x != 1.0 || s.scale.z != 1.0 || s.scale.y != 1.0) {
-						//Note no ConvertFromHavok as these are just straight multipliers 
-						//using t3d.setScale(vec3) appears to be taking the rotation out!!
-						Transform3D t3d2 = new Transform3D();
-						t3d2.setScale(new Vector3d(s.scale.x, s.scale.z, s.scale.y));
-						t3d.mul(t3d2);
-					}	
+					t3d.set(m);					
+					 
 					Transform t = NifBulletUtil.createTrans(t3d);
 
 					cs.addChildShape(t, shape);
