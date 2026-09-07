@@ -131,7 +131,11 @@ public abstract class BulletNifModelClassifier
 	public static boolean isNotPhysics(String filename, MeshSource meshSource)
 	{
 		NifFile nifFile = NifToJ3d.loadNiObjects(filename, meshSource);
-
+		return isNotPhysics(nifFile);
+	}
+	
+	public static boolean isNotPhysics(NifFile nifFile)
+	{
 		boolean ret = false;
 		if (nifFile != null)
 		{
@@ -249,7 +253,9 @@ public abstract class BulletNifModelClassifier
 
 				ret = (getMassedRigidBodyCount(niToJ3dData) == 1 && //
 						getNonMassedRigidBodyCount(niToJ3dData) == 0 && //
-						getLayerCount(niToJ3dData, OblivionLayer.OL_PROPS) + getLayerCount(niToJ3dData, OblivionLayer.OL_CLUTTER) == 1 //
+						getLayerCount(niToJ3dData, OblivionLayer.OL_PROPS) + getLayerCount(niToJ3dData, OblivionLayer.OL_CLUTTER)//
+						// apprently some static have mass in skyrim see Clutter\Silver\SilverCandleStick01.nif
+						+ getLayerCount(niToJ3dData, OblivionLayer.OL_STATIC)== 1 //
 				|| forcedMass != 0) && //
 						getTransformControllerCount(niToJ3dData) == 0 && //
 						getConstraintCount(niToJ3dData) == 0 && //
@@ -269,7 +275,7 @@ public abstract class BulletNifModelClassifier
 	public static boolean isComplexDynamic(String filename, MeshSource meshSource)
 	{
 		NifFile nifFile = NifToJ3d.loadNiObjects(filename, meshSource);
-		return isStaticModel(nifFile);
+		return isComplexDynamic(nifFile);
 	}
 
 	public static boolean isComplexDynamic(NifFile nifFile)

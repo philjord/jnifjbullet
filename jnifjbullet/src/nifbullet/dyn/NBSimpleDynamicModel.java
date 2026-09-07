@@ -41,7 +41,10 @@ public class NBSimpleDynamicModel extends NBDynamicModel implements BulletNifMod
 							bhkCollisionObject bhkCollisionObject = (bhkCollisionObject) niObject;
 							bhkRigidBody bhkRigidBody = (bhkRigidBody) nifFile.blocks.get(bhkCollisionObject.body);
 							int layer = bhkRigidBody.layerCopy.layer;
-							if (forcedMass != 0 || layer == OblivionLayer.OL_CLUTTER || layer == OblivionLayer.OL_PROPS)
+							if (forcedMass != 0 || layer == OblivionLayer.OL_CLUTTER || layer == OblivionLayer.OL_PROPS
+									// apprently some static have mass in skyrim see Clutter\Silver\SilverCandleStick01.nif
+									|| (layer ==  OblivionLayer.OL_STATIC && bhkRigidBody.mass > 0 ) //
+									)
 							{
 								bhkRigidBody.mass = forcedMass != 0 ? forcedMass : bhkRigidBody.mass;
 								if (bhkRigidBody.mass != 0)
