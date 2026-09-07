@@ -6,7 +6,6 @@ import java.util.WeakHashMap;
 
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.vecmath.Matrix4f;
-import org.jogamp.vecmath.Vector3d;
 
 import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.collision.shapes.CompoundShape;

@@ -83,7 +83,6 @@ public abstract class hkxCollisionToNifBullet {
 		return parent;
 	}
 
-	
 	/**
 	 * Same as hknpConvexPolytopeShape but there are no faces or indices or planes
 	 * @param data
@@ -103,8 +102,7 @@ public abstract class hkxCollisionToNifBullet {
 
 		return chs;
 	}
-	
-	
+
 	public static CollisionShape hknpConvexPolytopeShape(hknpConvexPolytopeShape data, float scale, NifVer nifVer) {
 		ObjectArrayList<Vector3f> points = new ObjectArrayList<Vector3f>();
 
@@ -217,43 +215,57 @@ public abstract class hkxCollisionToNifBullet {
 
 						//quad?
 						if (indices[2] != indices[3]) {
-							listPoints[idx++] = indices[0] < numPackedVertices ? indices[0] : sharedVerticesIndex[(indices[0]
-																													- numPackedVertices)
-																													+ sharedOffset]
-																								+ numPackedVertices;
-							listPoints[idx++] = indices[1] < numPackedVertices ? indices[1] : sharedVerticesIndex[(indices[1]
-																													- numPackedVertices)
-																													+ sharedOffset]
-																								+ numPackedVertices;
-							listPoints[idx++] = indices[2] < numPackedVertices ? indices[2] : sharedVerticesIndex[(indices[2]
-																													- numPackedVertices)
-																													+ sharedOffset]
-																								+ numPackedVertices;
-							listPoints[idx++] = indices[2] < numPackedVertices ? indices[2] : sharedVerticesIndex[(indices[2]
-																													- numPackedVertices)
-																													+ sharedOffset]
-																								+ numPackedVertices;
-							listPoints[idx++] = indices[3] < numPackedVertices ? indices[3] : sharedVerticesIndex[(indices[3]
-																													- numPackedVertices)
-																													+ sharedOffset]
-																								+ numPackedVertices;
-							listPoints[idx++] = indices[0] < numPackedVertices ? indices[0] : sharedVerticesIndex[(indices[0]
-																													- numPackedVertices)
-																													+ sharedOffset]
-																								+ numPackedVertices;
+							// if we go past teh end look into the shared vertex index, but make sure we don't go off the end of that!
+							int idx0 = indices[0] < numPackedVertices ? indices[0] : //								
+									((indices[0] - numPackedVertices) + sharedOffset) < sharedVerticesIndex.length ? //
+											(sharedVerticesIndex[(indices[0] - numPackedVertices) + sharedOffset]
+												+ numPackedVertices) : 0;
+							int idx1 = indices[1] < numPackedVertices ? indices[1] : //
+									((indices[1] - numPackedVertices) + sharedOffset) < sharedVerticesIndex.length ? //
+											sharedVerticesIndex[(indices[1] - numPackedVertices)
+																+ sharedOffset] + numPackedVertices : 0;
+							int idx2 = indices[2] < numPackedVertices ? indices[2] : //
+									((indices[2] - numPackedVertices) + sharedOffset) < sharedVerticesIndex.length ? //
+											sharedVerticesIndex[(indices[2] - numPackedVertices)
+																+ sharedOffset] + numPackedVertices : 0;
+							int idx3 = indices[3] < numPackedVertices ? indices[3] : //
+									((indices[3] - numPackedVertices) + sharedOffset) < sharedVerticesIndex.length ? //
+											sharedVerticesIndex[(indices[3] - numPackedVertices)
+																+ sharedOffset] + numPackedVertices : 0;
+							// don't go off the end, probably degenerate tris
+							idx0 = idx0 < numPackedVertices + sharedVertices.length ? idx0 : 0;
+							idx1 = idx1 < numPackedVertices + sharedVertices.length ? idx1 : 0;
+							idx2 = idx2 < numPackedVertices + sharedVertices.length ? idx2 : 0;
+							idx3 = idx3 < numPackedVertices + sharedVertices.length ? idx3 : 0;
+
+							listPoints[idx++] = idx0;
+							listPoints[idx++] = idx1;
+							listPoints[idx++] = idx2;
+							listPoints[idx++] = idx2;
+							listPoints[idx++] = idx3;
+							listPoints[idx++] = idx0;
 						} else {//just a tri					
-							listPoints[idx++] = indices[0] < numPackedVertices ? indices[0] : sharedVerticesIndex[(indices[0]
-																													- numPackedVertices)
-																													+ sharedOffset]
-																								+ numPackedVertices;
-							listPoints[idx++] = indices[1] < numPackedVertices ? indices[1] : sharedVerticesIndex[(indices[1]
-																													- numPackedVertices)
-																													+ sharedOffset]
-																								+ numPackedVertices;
-							listPoints[idx++] = indices[2] < numPackedVertices ? indices[2] : sharedVerticesIndex[(indices[2]
-																													- numPackedVertices)
-																													+ sharedOffset]
-																								+ numPackedVertices;
+							// if we go past teh end look into the shared vertex index, but make sure we don't go off the end of that!
+							int idx0 = indices[0] < numPackedVertices ? indices[0] : //								
+									((indices[0] - numPackedVertices) + sharedOffset) < sharedVerticesIndex.length ? //
+											(sharedVerticesIndex[(indices[0] - numPackedVertices) + sharedOffset]
+												+ numPackedVertices) : 0;
+							int idx1 = indices[1] < numPackedVertices ? indices[1] : //
+									((indices[1] - numPackedVertices) + sharedOffset) < sharedVerticesIndex.length ? //
+											sharedVerticesIndex[(indices[1] - numPackedVertices)
+																+ sharedOffset] + numPackedVertices : 0;
+							int idx2 = indices[2] < numPackedVertices ? indices[2] : //
+									((indices[2] - numPackedVertices) + sharedOffset) < sharedVerticesIndex.length ? //
+											sharedVerticesIndex[(indices[2] - numPackedVertices)
+																+ sharedOffset] + numPackedVertices : 0;
+							// don't go off the end, probably degenerate tris
+							idx0 = idx0 < numPackedVertices + sharedVertices.length ? idx0 : 0;
+							idx1 = idx1 < numPackedVertices + sharedVertices.length ? idx1 : 0;
+							idx2 = idx2 < numPackedVertices + sharedVertices.length ? idx2 : 0;
+
+							listPoints[idx++] = idx0;
+							listPoints[idx++] = idx1;
+							listPoints[idx++] = idx2;
 						}
 					} else {
 						//quad?
@@ -288,14 +300,19 @@ public abstract class hkxCollisionToNifBullet {
 			addMesh(indexVertexArrays, gi, t);
 		}
 
-		//NOTE!!!!!!!!!!!!!! there is no default CONCAVE CONCAVE collider so we MUST use GImpact or collision system throws null pointers!!
-		if (isDynamic) {
-			GImpactMeshShape trimesh = new GImpactMeshShape(indexVertexArrays);
-			trimesh.updateBound();
-			return trimesh;
+		if (indexVertexArrays.getNumSubParts() > 0) {
+			//NOTE!!!!!!!!!!!!!! there is no default CONCAVE CONCAVE collider so we MUST use GImpact or collision system throws null pointers!!
+			if (isDynamic) {
+				GImpactMeshShape trimesh = new GImpactMeshShape(indexVertexArrays);
+				trimesh.updateBound();
+				return trimesh;
+			} else {
+				BvhTriangleMeshShape trimesh = new BvhTriangleMeshShape(indexVertexArrays, true);
+				return trimesh;
+			}
 		} else {
-			BvhTriangleMeshShape trimesh = new BvhTriangleMeshShape(indexVertexArrays, true);
-			return trimesh;
+			// all teh compressed meshes were degenerated away
+			return null;
 		}
 	}
 
@@ -310,22 +327,25 @@ public abstract class hkxCollisionToNifBullet {
 
 		int[] coordIndices = gi.getCoordinateIndices();
 		coordIndices = NifBulletUtil.remove2dTriangles(coordIndices);
+		// we may have removed all tris
+		if (coordIndices.length > 3) {
 
-		Point3f[] points = gi.getCoordinates();
-		// transform (bake in) all coords by t	
-		NifBulletUtil.transformPoints(points, t);
-		float[] coords = NifBulletUtil.makePrimitive(points);
+			Point3f[] points = gi.getCoordinates();
+			// transform (bake in) all coords by t	
+			NifBulletUtil.transformPoints(points, t);
+			float[] coords = NifBulletUtil.makePrimitive(points);
 
-		IndexedMesh mesh = new IndexedMesh();
+			IndexedMesh mesh = new IndexedMesh();
 
-		mesh.numTriangles = coordIndices.length / 3;
-		mesh.triangleIndexBase = NifBulletUtil.convertToIndexBuffer(coordIndices);
-		mesh.triangleIndexStride = 4 * 3;
-		mesh.numVertices = coords.length / 3;
-		mesh.vertexBase = NifBulletUtil.convertToByteBuffer(coords);
-		mesh.vertexStride = 4 * 3;
+			mesh.numTriangles = coordIndices.length / 3;
+			mesh.triangleIndexBase = NifBulletUtil.convertToIndexBuffer(coordIndices);
+			mesh.triangleIndexStride = 4 * 3;
+			mesh.numVertices = coords.length / 3;
+			mesh.vertexBase = NifBulletUtil.convertToByteBuffer(coords);
+			mesh.vertexStride = 4 * 3;
 
-		indexVertexArrays.addIndexedMesh(mesh);
+			indexVertexArrays.addIndexedMesh(mesh);
+		}
 
 	}
 }
