@@ -171,8 +171,9 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel
 		if (partFileName != null && partFileName.length() > 0)
 		{
 			//NOTE! we don't actually add parts per se, they are all static so we just create them
-			if (BulletNifModelClassifier.isStaticModel(partFileName, meshSource)
-					|| BulletNifModelClassifier.isKinematicModel(partFileName, meshSource))
+			BulletNifModelClassifier bulletNifModelClassifier = new BulletNifModelClassifier(partFileName, meshSource);
+			if (bulletNifModelClassifier.isStaticModel()
+					|| bulletNifModelClassifier.isKinematicModel())
 			{
 				nifJ3dRoot = NifToJ3d.loadHavok(partFileName, meshSource);
 				J3dNiAVObject j3dNiNodeRoot = nifJ3dRoot.getHavokRoot();

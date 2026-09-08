@@ -7,14 +7,21 @@ import org.jogamp.vecmath.Quat4f;
 import org.jogamp.vecmath.Vector3f;
 
 import nif.NiObjectList;
+import nif.NifVer;
 import nif.enums.OblivionLayer;
 import nif.niobject.bhk.bhkCollisionObject;
 import nif.niobject.bhk.bhkRigidBody;
 import nif.niobject.bhk.bhkRigidBodyT;
 import nif.niobject.bhk.bhkShape;
+import nif.niobject.hkx.hknpBodyCinfo;
+import nif.niobject.hkx.hknpMaterial;
+import nif.niobject.hkx.hknpMotionCinfo;
+import nif.niobject.hkx.hknpShape;
+import nif.niobject.hkx.reader.HKXContents;
 import nifbullet.BulletNifModel;
 import nifbullet.NBRigidBody;
 import nifbullet.convert.BhkShapeToCollisionShape;
+import nifbullet.convert.hkxShapeToCollisionShape;
 import nifbullet.util.NifBulletUtil;
 import utils.convert.ConvertFromHavok;
 
@@ -22,14 +29,13 @@ import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.collision.shapes.CompoundShape;
 import com.bulletphysics.linearmath.Transform;
 
-public class NBDynamicRigidBody extends NBRigidBody
-{
+public class NBDynamicRigidBody extends NBRigidBody {
 	// transform binding point, send rigid body trans updates out to the parent transform group and nifbullet
-	private NBDynRBTransformListener rigidBodyTransformListener;
+	private NBDynRBTransformListener		rigidBodyTransformListener;
 
-	private HashMap<Object, CollisionShape> pointerToParts = new HashMap<Object, CollisionShape>();
+	private HashMap<Object, CollisionShape>	pointerToParts	= new HashMap<Object, CollisionShape>();
 
-	private HashMap<CollisionShape, Object> partsToPointer = new HashMap<CollisionShape, Object>();
+	private HashMap<CollisionShape, Object>	partsToPointer	= new HashMap<CollisionShape, Object>();
 
 	/**
 	 * As one of these simple objects controls the transform of one simple model we need the model now to update it
@@ -37,67 +43,98 @@ public class NBDynamicRigidBody extends NBRigidBody
 	 * @param bhkCollisionObject
 	 * @param niToJ3dData
 	 */
-	public NBDynamicRigidBody(NifBulletTransformListener nbtl, bhkCollisionObject bhkCollisionObject, NiObjectList niToJ3dData,
-			BulletNifModel parentModel, float fixedScaleFactor, float forcedMass)
-	{
+	public NBDynamicRigidBody(	NifBulletTransformListener nbtl, bhkCollisionObject bhkCollisionObject,
+								NiObjectList niToJ3dData, BulletNifModel parentModel, float fixedScaleFactor,
+								float forcedMass) {
 		super(parentModel);
 
 		this.scale = fixedScaleFactor;
 
-		bhkRigidBody bhkRigidBody = (bhkRigidBody) niToJ3dData.get(bhkCollisionObject.body);
+		bhkRigidBody bhkRigidBody = (bhkRigidBody)niToJ3dData.get(bhkCollisionObject.body);
 		setBhkRigidBody(bhkRigidBody);
 
 		int layer = bhkRigidBody.layer.layer;
 
 		if (forcedMass != 0 || layer == OblivionLayer.OL_CLUTTER || layer == OblivionLayer.OL_PROPS
-				// apprently some static have mass in skyrim see Clutter\Silver\SilverCandleStick01.nif
-				|| (layer ==  OblivionLayer.OL_STATIC && bhkRigidBody.mass > 0 ) //
-				)
-		{
+		// apprently some static have mass in skyrim see Clutter\Silver\SilverCandleStick01.nif
+			|| (layer == OblivionLayer.OL_STATIC && bhkRigidBody.mass > 0) //
+		) {
 			bhkRigidBody.mass = forcedMass != 0 ? forcedMass : bhkRigidBody.mass;
-			if (bhkRigidBody.mass != 0)
-			{
+			if (bhkRigidBody.mass != 0) {
 				Transform3D colTrans = new Transform3D();
 
-				if (bhkRigidBody instanceof bhkRigidBodyT)
-				{
+				if (bhkRigidBody instanceof bhkRigidBodyT) {
 					colTrans = new Transform3D(ConvertFromHavok.toJ3d(bhkRigidBody.rotation),
-							ConvertFromHavok.toJ3d(bhkRigidBody.translation, fixedScaleFactor, niToJ3dData.nifVer), 1.0f);
-				}
-				else
-				{
+							ConvertFromHavok.toJ3d(bhkRigidBody.translation, fixedScaleFactor, niToJ3dData.nifVer),
+							1.0f);
+				} else {
 					colTrans.setIdentity();
 				}
 
-				bhkShape bhkShape = (bhkShape) niToJ3dData.get(bhkRigidBody.shape);
+				bhkShape bhkShape = (bhkShape)niToJ3dData.get(bhkRigidBody.shape);
 
 				colShape = new CompoundShape();
-				((CompoundShape) colShape).addChildShape(NifBulletUtil.createTrans(colTrans),
+				((CompoundShape)colShape).addChildShape(NifBulletUtil.createTrans(colTrans),
 						BhkShapeToCollisionShape.processBhkShape(bhkShape, niToJ3dData, true, fixedScaleFactor));
-				setRigidBody(NifBulletUtil.createRigidBody(bhkRigidBody, colShape, NifBulletUtil.newIdentityTransform(), this));
+				setRigidBody(NifBulletUtil.createRigidBody(bhkRigidBody, colShape, NifBulletUtil.newIdentityTransform(),
+						this));
 
 				//note we don't set initial transform or velocities during construction
-				rigidBodyTransformListener = new NBDynRBTransformListener(nbtl, getRigidBody(), NifBulletUtil.newIdentityTransform());
+				rigidBodyTransformListener = new NBDynRBTransformListener(nbtl, getRigidBody(),
+						NifBulletUtil.newIdentityTransform());
 				getRigidBody().setMotionState(rigidBodyTransformListener);
-			}
-			else
-			{
+			} else {
 				new Throwable("bhkRigidBody.mass == 0 " + this).printStackTrace();
 			}
-		}
-		else
-		{
+		} else {
 			new Throwable("Why is a non OL_CLUTTER or OL_PROPS handed to  me? " + layer + " " + this).printStackTrace();
 		}
 	}
 
-	public void updateRootTransform(Transform3D rootTrans)
-	{
+	public NBDynamicRigidBody(	NifBulletTransformListener nbtl, hknpBodyCinfo hknpBodyCinfo,
+								hknpMotionCinfo hknpMotionCinfo, hknpMaterial hknpMaterial, HKXContents contents,
+								NifVer nifVer, BulletNifModel parentModel, float fixedScaleFactor, float forcedMass) {
+		super(parentModel);
+
+		this.scale = fixedScaleFactor;
+
+		long shapeId = hknpBodyCinfo.shape;
+		if (shapeId > 0) {
+			hknpShape hknpShape = (hknpShape)contents.get(shapeId);
+
+			if (hknpMotionCinfo.massFactor != 0) {
+				Transform3D colTrans = new Transform3D();
+
+				/*	if (bhkRigidBody instanceof bhkRigidBodyT) {
+						colTrans = new Transform3D(ConvertFromHavok.toJ3d(bhkRigidBody.rotation),
+								ConvertFromHavok.toJ3d(bhkRigidBody.translation, fixedScaleFactor, niToJ3dData.nifVer),
+								1.0f);
+					} else {
+						colTrans.setIdentity();
+					}*/
+
+				colShape = new CompoundShape();
+				((CompoundShape)colShape).addChildShape(NifBulletUtil.createTrans(colTrans),
+						hkxShapeToCollisionShape.processBhkShape(hknpShape, contents, nifVer, fixedScaleFactor));
+				setRigidBody(NifBulletUtil.createRigidBody(hknpBodyCinfo, hknpMotionCinfo, hknpMaterial, colShape,
+						NifBulletUtil.newIdentityTransform(), this));
+
+				//note we don't set initial transform or velocities during construction
+				rigidBodyTransformListener = new NBDynRBTransformListener(nbtl, getRigidBody(),
+						NifBulletUtil.newIdentityTransform());
+				getRigidBody().setMotionState(rigidBodyTransformListener);
+			} else {
+				new Throwable(".mass == 0 " + this).printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	public void updateRootTransform(Transform3D rootTrans) {
 		forceUpdate(rootTrans);
 	}
 
-	public void forceUpdate(Transform3D trans)
-	{
+	public void forceUpdate(Transform3D trans) {
 		Transform worldTransform = NifBulletUtil.createTrans(trans);
 		rigidBodyTransformListener.setWorldTransform(worldTransform);
 		// note I MUST also call this, even though I set it in the motion state above, odd.
@@ -105,21 +142,18 @@ public class NBDynamicRigidBody extends NBRigidBody
 		getRigidBody().activate(true);
 	}
 
-	public void forceUpdate(Transform3D trans, Vector3f linearVelocity, Vector3f rotationalVelocity)
-	{
+	public void forceUpdate(Transform3D trans, Vector3f linearVelocity, Vector3f rotationalVelocity) {
 		forceUpdate(trans);
 		forceUpdate(linearVelocity, rotationalVelocity);
 	}
 
-	public void forceUpdate(Vector3f linearVelocity, Vector3f rotationalVelocity)
-	{
+	public void forceUpdate(Vector3f linearVelocity, Vector3f rotationalVelocity) {
 		getRigidBody().setLinearVelocity(linearVelocity);
 		getRigidBody().setAngularVelocity(rotationalVelocity);
 		getRigidBody().activate(true);
 	}
 
-	public void applyRelCentralForce(Vector3f linearForce)
-	{
+	public void applyRelCentralForce(Vector3f linearForce) {
 		//tranlate force to local coords
 		Transform wt = new Transform();
 		getRigidBody().getWorldTransform(wt);
@@ -134,8 +168,7 @@ public class NBDynamicRigidBody extends NBRigidBody
 
 	}
 
-	public void applyRelTorque(Vector3f rotationalForce)
-	{
+	public void applyRelTorque(Vector3f rotationalForce) {
 		//tranlate force to local coords
 		Transform wt = new Transform();
 		getRigidBody().getWorldTransform(wt);
@@ -155,40 +188,37 @@ public class NBDynamicRigidBody extends NBRigidBody
 	 * @param blocks
 	 * @param pointer
 	 */
-	public void addPart(bhkCollisionObject bhkCollisionObject, NiObjectList blocks, Object pointer, Transform3D rootTrans)
-	{
-		if (partsToPointer.get(pointer) != null)
-		{
+	public void addPart(bhkCollisionObject bhkCollisionObject, NiObjectList blocks, Object pointer,
+						Transform3D rootTrans) {
+		if (partsToPointer.get(pointer) != null) {
 			throw new RuntimeException("multiple pointer part mapping!");
 		}
 
-		bhkRigidBody bhkRigidBody = (bhkRigidBody) blocks.get(bhkCollisionObject.body);
+		bhkRigidBody bhkRigidBody = (bhkRigidBody)blocks.get(bhkCollisionObject.body);
 		//NOTE rigidBodyT transform ignored here
 
-		bhkShape bhkShape = (bhkShape) blocks.get(bhkRigidBody.shape);
+		bhkShape bhkShape = (bhkShape)blocks.get(bhkRigidBody.shape);
 		CollisionShape partColShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, blocks, true, scale);
 
-		((CompoundShape) colShape).addChildShape(NifBulletUtil.createTrans(rootTrans), partColShape);
+		((CompoundShape)colShape).addChildShape(NifBulletUtil.createTrans(rootTrans), partColShape);
 
 		pointerToParts.put(pointer, partColShape);
 		partsToPointer.put(partColShape, pointer);
 	}
 
-	public void setPartTransform(Object pointer, Transform3D t)
-	{
+	public void setPartTransform(Object pointer, Transform3D t) {
 		CollisionShape cs = pointerToParts.get(pointer);
-		((CompoundShape) colShape).updateChildTransform(((CompoundShape) colShape).getChildShapeIndex(cs), NifBulletUtil.createTrans(t));
+		((CompoundShape)colShape).updateChildTransform(((CompoundShape)colShape).getChildShapeIndex(cs),
+				NifBulletUtil.createTrans(t));
 	}
 
-	public Object getPartPointer(CollisionShape collisionShape)
-	{
+	public Object getPartPointer(CollisionShape collisionShape) {
 		return partsToPointer.get(collisionShape);
 	}
 
-	public void removePart(Object pointer)
-	{
+	public void removePart(Object pointer) {
 		CollisionShape cs = pointerToParts.remove(pointer);
 		partsToPointer.remove(cs);
-		((CompoundShape) colShape).removeChildShape(cs);
+		((CompoundShape)colShape).removeChildShape(cs);
 	}
 }

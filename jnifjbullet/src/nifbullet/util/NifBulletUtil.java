@@ -17,7 +17,9 @@ import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.Transform;
 
 import nif.niobject.bhk.bhkRigidBody;
+import nif.niobject.hkx.hknpBodyCinfo;
 import nif.niobject.hkx.hknpMaterial;
+import nif.niobject.hkx.hknpMotionCinfo;
 
 public abstract class NifBulletUtil {
 	/** for statics only, no motion state created
@@ -57,9 +59,10 @@ public abstract class NifBulletUtil {
 	 * @param colShape
 	 * @return
 	 */
-	public static RigidBody createRigidBody(bhkRigidBody bhkRigidBody, CollisionShape colShape,
+	public static RigidBody createRigidBody(hknpBodyCinfo hknpBodyCinfo, hknpMotionCinfo hknpMotionCinfo,
+											hknpMaterial hknpMaterial, CollisionShape colShape,
 											Transform startTransform, Object userPointer) {
-		float mass = bhkRigidBody.mass;
+		float mass = 1.0f/hknpMotionCinfo.inverseMass;//hope that's right
 
 		Vector3f localInertia = new Vector3f(0, 0, 0);
 
@@ -67,11 +70,8 @@ public abstract class NifBulletUtil {
 		boolean isDynamic = (mass != 0f);
 
 		if (isDynamic) {
-			//TODO: BULLET bhkRigidBody.inertia might be better?
-			if(bhkRigidBody.inertia.m11 !=0.0)
-				localInertia.set(bhkRigidBody.inertia.m11,bhkRigidBody.inertia.m33,bhkRigidBody.inertia.m22);
-			else
-				colShape.calculateLocalInertia(mass, localInertia);
+			//TODO: whats the inertia of the new np gear?
+			colShape.calculateLocalInertia(mass, localInertia);
 		}
 
 		// note I need to set motion states for kinematics to work
@@ -80,14 +80,12 @@ public abstract class NifBulletUtil {
 		//BULLET am I always getting good values from nif, compare with defaults
 		// default is 0, these tend to be numbers like 0.09 so not really sure
 		RigidBodyConstructionInfo rbInfo = new RigidBodyConstructionInfo(mass, myMotionState, colShape, localInertia);
-		rbInfo.linearDamping = bhkRigidBody.linearDamping;
-		rbInfo.angularDamping = bhkRigidBody.angularDamping;
+		rbInfo.linearDamping = 0.1f;
+		rbInfo.angularDamping = 0.1f;
 
-		//example Meshes\Dungeons\Imperial\Jail\ImpJailDoor01.nif bhkRigidBody.friction = 0.5 
-		rbInfo.friction = bhkRigidBody.friction < 0.1f ? 0.1f : bhkRigidBody.friction;
-		//example Meshes\Dungeons\Imperial\Jail\ImpJailDoor01.nif bhkRigidBody.restitution=0.4
+		rbInfo.friction = hknpMaterial.staticFriction;//TODO: could be dynamic
 		// I'll set 0 as advised by the default
-		rbInfo.restitution = 0;//bhkRigidBody.restitution;
+		rbInfo.restitution = 0;//hknpMaterial.restitution;
 
 		//use the default sleep thresholds
 		rbInfo.linearSleepingThreshold *= 2;
@@ -111,8 +109,73 @@ public abstract class NifBulletUtil {
 		//FIXME: Can I ask everyone to start off sleeping, unless they are like a skele ragdoll that needs a bit o sim?
 		// apparently they all wake up anyway? 0 is in RigidBody updateDeactivation, but is not a constant
 		//rigidBody.setActivationState(0);//CollisionObject.ISLAND_SLEEPING);
-	 
-		
+
+		return rigidBody;
+	}
+
+	/**
+	 * DO NOT hand static into this call
+	 * Note, in space damping needs to be 0! just make sure the damn models are correct!
+	 * Collision type will be set to KINEMATIC if mass == 0 
+	 * @param bhkRigidBody
+	 * @param colShape
+	 * @return
+	 */
+	public static RigidBody createRigidBody(bhkRigidBody bhkRigidBody, CollisionShape colShape,
+											Transform startTransform, Object userPointer) {
+		float mass = bhkRigidBody.mass;
+
+		Vector3f localInertia = new Vector3f(0, 0, 0);
+
+		// rigidbody is dynamic if and only if mass is non zero
+		boolean isDynamic = (mass != 0f);
+
+		if (isDynamic) {
+			//TODO: BULLET bhkRigidBody.inertia might be better?
+			if (bhkRigidBody.inertia.m11 != 0.0)
+				localInertia.set(bhkRigidBody.inertia.m11, bhkRigidBody.inertia.m33, bhkRigidBody.inertia.m22);
+			else
+				colShape.calculateLocalInertia(mass, localInertia);
+		}
+
+		// note I need to set motion states for kinematics to work
+		DefaultMotionState myMotionState = new DefaultMotionState(startTransform);
+
+		//BULLET am I always getting good values from nif, compare with defaults
+		// default is 0, these tend to be numbers like 0.09 so not really sure
+		RigidBodyConstructionInfo rbInfo = new RigidBodyConstructionInfo(mass, myMotionState, colShape, localInertia);
+		rbInfo.linearDamping = bhkRigidBody.linearDamping;
+		rbInfo.angularDamping = bhkRigidBody.angularDamping;
+
+		//example Meshes\Dungeons\Imperial\Jail\ImpJailDoor01.nif bhkRigidBody.friction = 0.5 
+		rbInfo.friction = bhkRigidBody.friction < 0.1f ? 0.1f : bhkRigidBody.friction;
+		//example Meshes\Dungeons\Imperial\Jail\ImpJailDoor01.nif bhkRigidBody.restitution=0.4
+		// I'll set 0 as advised by the default
+		rbInfo.restitution = 0;//hknpMaterial.restitution;
+
+		//use the default sleep thresholds
+		rbInfo.linearSleepingThreshold *= 2;
+		rbInfo.angularSleepingThreshold *= 2;
+
+		//Apparently I should remove this when bullet is improved, however that seems unlikely
+		rbInfo.additionalDamping = true;
+		rbInfo.additionalDampingFactor *= 2;
+		rbInfo.additionalLinearDampingThresholdSqr *= 2;
+		rbInfo.additionalAngularDampingThresholdSqr *= 2;
+		rbInfo.additionalAngularDampingFactor *= 2;
+
+		RigidBody rigidBody = new RigidBody(rbInfo);
+		rigidBody.setUserPointer(userPointer);
+
+		if (mass == 0f) {
+			// set it as kinematic
+			rigidBody.setCollisionFlags(CollisionFlags.KINEMATIC_OBJECT);
+		}
+
+		//FIXME: Can I ask everyone to start off sleeping, unless they are like a skele ragdoll that needs a bit o sim?
+		// apparently they all wake up anyway? 0 is in RigidBody updateDeactivation, but is not a constant
+		//rigidBody.setActivationState(0);//CollisionObject.ISLAND_SLEEPING);
+
 		return rigidBody;
 	}
 

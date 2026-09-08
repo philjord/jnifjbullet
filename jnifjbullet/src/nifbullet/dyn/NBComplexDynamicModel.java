@@ -86,68 +86,49 @@ import utils.source.MeshSource;
  * @param forcedMass
  */
 
-public class NBComplexDynamicModel extends NBDynamicModel implements BulletNifModel
-{
+public class NBComplexDynamicModel extends NBDynamicModel implements BulletNifModel {
 
-	public NBComplexDynamicModel(String fileName, MeshSource meshSource)
-	{
+	public NBComplexDynamicModel(String fileName, MeshSource meshSource) {
 		this(fileName, meshSource, 0);
-
 	}
 
-	public NBComplexDynamicModel(String fileName, MeshSource meshSource, float forcedMass)
-	{
-
+	public NBComplexDynamicModel(String fileName, MeshSource meshSource, float forcedMass) {
 		super(fileName);
-
-		if (BulletNifModelClassifier.isSimpleDynamicModel(fileName, meshSource, forcedMass))
-		{
-			NifFile nifFile = NifToJ3d.loadNiObjects(fileName, meshSource);
-
-			if (nifFile != null)
-			{
-				if (nifFile.blocks.root() instanceof NiNode)
-				{
-					for (NiObject niObject : nifFile.blocks.getNiObjects())
-					{
-						if (niObject instanceof bhkCollisionObject)
-						{
-							bhkCollisionObject bhkCollisionObject = (bhkCollisionObject) niObject;
-							bhkRigidBody bhkRigidBody = (bhkRigidBody) nifFile.blocks.get(bhkCollisionObject.body);
+		NifFile nifFile = NifToJ3d.loadNiObjects(fileName, meshSource);
+		if (nifFile != null) {
+			BulletNifModelClassifier bulletNifModelClassifier = new BulletNifModelClassifier(nifFile);
+			if (bulletNifModelClassifier.isSimpleDynamicModel(forcedMass)) {
+				if (nifFile.blocks.root() instanceof NiNode) {
+					for (NiObject niObject : nifFile.blocks.getNiObjects()) {
+						if (niObject instanceof bhkCollisionObject) {
+							bhkCollisionObject bhkCollisionObject = (bhkCollisionObject)niObject;
+							bhkRigidBody bhkRigidBody = (bhkRigidBody)nifFile.blocks.get(bhkCollisionObject.body);
 							int layer = bhkRigidBody.layerCopy.layer;
-							if (forcedMass != 0 || layer == OblivionLayer.OL_CLUTTER || layer == OblivionLayer.OL_PROPS)
-							{
+							if (forcedMass != 0 || layer == OblivionLayer.OL_CLUTTER
+								|| layer == OblivionLayer.OL_PROPS) {
 								bhkRigidBody.mass = forcedMass != 0 ? forcedMass : bhkRigidBody.mass;
-								if (bhkRigidBody.mass != 0)
-								{
+								if (bhkRigidBody.mass != 0) {
 									//NOTE for now the first is considered the root 
-									if (rootDynamicBody != null)
-									{
-										rootDynamicBody = new NBDynamicRigidBody(new NifBulletTransformListenerDelegate(),
-												bhkCollisionObject, nifFile.blocks, this, 1.0f, forcedMass);
+									if (rootDynamicBody != null) {
+										rootDynamicBody = new NBDynamicRigidBody(
+												new NifBulletTransformListenerDelegate(), bhkCollisionObject,
+												nifFile.blocks, this, 1.0f, forcedMass);
 									}
-								}
-								else
-								{
+								} else {
 									new Throwable("bhkRigidBody.mass == 0 " + this).printStackTrace();
 								}
-							}
-							else
-							{
-								new Throwable("what is this layer being given to me for? " + layer + " " + this).printStackTrace();
+							} else {
+								new Throwable("what is this layer being given to me for? " + layer + " " + this)
+										.printStackTrace();
 							}
 						}
 					}
 				}
 			}
-		}
-		else
-		{
+		} else {
 			new Exception("NifBulletClasser.isSimpleDynamic = false " + fileName).printStackTrace();
 		}
 
 	}
-
-	
 
 }
