@@ -9,6 +9,7 @@ import nif.NiObjectList;
 import nif.enums.OblivionLayer;
 import nif.j3d.J3dNiAVObject;
 import nif.niobject.NiAVObject;
+import nif.niobject.NiTriShape;
 import nif.niobject.RootCollisionNode;
 import nif.niobject.bhk.bhkCollisionObject;
 import nif.niobject.bhk.bhkNPCollisionObject;
@@ -149,7 +150,23 @@ public class NBStaticRigidBody extends NBRigidBody {
 								BulletNifModel parentModel) {
 		super(parentModel);
 		Transform worldTransform = calcWorldTransform(rootTrans);
-		colShape = RootCollisionNodeToCollisionShape.processRootCollisionNode(rootCollisionNode, blocks, 1f);
+		colShape = RootCollisionNodeToCollisionShape.processRootCollisionNode(rootCollisionNode, blocks, scale);
+		RigidBody rigidBody = new RigidBody(new RigidBodyConstructionInfo(0, null, colShape));
+		rigidBody.setCollisionFlags(CollisionFlags.STATIC_OBJECT);
+		setRigidBody(rigidBody);
+		rigidBody.setWorldTransform(worldTransform);
+	}
+	
+	/**
+	 * Special cut down version for morrowind
+	 * @param  
+	 * @param rootTrans
+	 * @param parentModel
+	 */
+	public NBStaticRigidBody(	NiTriShape niTriShape, NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel) {
+		super(parentModel);
+		Transform worldTransform = calcWorldTransform(rootTrans);
+		colShape = RootCollisionNodeToCollisionShape.processRootNiTriShape(niTriShape, blocks, scale);
 		RigidBody rigidBody = new RigidBody(new RigidBodyConstructionInfo(0, null, colShape));
 		rigidBody.setCollisionFlags(CollisionFlags.STATIC_OBJECT);
 		setRigidBody(rigidBody);

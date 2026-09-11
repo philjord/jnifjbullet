@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.jogamp.java3d.utils.geometry.GeometryInfo;
-import org.jogamp.vecmath.Matrix3f;
 import org.jogamp.vecmath.Quat4f;
 import org.jogamp.vecmath.Vector3f;
 
@@ -25,8 +24,7 @@ import nifbullet.util.NifBulletUtil;
 import tools3d.utils.Utils3D;
 import utils.convert.ConvertFromHavok;
 
-public abstract class RootCollisionNodeToCollisionShape
-{
+public abstract class RootCollisionNodeToCollisionShape {
 	/**
 	 * Convenience for non dynamic shapes
 	 * @param bhkShape
@@ -36,12 +34,12 @@ public abstract class RootCollisionNodeToCollisionShape
 	 */
 
 	//NOTE ONLY scale ==1 in here!
-	public static boolean CACHE_WEAK = true;
-	private static Map<RootCollisionNode, CollisionShape> preloadedScale1Shapes = Collections
+	public static boolean									CACHE_WEAK				= true;
+	private static Map<RootCollisionNode, CollisionShape>	preloadedScale1Shapes	= Collections
 			.synchronizedMap(new WeakHashMap<RootCollisionNode, CollisionShape>());
 
-	public static CollisionShape processRootCollisionNode(RootCollisionNode rootCollisionNode, NiObjectList niToJ3dData, float scale)
-	{
+	public static CollisionShape processRootCollisionNode(	RootCollisionNode rootCollisionNode, NiObjectList niToJ3dData,
+															float scale) {
 		CollisionShape ret = null;
 		if (scale == 1)
 			ret = preloadedScale1Shapes.get(rootCollisionNode);
@@ -49,18 +47,15 @@ public abstract class RootCollisionNodeToCollisionShape
 			return ret;
 
 		CompoundShape cs = new CompoundShape();
-		for (int i = 0; i < rootCollisionNode.numChildren; i++)
-		{
-			NiAVObject child = (NiAVObject) niToJ3dData.get(rootCollisionNode.children[i]);
-			if (child != null)
-			{
-				if (child instanceof NiTriShape)
-				{
-					NiTriShape niTriShape = (NiTriShape) child;
-					NiTriShapeData data = (NiTriShapeData) niToJ3dData.get(niTriShape.data);
+		for (int i = 0; i < rootCollisionNode.numChildren; i++) {
+			NiAVObject child = (NiAVObject)niToJ3dData.get(rootCollisionNode.children[i]);
+			if (child != null) {
+				if (child instanceof NiTriShape) {
+					NiTriShape niTriShape = (NiTriShape)child;
+					NiTriShapeData data = (NiTriShapeData)niToJ3dData.get(niTriShape.data);
 
-					CollisionShape shape = processNiTriStripsData(data, false, scale);
-					
+					CollisionShape shape = processNiTriShapeData(data, false, scale);
+
 					//Matrix3f m = ConvertFromHavok.toJ3dM3(niTriShape.rotation);
 					Vector3f v = new Vector3f(ConvertFromHavok.toJ3dP3fNif(niTriShape.translation, scale));
 					//TODO: the M3 convert above should work better, but does not, probably due to morrowind 4DP isse
@@ -78,17 +73,41 @@ public abstract class RootCollisionNodeToCollisionShape
 		ret = cs;
 
 		if (ret != null && scale == 1)
-			if(CACHE_WEAK)
+			if (CACHE_WEAK)
 				preloadedScale1Shapes.put(rootCollisionNode, ret);
 		return ret;
 	}
 
-	public static CollisionShape processNiTriStripsData(NiTriShapeData data, boolean isDynamic, float scale)
-	{
+	public static CollisionShape processRootNiTriShape(NiTriShape niTriShape, NiObjectList niToJ3dData, float scale) {
+		CollisionShape ret = null;
+
+		CompoundShape cs = new CompoundShape();
+
+		NiTriShapeData data = (NiTriShapeData)niToJ3dData.get(niTriShape.data);
+
+		CollisionShape shape = processNiTriShapeData(data, false, scale);
+
+		//Matrix3f m = ConvertFromHavok.toJ3dM3(niTriShape.rotation);
+		Vector3f v = new Vector3f(ConvertFromHavok.toJ3dP3fNif(niTriShape.translation, scale));
+		//TODO: the M3 convert above should work better, but does not, probably due to morrowind 4DP isse
+		Quat4f q = ConvertFromHavok.toJ3dQ4f(niTriShape.rotation);
+		Transform t = NifBulletUtil.createTrans(q, v);
+		//Transform t = new Transform();
+		//t.origin.set(v);
+		//t.basis.set(m);
+
+		cs.addChildShape(t, shape);
+
+		cs.recalculateLocalAabb();
+		ret = cs;
+
+		return ret;
+	}
+
+	public static CollisionShape processNiTriShapeData(NiTriShapeData data, boolean isDynamic, float scale) {
 		GeometryInfo gi = new GeometryInfo(GeometryInfo.TRIANGLE_ARRAY);
 
-		if (data.hasVertices)
-		{
+		if (data.hasVertices) {
 			//OPTOMIZATION
 			/*
 			Point3f[] vertices = new Point3f[data.numVertices];
@@ -106,8 +125,7 @@ public abstract class RootCollisionNodeToCollisionShape
 
 		}
 
-		if (data.hasTriangles)
-		{
+		if (data.hasTriangles) {
 			gi.setCoordinateIndices(data.trianglesOpt);
 			gi.setUseCoordIndexOnly(true);
 		}
@@ -121,18 +139,15 @@ public abstract class RootCollisionNodeToCollisionShape
 		// float[] normals = NifBulletUtil.makePrimitive(gi.getNormals());
 
 		TriangleIndexVertexArray indexVertexArrays = new TriangleIndexVertexArray(coordIndices.length / 3,
-				NifBulletUtil.convertToIndexBuffer(coordIndices), 4 * 3, coords.length / 3, NifBulletUtil.convertToByteBuffer(coords),
-				4 * 3);
+				NifBulletUtil.convertToIndexBuffer(coordIndices), 4 * 3, coords.length / 3,
+				NifBulletUtil.convertToByteBuffer(coords), 4 * 3);
 
 		//NOTE!!!!!!!!!!!!!! there is no default CONCAVE CONCAVE collider so we MUST use GImpact or collision system throws null pointers!!
-		if (isDynamic)
-		{
+		if (isDynamic) {
 			GImpactMeshShape trimesh = new GImpactMeshShape(indexVertexArrays);
 			trimesh.updateBound();
 			return trimesh;
-		}
-		else
-		{
+		} else {
 			BvhTriangleMeshShape trimesh = new BvhTriangleMeshShape(indexVertexArrays, true);
 			return trimesh;
 		}

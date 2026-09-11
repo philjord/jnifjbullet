@@ -4,12 +4,15 @@ import org.jogamp.java3d.Transform3D;
 
 import nif.NifFile;
 import nif.NifToJ3d;
+import nif.NifVer;
 import nif.enums.OblivionLayer;
+import nif.enums.SkyrimLayer;
 import nif.j3d.NiToJ3dData;
 import nif.niobject.NiBone;
 import nif.niobject.NiNode;
 import nif.niobject.NiObject;
 import nif.niobject.NiSkinInstance;
+import nif.niobject.NiTriShape;
 import nif.niobject.RootCollisionNode;
 import nif.niobject.bhk.bhkConstraint;
 import nif.niobject.bhk.bhkPhysicsSystem;
@@ -102,15 +105,30 @@ public class BulletNifModelClassifier {
 	}
 
 	//no rigids at all
-
 	public boolean isNotPhysics() {
 		boolean ret = false;
 		if (nifFile != null) {
-			if (nifFile.blocks.root() instanceof NiNode || nifFile.blocks.root() instanceof BSTreeNode) {
+			if (niToJ3dData.nifVer.LOAD_VER < NifVer.VER_10_0_1_0) {
+				if (nifFile.blocks.nifVer.fileName.toLowerCase().contains("marker")) {
+					return true;
+				} else if (nifFile.blocks.root() instanceof NiTriShape) {
+					//morrowind can have a single NiTriShape as the root and that counts as physics too 
+					return false;
+				}
+			} else {
 				ret = physicsInfo.rigidBodyCount == 0;
 			}
 		}
 		return ret;
+	}
+
+	public boolean isPhysicTypeNotImplemented() {
+		if (getLayerCount(niToJ3dData, SkyrimLayer.SKYL_NONCOLLIDABLE) == 1) {
+			// it must move but the physics isn't fussed, can be done later
+			// eg skyrim showNif: meshes\plants\florahangingmoss01.nif
+			return true;
+		}
+		return false;
 	}
 
 	//no massed rigids, at least 1 non massed
@@ -125,7 +143,11 @@ public class BulletNifModelClassifier {
 	public boolean isStaticModel() {
 		boolean ret = false;
 		if (nifFile != null) {
-			if (nifFile.blocks.root() instanceof NiNode || nifFile.blocks.root() instanceof BSTreeNode) {
+
+			if (nifFile.blocks.root() instanceof NiTriShape) {
+				//morrowind can have a single NiTriShape as the root and that counts as physics too 				
+				return true;
+			} else if (nifFile.blocks.root() instanceof NiNode || nifFile.blocks.root() instanceof BSTreeNode) {
 				ret = physicsInfo.massedRigidBodyCount == 0 && //
 						physicsInfo.nonMassedRigidBodyCount > 0 && //
 						isOnlyAllowedLayers(niToJ3dData,
@@ -191,13 +213,16 @@ public class BulletNifModelClassifier {
 				//or it has a forced mass which flips this to a dynamic from any layer type
 				ret = (physicsInfo.massedRigidBodyCount == 1 && //
 						physicsInfo.nonMassedRigidBodyCount == 0 && //
-						getLayerCount(niToJ3dData, OblivionLayer.OL_PROPS) + getLayerCount(niToJ3dData,
-								OblivionLayer.OL_CLUTTER)//
-						// apprently some static have mass in skyrim see Clutter\Silver\SilverCandleStick01.nif
-																	+ getLayerCount(niToJ3dData,
-																			OblivionLayer.OL_STATIC) == 1 //
+						(physicsInfo.singleLayer == OblivionLayer.OL_PROPS
+							|| physicsInfo.singleLayer == OblivionLayer.OL_CLUTTER //
+							// apprently some static have mass in skyrim see Clutter\Silver\SilverCandleStick01.nif
+							|| physicsInfo.singleLayer == OblivionLayer.OL_STATIC //
+							|| physicsInfo.singleLayer == SkyrimLayer.SKYL_WEAPON//
+							|| physicsInfo.singleLayer == SkyrimLayer.SKYL_PROJECTILE)
 						|| forcedMass != 0) && //
-						physicsInfo.transformControllerCount == 0 && //
+
+				// a single rigid can't have much of a transform that does anythign much, for example a desk fan
+				//physicsInfo.transformControllerCount == 0 && //						
 						physicsInfo.constraintCount == 0 && //
 						physicsInfo.skinAndBoneCount == 0;
 
@@ -237,63 +262,91 @@ public class BulletNifModelClassifier {
 		public int	transformControllerCount	= 0;
 		public int	constraintCount				= 0;
 		public int	skinAndBoneCount			= 0;
+		public int	singleLayer					= 0;// -1if multiple layers, -1 if FO4+
 	}
 
 	private static PhysicsInfo getPhysicsInfo(NiToJ3dData niToJ3dData) {
 		PhysicsInfo physicsInfo = new PhysicsInfo();
-		for (NiObject niObject : niToJ3dData.getNiObjects()) {
-			if (niObject instanceof bhkRigidBody) {
-				bhkRigidBody bhkRigidBody = (bhkRigidBody)niObject;
-				physicsInfo.rigidBodyCount++;
-				physicsInfo.massedRigidBodyCount += (bhkRigidBody.mass > 0 ? 1 : 0);
-				physicsInfo.nonMassedRigidBodyCount += (bhkRigidBody.mass == 0 ? 1 : 0); // note count of 0 mass				
-			} else if (niObject instanceof RootCollisionNode) {
-				RootCollisionNode rootCollisionNode = (RootCollisionNode)niObject;
-				physicsInfo.rigidBodyCount += rootCollisionNode.numChildren;
-				physicsInfo.nonMassedRigidBodyCount += rootCollisionNode.numChildren;// all children are non massed rigids
-			} else if (niObject instanceof bhkPhysicsSystem) {
-				bhkPhysicsSystem bhkPhysicsSystem = (bhkPhysicsSystem)niObject;
-
-				HKXContents contents = bhkPhysicsSystem.hkxContents;
-				// the first one had better be a system
-				hknpPhysicsSystemData hknpPhysicsSystemData = (hknpPhysicsSystemData)contents.getContentCollection()
-						.iterator().next();
-				hknpBodyCinfo[] bodyCinfos = hknpPhysicsSystemData.bodyCinfos;
-				hknpMotionCinfo[] motionCinfos = hknpPhysicsSystemData.motionCinfos;
-
-				physicsInfo.rigidBodyCount = hknpPhysicsSystemData.bodyCinfos.length;
-
-				for (int i = 0; i < bodyCinfos.length; i++) {
-					if (motionCinfos != null	&& bodyCinfos[i].motionId < motionCinfos.length
-						&& motionCinfos[bodyCinfos[i].motionId].inverseMass != 0) {
-						physicsInfo.massedRigidBodyCount++;
-					} else {
-						physicsInfo.nonMassedRigidBodyCount++;
-					}
+		if (niToJ3dData.nifVer.LOAD_VER < NifVer.VER_10_0_1_0) {
+			//morrowind only
+			physicsInfo.singleLayer = OblivionLayer.OL_STATIC;//Morrowind no layers
+			for (NiObject niObject : niToJ3dData.getNiObjects()) {
+				if (niObject instanceof RootCollisionNode) {
+					RootCollisionNode rootCollisionNode = (RootCollisionNode)niObject;
+					physicsInfo.rigidBodyCount = rootCollisionNode.numChildren;
+					physicsInfo.nonMassedRigidBodyCount += rootCollisionNode.numChildren;// all children are non massed rigids
+					physicsInfo.singleLayer = OblivionLayer.OL_STATIC;//Morrowind no layers
+					return physicsInfo;
+				} else if (niObject instanceof NiTriShape) {
+					physicsInfo.rigidBodyCount++;
+					physicsInfo.nonMassedRigidBodyCount++;
 				}
-
-				hknpConstraintCinfo[] hknpConstraintCinfos = hknpPhysicsSystemData.constraintCinfos;
-				// if we have motion for all parts then we are not nonmassed, but massed
-				if (hknpConstraintCinfos != null)
-					physicsInfo.constraintCount += hknpConstraintCinfos.length;
-
-			} else if (niObject instanceof NiTransformController
-						|| niObject instanceof NiMultiTargetTransformController) {
-				//TODO: check for dud entries, no controller or no interpolator, is teh below correct?
-				// what about other position controllers and what about extra targets in multi?
-				NiObject target = niToJ3dData.get(((NiTimeController)niObject).target);
-				if (target != null) {
-					physicsInfo.transformControllerCount++;
-				}
-			} else if (niObject instanceof bhkConstraint) {
-				//TODO: check for dud entries, at least one side of constraint must attach to a rigid body
-				physicsInfo.constraintCount++;
-			} else if (niObject instanceof NiSkinInstance || niObject instanceof NiBone) {
-				physicsInfo.skinAndBoneCount++;
 			}
+			return physicsInfo;
 
+		} else {
+			for (NiObject niObject : niToJ3dData.getNiObjects()) {
+				if (niObject instanceof bhkRigidBody) {
+					bhkRigidBody bhkRigidBody = (bhkRigidBody)niObject;
+					physicsInfo.rigidBodyCount++;
+					physicsInfo.massedRigidBodyCount += (bhkRigidBody.mass > 0 ? 1 : 0);
+					physicsInfo.nonMassedRigidBodyCount += (bhkRigidBody.mass == 0 ? 1 : 0); // note count of 0 mass	
+					physicsInfo.singleLayer = physicsInfo.singleLayer > -1 ? -1 : bhkRigidBody.layer.layer;// no multiples thanks
+				} else if (niObject instanceof bhkPhysicsSystem) {
+					bhkPhysicsSystem bhkPhysicsSystem = (bhkPhysicsSystem)niObject;
+
+					HKXContents contents = bhkPhysicsSystem.hkxContents;
+					// the first one had better be a system
+					hknpPhysicsSystemData hknpPhysicsSystemData = (hknpPhysicsSystemData)contents.getContentCollection()
+							.iterator().next();
+					hknpBodyCinfo[] bodyCinfos = hknpPhysicsSystemData.bodyCinfos;
+					hknpMotionCinfo[] motionCinfos = hknpPhysicsSystemData.motionCinfos;
+
+					physicsInfo.rigidBodyCount = hknpPhysicsSystemData.bodyCinfos.length;
+
+					for (int i = 0; i < bodyCinfos.length; i++) {
+						if (motionCinfos != null	&& bodyCinfos[i].motionId < motionCinfos.length
+							&& motionCinfos[bodyCinfos[i].motionId].inverseMass != 0) {
+							physicsInfo.massedRigidBodyCount++;
+						} else {
+							physicsInfo.nonMassedRigidBodyCount++;
+						}
+					}
+
+					hknpConstraintCinfo[] hknpConstraintCinfos = hknpPhysicsSystemData.constraintCinfos;
+					// if we have motion for all parts then we are not nonmassed, but massed
+					if (hknpConstraintCinfos != null)
+						physicsInfo.constraintCount += hknpConstraintCinfos.length;
+
+					//FO4+ no layers yet
+					physicsInfo.singleLayer = OblivionLayer.OL_STATIC;
+
+				} else if (niObject instanceof NiTransformController
+							|| niObject instanceof NiMultiTargetTransformController) {
+					//TODO: check for dud entries, no controller or no interpolator, is teh below correct?
+					// what about other position controllers and what about extra targets in multi?
+					NiObject target = niToJ3dData.get(((NiTimeController)niObject).target);
+					if (target != null) {
+						physicsInfo.transformControllerCount++;
+					}
+				} else if (niObject instanceof bhkConstraint) {
+					//TODO: check for dud entries, at least one side of constraint must attach to a rigid body
+					physicsInfo.constraintCount++;
+				} else if (niObject instanceof NiSkinInstance || niObject instanceof NiBone) {
+					physicsInfo.skinAndBoneCount++;
+				}
+			}
 		}
 		return physicsInfo;
+	}
+
+	public void outputDetails() {
+		System.out.print("physicsInfo rigidBodyCount " + physicsInfo.rigidBodyCount);
+		System.out.print(" massedRigidBodyCount " + physicsInfo.massedRigidBodyCount);
+		System.out.print(" nonMassedRigidBodyCount " + physicsInfo.nonMassedRigidBodyCount);
+		System.out.print(" transformControllerCount " + physicsInfo.transformControllerCount);
+		System.out.print(" constraintCount " + physicsInfo.constraintCount);
+		System.out.println(" skinAndBoneCount " + physicsInfo.skinAndBoneCount);
 	}
 
 	private static int getLayerCount(NiToJ3dData niToJ3dData, int layer) {
@@ -317,12 +370,13 @@ public class BulletNifModelClassifier {
 	}
 
 	private static boolean isOnlyAllowedLayers(NiToJ3dData niToJ3dData, int[] allowedLayers) {
-		//return true if a RootCollisionNode exists (morrowind system, no layers all statics)
+		//return true if morrowind system, no layers all statics
+		if (niToJ3dData.nifVer.LOAD_VER < NifVer.VER_10_0_1_0) {
+			return true;
+		}
 		//FO4 + has a physic system that's not about layers
 		for (NiObject niObject : niToJ3dData.getNiObjects()) {
-			if (niObject instanceof RootCollisionNode) {
-				return true;
-			} else if (niObject instanceof bhkPhysicsSystem) {
+			if (niObject instanceof bhkPhysicsSystem) {
 				return true;
 			}
 		}
@@ -345,6 +399,11 @@ public class BulletNifModelClassifier {
 			System.out.println("isNotPhysics");
 		}
 
+		if (bulletNifModelClassifier.isPhysicTypeNotImplemented()) {
+			categoryCount++;
+			System.out.println("isPhysicTypeNotImplemented");
+		}
+
 		if (bulletNifModelClassifier.isStaticModel()) {
 			categoryCount++;
 			System.out.println("isStaticModel");
@@ -365,9 +424,11 @@ public class BulletNifModelClassifier {
 			System.out.println("isComplexDynamic");
 		}
 
-		if (categoryCount != 1) {
+		if (categoryCount == 0) {
+			System.err.println("No Physics category for file!! " + filename);
+		} else if (categoryCount > 1) {
 			//TODO: E:\game media\Oblivion\meshes\architecture\arena\arenacolumn01.nif gives count0
-			System.err.println("Bad category count for file!!" + categoryCount);
+			System.err.println("Bad category count for file!! " + categoryCount + " " + filename);
 		}
 		return;
 
@@ -379,6 +440,9 @@ public class BulletNifModelClassifier {
 		if (bulletNifModelClassifier.isNotPhysics()) {
 			System.out.println("is not physics");
 			return null;
+		} else if (bulletNifModelClassifier.isPhysicTypeNotImplemented()) {
+			System.out.println("isPhysicTypeNotImplemented");
+			return null;
 		} else if (bulletNifModelClassifier.isStaticModel() || bulletNifModelClassifier.isKinematicModel()) {
 			return new NBSimpleModel(filename, meshSource, new Transform3D());
 		} else if (bulletNifModelClassifier.isSimpleDynamicModel(forcedMass)) {
@@ -388,8 +452,10 @@ public class BulletNifModelClassifier {
 			return null;
 		}
 
-		System.err.println("Bad category for file isNotPhysics didn't catch it!!" + filename);
+		System.err.println("No Physics category for file!! " + filename);
+		bulletNifModelClassifier.outputDetails();
 		return null;
 
 	}
+
 }
