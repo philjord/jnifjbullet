@@ -73,7 +73,6 @@ public class NBStaticRigidBody extends NBRigidBody {
 			new Throwable("bhkRigidBody.mass != 0 " + this).printStackTrace();
 		}
 
-		 
 	}
 
 	public NBStaticRigidBody(	bhkNPCollisionObject bhkNPCollisionObject, bhkPhysicsSystem bhkPhysicsSystem,
@@ -145,14 +144,15 @@ public class NBStaticRigidBody extends NBRigidBody {
 		setRigidBody(rigidBody);
 		rigidBody.setWorldTransform(worldTransform);
 	}
-	
+
 	/**
 	 * Special cut down version for morrowind
 	 * @param  
 	 * @param rootTrans
 	 * @param parentModel
 	 */
-	public NBStaticRigidBody(	NiTriShape niTriShape, NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel) {
+	public NBStaticRigidBody(	NiTriShape niTriShape, NiObjectList blocks, Transform3D rootTrans,
+								BulletNifModel parentModel) {
 		super(parentModel);
 		Transform worldTransform = calcWorldTransform(rootTrans);
 		colShape = RootCollisionNodeToCollisionShape.processRootNiTriShape(niTriShape, blocks, scale);
@@ -218,18 +218,20 @@ public class NBStaticRigidBody extends NBRigidBody {
 		worldTransformCalc.set(rootTrans);
 
 		NiAVObject parent = parentNiObject;
-		// WAIT J3dNiAVObject goes from parent down wards this business goes 
-		// root then parent up to null then bhkRigidbody!
-		mulFromRootDown(parent);
+
+	
 
 		bhkRigidBody rb = getBhkRigidBody();
 		//land and morrwind can be null
 		if (rb != null && rb instanceof bhkRigidBodyT) {
+			mulFromRootDown(parent, true);
 			// like jnif the parents scale is ignored on a bhkRigidBodyT
-			worldTransformCalc.setScale(1);			
+			//worldTransformCalc.setScale(1);
 			temp.setRotation(ConvertFromHavok.toJ3d(rb.rotation));
 			temp.setTranslation(ConvertFromHavok.toJ3d(rb.translation, 1f, niObjectList.nifVer));
 			worldTransformCalc.mul(temp);
+		} else {
+			mulFromRootDown(parent, false);
 		}
 
 		Transform worldTransform = NifBulletUtil.newIdentityTransform();
@@ -240,7 +242,7 @@ public class NBStaticRigidBody extends NBRigidBody {
 		// bullet transforms, so scaling got sent to the 
 		// BhkShapeToCollisionShape call and is in the model now
 		// so we just record it here
-		this.scale = 1.0f;// (float)worldTransformCalc.getScale();
+		this.scale = (float)worldTransformCalc.getScale();
 
 		return worldTransform;
 	}
@@ -248,10 +250,15 @@ public class NBStaticRigidBody extends NBRigidBody {
 	// deburner
 	private Transform3D temp = new Transform3D();
 
-	private void mulFromRootDown(NiAVObject parent) {
+	/**
+	 * skipFirstParentScale is used to remove the scale factor that can be set (erroneously) on the NiNode parent 
+	 * @param parent
+	 * @param skipFirstParentScale
+	 */
+	private void mulFromRootDown(NiAVObject parent, boolean skipFirstParentScale) {
 		if (parent != null) {
 			//note go up first then come back down and do multiplys
-			mulFromRootDown(parent.parent);
+			mulFromRootDown(parent.parent, false);
 
 			if (!J3dNiAVObject.ignoreTopTransformRot(parent)) {
 				temp.setRotation(ConvertFromNif.toJ3d(parent.rotation));
@@ -259,7 +266,8 @@ public class NBStaticRigidBody extends NBRigidBody {
 				temp.setRotation(new Quat4f(0, 0, 0, 1));
 			}
 			temp.setTranslation(ConvertFromNif.toJ3d(parent.translation));
-			temp.setScale(parent.scale);
+			if(!skipFirstParentScale)
+				temp.setScale(parent.scale);
 
 			worldTransformCalc.mul(temp);
 		}
