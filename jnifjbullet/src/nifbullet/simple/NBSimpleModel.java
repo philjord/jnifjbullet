@@ -186,17 +186,15 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel {
 							if (niObject instanceof NiTriShape) {
 								//morrowind has special casde of a single NiTriShape as root
 								NiTriShape niTriShape = (NiTriShape)niObject;
-								if (!hasPivot) {
-									NBStaticRigidBody nbbco = new NBStaticRigidBody(niTriShape,
-											niToJ3dData.getNiObjects(), rootTrans, this);
-									updatePointers(pointer, nbbco);
-								} else {
-									System.out.println("Pivot on NiTriShape " + niToJ3dData.nifVer.fileName);
-								}
+								//notice pivot ignored in this case, as they are load doors that don't move
+								NBStaticRigidBody nbbco = new NBStaticRigidBody(niTriShape, niToJ3dData.getNiObjects(),
+										rootTrans, this);
+								updatePointers(pointer, nbbco);
 							}
 						}
 					}
 				} else {
+
 					for (NiObject niObject : niToJ3dData.getNiObjects()) {
 						if (niObject instanceof bhkNPCollisionObject) {
 							bhkNPCollisionObject bhkNPCollisionObject = (bhkNPCollisionObject)niObject;
@@ -217,14 +215,7 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel {
 							if (nio instanceof bhkRigidBody) {
 								bhkRigidBody bhkRigidBody = (bhkRigidBody)niToJ3dData.get(bhkCollisionObject.body);
 								int layer = bhkRigidBody.layer.layer;
-								if (layer == OblivionLayer.OL_STATIC	|| layer == OblivionLayer.OL_UNIDENTIFIED
-									|| layer == OblivionLayer.OL_STAIRS || layer == OblivionLayer.OL_TERRAIN
-									|| layer == OblivionLayer.OL_TRANSPARENT || layer == OblivionLayer.OL_TREES) {
-									NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkCollisionObject,
-											niToJ3dData.getNiObjects(), rootTrans, this);
-
-									updatePointers(pointer, nbbco);
-								} else if (layer == OblivionLayer.OL_ANIM_STATIC) {
+								if (layer == OblivionLayer.OL_ANIM_STATIC) {
 									float sf = (float)rootTrans.getScale();
 									rootTrans.setScale(1.0f);
 									NBKinematicRigidBody kb = new NBKinematicRigidBody(this, j3dNiNodeRoot,
@@ -235,12 +226,15 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel {
 								} else if (layer == OblivionLayer.OL_LINE_OF_SIGHT) {
 									//skipped for now
 								} else {
-									// skipped 
-									new Throwable("what is this layer being given to me for? " + layer + " " + this)
-											.printStackTrace();
+									// all others just make a static, layers for static are not reliable
+									NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkCollisionObject,
+											niToJ3dData.getNiObjects(), rootTrans, this);
+
+									updatePointers(pointer, nbbco);
 								}
 							}
 						}
+
 					}
 				}
 

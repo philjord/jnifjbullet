@@ -5,8 +5,13 @@ import org.jogamp.java3d.utils.geometry.GeometryInfo;
 import org.jogamp.vecmath.Quat4f;
 import org.jogamp.vecmath.Vector3f;
 
+import com.bulletphysics.collision.dispatch.CollisionFlags;
+import com.bulletphysics.dom.HeightfieldTerrainShape;
+import com.bulletphysics.dynamics.RigidBody;
+import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
+import com.bulletphysics.linearmath.Transform;
+
 import nif.NiObjectList;
-import nif.enums.OblivionLayer;
 import nif.j3d.J3dNiAVObject;
 import nif.niobject.NiAVObject;
 import nif.niobject.NiTriShape;
@@ -31,12 +36,6 @@ import nifbullet.convert.hkxShapeToCollisionShape;
 import nifbullet.util.NifBulletUtil;
 import utils.convert.ConvertFromHavok;
 import utils.convert.ConvertFromNif;
-
-import com.bulletphysics.collision.dispatch.CollisionFlags;
-import com.bulletphysics.dom.HeightfieldTerrainShape;
-import com.bulletphysics.dynamics.RigidBody;
-import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
-import com.bulletphysics.linearmath.Transform;
 
 public class NBStaticRigidBody extends NBRigidBody {
 	private NiAVObject		parentNiObject;
@@ -63,28 +62,18 @@ public class NBStaticRigidBody extends NBRigidBody {
 		bhkRigidBody bhkRigidBody = (bhkRigidBody)blocks.get(bhkCollisionObject.body);
 		setBhkRigidBody(bhkRigidBody);
 
-		int layer = bhkRigidBody.layer.layer;
-		if (layer == OblivionLayer.OL_STATIC	|| layer == OblivionLayer.OL_UNIDENTIFIED
-			|| layer == OblivionLayer.OL_STAIRS || layer == OblivionLayer.OL_TERRAIN
-			|| layer == OblivionLayer.OL_TRANSPARENT || layer == OblivionLayer.OL_TREES) {
-			if (bhkRigidBody.mass == 0) {
-				bhkShape bhkShape = (bhkShape)blocks.get(bhkRigidBody.shape);
-				//updateTransfrom MUST be called first, it sets scale
-				Transform worldTransform = calcWorldTransform(rootTrans);
-				colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, blocks, scale);
-				setRigidBody(NifBulletUtil.createStaticRigidBody(bhkRigidBody, colShape, this));
-				getRigidBody().setWorldTransform(worldTransform);
-			} else {
-				new Throwable("bhkRigidBody.mass != 0 " + this).printStackTrace();
-			}
-
-		} else if (layer == OblivionLayer.OL_LINE_OF_SIGHT) {
-			//skipped for now
+		if (bhkRigidBody.mass == 0) {
+			bhkShape bhkShape = (bhkShape)blocks.get(bhkRigidBody.shape);
+			//updateTransfrom MUST be called first, it sets scale
+			Transform worldTransform = calcWorldTransform(rootTrans);
+			colShape = BhkShapeToCollisionShape.processBhkShape(bhkShape, blocks, scale);
+			setRigidBody(NifBulletUtil.createStaticRigidBody(bhkRigidBody, colShape, this));
+			getRigidBody().setWorldTransform(worldTransform);
 		} else {
-			new Throwable(
-					"Why is a non OL_STATIC, OL_LINE_OF_SIGHT, OL_UNIDENTIFID, OL_STAIRS, OL_TERRAIN, OL_TRANSPARENT, OL_TREES handed to  me? "
-							+ layer + " " + this).printStackTrace();
+			new Throwable("bhkRigidBody.mass != 0 " + this).printStackTrace();
 		}
+
+		 
 	}
 
 	public NBStaticRigidBody(	bhkNPCollisionObject bhkNPCollisionObject, bhkPhysicsSystem bhkPhysicsSystem,
@@ -236,6 +225,8 @@ public class NBStaticRigidBody extends NBRigidBody {
 		bhkRigidBody rb = getBhkRigidBody();
 		//land and morrwind can be null
 		if (rb != null && rb instanceof bhkRigidBodyT) {
+			// like jnif the parents scale is ignored on a bhkRigidBodyT
+			worldTransformCalc.setScale(1);			
 			temp.setRotation(ConvertFromHavok.toJ3d(rb.rotation));
 			temp.setTranslation(ConvertFromHavok.toJ3d(rb.translation, 1f, niObjectList.nifVer));
 			worldTransformCalc.mul(temp);
@@ -249,7 +240,7 @@ public class NBStaticRigidBody extends NBRigidBody {
 		// bullet transforms, so scaling got sent to the 
 		// BhkShapeToCollisionShape call and is in the model now
 		// so we just record it here
-		this.scale = (float)worldTransformCalc.getScale();
+		this.scale = 1.0f;// (float)worldTransformCalc.getScale();
 
 		return worldTransform;
 	}

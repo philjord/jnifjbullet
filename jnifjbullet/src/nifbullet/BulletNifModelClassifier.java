@@ -150,11 +150,14 @@ public class BulletNifModelClassifier {
 			} else if (nifFile.blocks.root() instanceof NiNode || nifFile.blocks.root() instanceof BSTreeNode) {
 				ret = physicsInfo.massedRigidBodyCount == 0 && //
 						physicsInfo.nonMassedRigidBodyCount > 0 && //
-						isOnlyAllowedLayers(niToJ3dData,
+						// these layers always seem wrong, I've got 
+						//meshes/clutter/middleclass/middlebarreltopped04.nif
+						// with 0 mass but a layer of OL_CLUTTER
+					/*	isOnlyAllowedLayers(niToJ3dData,
 								new int[] {OblivionLayer.OL_STATIC, OblivionLayer.OL_LINE_OF_SIGHT,
 									OblivionLayer.OL_UNIDENTIFIED, OblivionLayer.OL_STAIRS, OblivionLayer.OL_TERRAIN,
 									OblivionLayer.OL_TRANSPARENT, OblivionLayer.OL_TREES})
-						&& //
+						&& *///
 						physicsInfo.constraintCount == 0;// 
 
 				//getSkinAndBoneCount(niToJ3dData) == 0; // trees can be skinned but have simple phys
@@ -291,7 +294,7 @@ public class BulletNifModelClassifier {
 					physicsInfo.rigidBodyCount++;
 					physicsInfo.massedRigidBodyCount += (bhkRigidBody.mass > 0 ? 1 : 0);
 					physicsInfo.nonMassedRigidBodyCount += (bhkRigidBody.mass == 0 ? 1 : 0); // note count of 0 mass	
-					physicsInfo.singleLayer = physicsInfo.singleLayer > -1 ? -1 : bhkRigidBody.layer.layer;// no multiples thanks
+					physicsInfo.singleLayer = physicsInfo.singleLayer > 0 ? -1 : bhkRigidBody.layer.layer;// no multiples thanks
 				} else if (niObject instanceof bhkPhysicsSystem) {
 					bhkPhysicsSystem bhkPhysicsSystem = (bhkPhysicsSystem)niObject;
 

@@ -98,6 +98,7 @@ public class NBSimpleDynamicModel extends NBDynamicModel implements BulletNifMod
 										new Throwable("Multiple rigid bodies found in a simple dunamic model !!!! "
 														+ fileName).printStackTrace();
 									} else {
+										//FIXME: is a 1.0 scale correct? 
 										rootDynamicBody = new NBDynamicRigidBody(
 												new NifBulletTransformListenerDelegate(), bhkCollisionObject,
 												nifFile.blocks, this, 1.0f, forcedMass);
