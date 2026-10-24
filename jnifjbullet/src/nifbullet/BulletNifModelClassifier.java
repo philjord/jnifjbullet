@@ -18,6 +18,7 @@ import nif.niobject.bhk.bhkConstraint;
 import nif.niobject.bhk.bhkPhysicsSystem;
 import nif.niobject.bhk.bhkRigidBody;
 import nif.niobject.bs.BSTreeNode;
+import nif.niobject.controller.NiControllerManager;
 import nif.niobject.controller.NiMultiTargetTransformController;
 import nif.niobject.controller.NiTimeController;
 import nif.niobject.controller.NiTransformController;
@@ -153,11 +154,11 @@ public class BulletNifModelClassifier {
 						// these layers always seem wrong, I've got 
 						//meshes/clutter/middleclass/middlebarreltopped04.nif
 						// with 0 mass but a layer of OL_CLUTTER
-					/*	isOnlyAllowedLayers(niToJ3dData,
-								new int[] {OblivionLayer.OL_STATIC, OblivionLayer.OL_LINE_OF_SIGHT,
-									OblivionLayer.OL_UNIDENTIFIED, OblivionLayer.OL_STAIRS, OblivionLayer.OL_TERRAIN,
-									OblivionLayer.OL_TRANSPARENT, OblivionLayer.OL_TREES})
-						&& *///
+						/*	isOnlyAllowedLayers(niToJ3dData,
+									new int[] {OblivionLayer.OL_STATIC, OblivionLayer.OL_LINE_OF_SIGHT,
+										OblivionLayer.OL_UNIDENTIFIED, OblivionLayer.OL_STAIRS, OblivionLayer.OL_TERRAIN,
+										OblivionLayer.OL_TRANSPARENT, OblivionLayer.OL_TREES})
+							&& *///
 						physicsInfo.constraintCount == 0;// 
 
 				//getSkinAndBoneCount(niToJ3dData) == 0; // trees can be skinned but have simple phys
@@ -173,6 +174,19 @@ public class BulletNifModelClassifier {
 
 			}
 		}
+		
+
+		//FO4+ quick check for a controller manager for kinematic classification
+		boolean hasNiControllerManager = false;
+		for (NiObject niObject : niToJ3dData.getNiObjects()) {
+			if (niObject instanceof NiControllerManager) {
+				hasNiControllerManager = true;
+				break;
+			}
+		}
+		
+		ret = ret && !hasNiControllerManager;
+		
 		return ret;
 	}
 
@@ -200,6 +214,17 @@ public class BulletNifModelClassifier {
 
 			}
 		}
+
+		//FO4+ quick check for a controller manager for kinematic classification
+		boolean hasNiControllerManager = false;
+		for (NiObject niObject : niToJ3dData.getNiObjects()) {
+			if (niObject instanceof NiControllerManager) {
+				hasNiControllerManager = true;
+				break;
+			}
+		}
+		ret = ret || hasNiControllerManager;
+
 		return ret;
 	}
 

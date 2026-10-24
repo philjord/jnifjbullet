@@ -62,7 +62,10 @@ public abstract class NifBulletUtil {
 	public static RigidBody createRigidBody(hknpBodyCinfo hknpBodyCinfo, hknpMotionCinfo hknpMotionCinfo,
 											hknpMaterial hknpMaterial, CollisionShape colShape,
 											Transform startTransform, Object userPointer) {
-		float mass = 1.0f/hknpMotionCinfo.inverseMass;//hope that's right
+		float mass = 0.0f;
+		if (hknpMotionCinfo != null) {
+			mass = 1.0f / hknpMotionCinfo.inverseMass;//hope that's right
+		}
 
 		Vector3f localInertia = new Vector3f(0, 0, 0);
 

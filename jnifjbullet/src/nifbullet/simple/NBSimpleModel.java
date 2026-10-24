@@ -26,6 +26,7 @@ import nif.niobject.bhk.bhkCollisionObject;
 import nif.niobject.bhk.bhkNPCollisionObject;
 import nif.niobject.bhk.bhkPhysicsSystem;
 import nif.niobject.bhk.bhkRigidBody;
+import nif.niobject.controller.NiControllerManager;
 import nifbullet.BulletNifModelClassifier;
 import nifbullet.NBRigidBody;
 import nifbullet.PartedBulletNifModel;
@@ -194,6 +195,14 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel {
 						}
 					}
 				} else {
+					//quick precheck for a controller manager for kinematic classification
+					boolean hasNiControllerManager = false;
+					for (NiObject niObject : niToJ3dData.getNiObjects()) {
+						if (niObject instanceof NiControllerManager) {
+							hasNiControllerManager = true;
+							break;
+						}
+					}
 
 					for (NiObject niObject : niToJ3dData.getNiObjects()) {
 						if (niObject instanceof bhkNPCollisionObject) {
@@ -202,10 +211,22 @@ public class NBSimpleModel extends BranchGroup implements PartedBulletNifModel {
 							if (nio instanceof bhkPhysicsSystem) {
 								bhkPhysicsSystem bhkPhysicsSystem = (bhkPhysicsSystem)nio;
 								int bodyId = bhkNPCollisionObject.BodyID;
-								NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkNPCollisionObject, bhkPhysicsSystem,
-										niToJ3dData.getNiObjects(), rootTrans, this, bodyId);
 
-								updatePointers(pointer, nbbco);
+								if (hasNiControllerManager) {
+									float sf = (float)rootTrans.getScale();
+									rootTrans.setScale(1.0f);
+									NBKinematicRigidBody kb = new NBKinematicRigidBody(this, j3dNiNodeRoot,
+											bhkNPCollisionObject, niToJ3dData, bhkPhysicsSystem, bodyId, rootTrans,
+											this, sf);
+
+									updatePointers(pointer, kb);
+									hasKinematics = true;
+								} else {
+									NBStaticRigidBody nbbco = new NBStaticRigidBody(bhkNPCollisionObject,
+											bhkPhysicsSystem, niToJ3dData.getNiObjects(), rootTrans, this, bodyId);
+									updatePointers(pointer, nbbco);
+								}
+
 							}
 						} else if (niObject instanceof bhkCollisionObject) {
 							bhkCollisionObject bhkCollisionObject = (bhkCollisionObject)niObject;

@@ -12,6 +12,7 @@ import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.linearmath.Transform;
 
 import nif.NiObjectList;
+import nif.NifVer;
 import nif.j3d.J3dNiAVObject;
 import nif.niobject.NiAVObject;
 import nif.niobject.NiTriShape;
@@ -37,10 +38,15 @@ import nifbullet.util.NifBulletUtil;
 import utils.convert.ConvertFromHavok;
 import utils.convert.ConvertFromNif;
 
+/** 
+ * StaticRigidBody is rigid (table)
+ * KinematicRigidBody is a rigid that moves itself (Door, Player) 
+ * DynamicRigidBody is a rigid that rolls about (apple)
+ */
 public class NBStaticRigidBody extends NBRigidBody {
 	private NiAVObject		parentNiObject;
 
-	private NiObjectList	niObjectList;
+	private NifVer	nifVer;
 
 	private Transform3D		worldTransformCalc	= new Transform3D();
 
@@ -56,7 +62,7 @@ public class NBStaticRigidBody extends NBRigidBody {
 								BulletNifModel parentModel) {
 		super(parentModel);
 
-		this.niObjectList = blocks;
+		this.nifVer = blocks.nifVer;
 
 		parentNiObject = (NiAVObject)blocks.get(bhkCollisionObject.target);
 		bhkRigidBody bhkRigidBody = (bhkRigidBody)blocks.get(bhkCollisionObject.body);
@@ -79,8 +85,13 @@ public class NBStaticRigidBody extends NBRigidBody {
 								NiObjectList blocks, Transform3D rootTrans, BulletNifModel parentModel,
 								int bodyCinfosIdx) {
 		super(parentModel);
-
-		this.niObjectList = blocks;
+		
+		//FIXME: drop teh -1 system! doesn't appear used by anything
+		if(bodyCinfosIdx == -1)
+			System.err.println("WOooooooooooooooooooooooooooooohhh -1 bodyCinfosIdx what the hells!");
+		
+		// null NifVer hence Skyrim scale
+		this.nifVer = null;
 		parentNiObject = (NiAVObject)blocks.get(bhkNPCollisionObject.target);
 
 		HKXContents contents = bhkPhysicsSystem.hkxContents;
@@ -228,7 +239,7 @@ public class NBStaticRigidBody extends NBRigidBody {
 			// like jnif the parents scale is ignored on a bhkRigidBodyT
 			//worldTransformCalc.setScale(1);
 			temp.setRotation(ConvertFromHavok.toJ3d(rb.rotation));
-			temp.setTranslation(ConvertFromHavok.toJ3d(rb.translation, 1f, niObjectList.nifVer));
+			temp.setTranslation(ConvertFromHavok.toJ3d(rb.translation, 1f, nifVer));
 			worldTransformCalc.mul(temp);
 		} else {
 			mulFromRootDown(parent, false);
