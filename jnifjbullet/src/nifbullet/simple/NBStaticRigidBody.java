@@ -76,7 +76,7 @@ public class NBStaticRigidBody extends NBRigidBody {
 			setRigidBody(NifBulletUtil.createStaticRigidBody(bhkRigidBody, colShape, this));
 			getRigidBody().setWorldTransform(worldTransform);
 		} else {
-			new Throwable("bhkRigidBody.mass != 0 " + this).printStackTrace();
+			new Throwable("bhkRigidBody.mass != 0 " + this.nifVer.fileName).printStackTrace();
 		}
 
 	}

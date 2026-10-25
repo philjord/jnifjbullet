@@ -1,5 +1,7 @@
 package nifbullet;
 
+import java.util.Iterator;
+
 import org.jogamp.java3d.Transform3D;
 
 import nif.NifFile;
@@ -22,6 +24,7 @@ import nif.niobject.controller.NiControllerManager;
 import nif.niobject.controller.NiMultiTargetTransformController;
 import nif.niobject.controller.NiTimeController;
 import nif.niobject.controller.NiTransformController;
+import nif.niobject.hkx.hkBaseObject;
 import nif.niobject.hkx.hknpBodyCinfo;
 import nif.niobject.hkx.hknpConstraintCinfo;
 import nif.niobject.hkx.hknpMotionCinfo;
@@ -174,7 +177,6 @@ public class BulletNifModelClassifier {
 
 			}
 		}
-		
 
 		//FO4+ quick check for a controller manager for kinematic classification
 		boolean hasNiControllerManager = false;
@@ -184,9 +186,9 @@ public class BulletNifModelClassifier {
 				break;
 			}
 		}
-		
+
 		ret = ret && !hasNiControllerManager;
-		
+
 		return ret;
 	}
 
@@ -324,30 +326,35 @@ public class BulletNifModelClassifier {
 					bhkPhysicsSystem bhkPhysicsSystem = (bhkPhysicsSystem)niObject;
 
 					HKXContents contents = bhkPhysicsSystem.hkxContents;
-					// the first one had better be a system
-					hknpPhysicsSystemData hknpPhysicsSystemData = (hknpPhysicsSystemData)contents.getContentCollection()
-							.iterator().next();
-					hknpBodyCinfo[] bodyCinfos = hknpPhysicsSystemData.bodyCinfos;
-					hknpMotionCinfo[] motionCinfos = hknpPhysicsSystemData.motionCinfos;
+					Iterator<hkBaseObject> it = contents.getContentCollection().iterator();
 
-					physicsInfo.rigidBodyCount = hknpPhysicsSystemData.bodyCinfos.length;
+					//Starfield has nothing in the contents, because the version number is 2019 not 2015 it throws up
+					// on the console
+					if (it.hasNext()) {
+						// the first one had better be a system
+						hknpPhysicsSystemData hknpPhysicsSystemData = (hknpPhysicsSystemData)it.next();
+						hknpBodyCinfo[] bodyCinfos = hknpPhysicsSystemData.bodyCinfos;
+						hknpMotionCinfo[] motionCinfos = hknpPhysicsSystemData.motionCinfos;
 
-					for (int i = 0; i < bodyCinfos.length; i++) {
-						if (motionCinfos != null	&& bodyCinfos[i].motionId < motionCinfos.length
-							&& motionCinfos[bodyCinfos[i].motionId].inverseMass != 0) {
-							physicsInfo.massedRigidBodyCount++;
-						} else {
-							physicsInfo.nonMassedRigidBodyCount++;
+						physicsInfo.rigidBodyCount = hknpPhysicsSystemData.bodyCinfos.length;
+
+						for (int i = 0; i < bodyCinfos.length; i++) {
+							if (motionCinfos != null	&& bodyCinfos[i].motionId < motionCinfos.length
+								&& motionCinfos[bodyCinfos[i].motionId].inverseMass != 0) {
+								physicsInfo.massedRigidBodyCount++;
+							} else {
+								physicsInfo.nonMassedRigidBodyCount++;
+							}
 						}
+
+						hknpConstraintCinfo[] hknpConstraintCinfos = hknpPhysicsSystemData.constraintCinfos;
+						// if we have motion for all parts then we are not nonmassed, but massed
+						if (hknpConstraintCinfos != null)
+							physicsInfo.constraintCount += hknpConstraintCinfos.length;
+
+						//FO4+ no layers yet
+						physicsInfo.singleLayer = OblivionLayer.OL_STATIC;
 					}
-
-					hknpConstraintCinfo[] hknpConstraintCinfos = hknpPhysicsSystemData.constraintCinfos;
-					// if we have motion for all parts then we are not nonmassed, but massed
-					if (hknpConstraintCinfos != null)
-						physicsInfo.constraintCount += hknpConstraintCinfos.length;
-
-					//FO4+ no layers yet
-					physicsInfo.singleLayer = OblivionLayer.OL_STATIC;
 
 				} else if (niObject instanceof NiTransformController
 							|| niObject instanceof NiMultiTargetTransformController) {
